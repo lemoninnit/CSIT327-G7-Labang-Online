@@ -1,28 +1,42 @@
-# Labang Online
+## Labang Online
 
-The primary purpose of LabangOnline is to modernize and digitize the delivery of barangay-level services in Barangay Labangon, Cebu City. At present, residents face long queues, delays, and limited transparency due to the barangay’s reliance on manual, paper-based processes. By creating a localized digital platform, this project directly addresses these inefficiencies and ensures that essential services such as certificate requests, complaint filing, and service inquiries are accessible anytime and anywhere.
+The primary purpose of Labang Online is to digitize barangay-level services in Barangay Labangon, Cebu City. This project targets long queues and paper-based processes by enabling online access to services like certificate requests, complaints, and inquiries.
 
-## Features
+## Sprint 1 Scope
 
 - Registration form (name, DOB, address, contact)
 - Barangay Labangon verification
-- Email/phone verification
+- Email/phone verification (OTP)
 - Password setup & encryption
 - Error handling & input validation
 - Welcome message / confirmation email
 
-## Installation
+## Quickstart (Windows, using Python launcher)
 
-1. Clone the repository
-2. Create virtual environment: `python -m venv env`
-3. Activate environment: `source env/bin/activate` (Linux/Mac) or `env\Scripts\activate`
-(Windows)
-4. Install requirements: `pip install -r requirements.txt`
-5. Run migrations: `python manage.py migrate`
-6. Create superuser: `python manage.py createsuperuser`
-7. Run server: `python manage.py runserver`
+1) Ensure Python 3.13+ is installed. Verify: `py -V`
+2) Option A: Virtual environment (recommended)
 
-## Technology Stack
+```
+py -m venv .venv
+# If activation scripts are missing, you can skip activation and use `py -m pip --user` below.
+```
+
+3) Install dependencies
+
+```
+py -m pip install --user django django-environ phonenumbers
+```
+
+4) Initialize database and run server
+
+```
+py manage.py migrate
+py manage.py runserver
+```
+
+Open `http://127.0.0.1:8000/accounts/register/` to register and verify.
+
+## Tech Stack
 - Django
-- SQLite (can be configured for other databases)
+- SQLite (default; can be replaced)
 - HTML/CSS/JavaScript

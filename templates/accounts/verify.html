@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verify your account</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#f6f7fb; }
+    .container { max-width: 560px; margin: 60px auto; background:#fff; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.06); padding:24px; }
+    label { display:block; font-weight:600; margin:10px 0 6px; }
+    input { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #d9dbe3; background:#fbfbfd; }
+    .actions { margin-top: 18px; }
+    .btn { padding: 10px 16px; border-radius: 8px; border:0; cursor:pointer; font-weight:600; background:#2563eb; color:#fff; }
+    .messages { margin-bottom: 12px; }
+    .msg { padding:10px 12px; border-radius:8px; margin-bottom:8px; }
+    .msg.error { background:#fee2e2; color:#991b1b; }
+    .msg.success { background:#dcfce7; color:#166534; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Verify your account</h2>
+    <div class="messages">
+      {% for message in messages %}
+        <div class="msg {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <label>Email code</label>
+      <input name="email_code" placeholder="6-digit code" />
+      <label>Phone code</label>
+      <input name="phone_code" placeholder="6-digit code" />
+      <div class="actions">
+        <button class="btn" type="submit">Verify</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
+
+
