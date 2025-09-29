@@ -1,42 +1,59 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Verify your account</title>
-  <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#f6f7fb; }
-    .container { max-width: 560px; margin: 60px auto; background:#fff; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.06); padding:24px; }
-    label { display:block; font-weight:600; margin:10px 0 6px; }
-    input { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #d9dbe3; background:#fbfbfd; }
-    .actions { margin-top: 18px; }
-    .btn { padding: 10px 16px; border-radius: 8px; border:0; cursor:pointer; font-weight:600; background:#2563eb; color:#fff; }
-    .messages { margin-bottom: 12px; }
-    .msg { padding:10px 12px; border-radius:8px; margin-bottom:8px; }
-    .msg.error { background:#fee2e2; color:#991b1b; }
-    .msg.success { background:#dcfce7; color:#166534; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>Verify your account</h2>
-    <div class="messages">
-      {% for message in messages %}
-        <div class="msg {{ message.tags }}">{{ message }}</div>
-      {% endfor %}
+{% extends 'base.html' %}
+
+{% block title %}Verify your account • Labang Online{% endblock %}
+
+{% block content %}
+  <section class="panel" style="max-width:640px;margin:0 auto;">
+    <div class="header">
+      <img src="{% load static %}{% static 'logo.png' %}" alt="" class="logo"/>
+      <h1>Verify your account</h1>
     </div>
-    <form method="post">
-      {% csrf_token %}
-      <label>Email code</label>
-      <input name="email_code" placeholder="6-digit code" />
-      <label>Phone code</label>
-      <input name="phone_code" placeholder="6-digit code" />
-      <div class="actions">
-        <button class="btn" type="submit">Verify</button>
+    <div class="body">
+      <div class="messages">
+        {% for message in messages %}
+          <div class="msg {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
       </div>
-    </form>
-  </div>
-</body>
-</html>
 
+      <form method="post" id="form-otp" style="margin-bottom:20px">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="otp" />
+        <div id="otp-email">
+          <label>Email code</label>
+          <input name="email_code" placeholder="6-digit code" />
+          <div class="hint" style="margin-bottom:14px">Enter the code sent to your email. Check spam if you don't see it.</div>
+        </div>
+        <div id="otp-phone" style="display:none">
+          <label>Phone code</label>
+          <input name="phone_code" placeholder="6-digit code" />
+          <div class="hint" style="margin-bottom:14px">Use the code sent via SMS.</div>
+        </div>
 
+        <div class="actions" style="justify-content:space-between;flex-wrap:wrap">
+          <div>
+            <button class="btn" type="button" id="switch-to-email">Use Email Code</button>
+            <button class="btn" type="button" id="switch-to-phone">Use Phone Code</button>
+          </div>
+          <button class="btn btn-primary" type="submit">Verify</button>
+        </div>
+      </form>
+
+      
+    </div>
+</section>
+
+{% block scripts %}
+<script>
+  const emailBlock = document.getElementById('otp-email');
+  const phoneBlock = document.getElementById('otp-phone');
+  const toEmail = document.getElementById('switch-to-email');
+  const toPhone = document.getElementById('switch-to-phone');
+  function showEmail(){ emailBlock.style.display='block'; phoneBlock.style.display='none'; }
+  function showPhone(){ emailBlock.style.display='none'; phoneBlock.style.display='block'; }
+  toEmail.addEventListener('click', showEmail);
+  toPhone.addEventListener('click', showPhone);
+  showEmail();
+</script>
+{% endblock %}
+
+{% endblock %}

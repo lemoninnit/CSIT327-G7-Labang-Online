@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Barangay Labangon Certification • Labang Online{% endblock %}
+
+{% block content %}
+  <section class="panel brgy-panel">
+    <div class="header">
+      <img src="{% load static %}{% static 'logo.png' %}" alt="" class="logo"/>
+      <h1>Confirmation</h1>
+    </div>
+    <div class="body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="grid grid-2">
+          <div>
+            <label>Type of ID</label>
+            <select name="id_type" required>
+              <option value="">-SELECT-</option>
+              <option>Barangay ID</option>
+              <option>PhilSys ID</option>
+              <option>Driver's License</option>
+              <option>Passport</option>
+            </select>
+          </div>
+          <div>
+            <label>ID Number</label>
+            <input name="id_number" required />
+          </div>
+        </div>
+
+        <div class="upload-row">
+          <label>Take/Upload ID Photo</label>
+          <input type="file" name="id_photo" accept="image/*" />
+        </div>
+
+        <div class="terms-box">
+          <div class="terms-text-box">
+            <p class="terms-text">I certify that all information on this form are true and correct. I understand that any incorrect, false or misleading statement is punishable by law.</p>
+            <label class="terms-agree">
+              <input type="checkbox" name="agree" required />
+              <span>Agree</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="actions actions-center" style="margin-top:20px">
+          <button class="btn btn-primary" type="submit">Submit</button>
+          <a class="btn" href="{% url 'accounts:verify' %}">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </section>
+{% endblock %}
+
+

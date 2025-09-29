@@ -1,38 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Labang Online - Register</title>
-  <link rel="stylesheet" href="/static/base.css">
-  <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; background:#f6f7fb; }
-    .container { max-width: 720px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.06); overflow: hidden; }
-    header { padding: 20px 24px; border-bottom: 1px solid #eee; display:flex; align-items:center; gap:12px; }
-    header h1 { font-size: 20px; margin:0; }
-    main { padding: 24px; }
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .grid-1 { grid-template-columns: 1fr; }
-    label { display:block; font-weight:600; margin-bottom:6px; }
-    input, select { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #d9dbe3; background:#fbfbfd; }
-    .actions { margin-top: 20px; display:flex; gap:12px; }
-    .btn { padding: 10px 16px; border-radius: 8px; border:0; cursor:pointer; font-weight:600; }
-    .btn-primary { background:#2563eb; color:#fff; }
-    .messages { margin-bottom: 16px; }
-    .msg { padding:10px 12px; border-radius:8px; margin-bottom:8px; }
-    .msg.error { background:#fee2e2; color:#991b1b; }
-    .msg.success { background:#dcfce7; color:#166534; }
-    .hint { color:#6b7280; font-size:12px; margin-top:4px; }
-  </style>
-  {% load static %}
-</head>
-<body>
-  <div class="container">
-    <header>
-      <img src="{% static 'logo.svg' %}" alt="Labang Online" height="28" />
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create your account • Labang Online{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="header">
+      <img src="{% static 'logo.png' %}" alt="" class="logo"/>
       <h1>Create your account</h1>
-    </header>
-    <main>
+    </div>
+    <div class="body">
       <div class="messages">
         {% for field in form %}
           {% for error in field.errors %}
@@ -46,26 +23,27 @@
           <div class="msg {{ message.tags }}">{{ message }}</div>
         {% endfor %}
       </div>
+
       <form method="post" novalidate>
         {% csrf_token %}
-        <div class="grid">
+        <div class="grid grid-2">
           <div>
             <label>Full name</label>
-            <input name="full_name" value="{{ form.full_name.value }}" required />
+            <input name="full_name" value="{{ form.full_name.value|default:'' }}" required />
           </div>
           <div>
             <label>Username</label>
-            <input name="username" value="{{ form.username.value }}" required />
+            <input name="username" value="{{ form.username.value|default:'' }}" required />
           </div>
           <div>
             <label>Email</label>
-            <input type="email" name="email" value="{{ form.email.value }}" required />
-            <div class="hint">We will send a 6-digit code</div>
+            <input type="email" name="email" value="{{ form.email.value|default:'' }}" required />
+            <div class="hint">We will send a 6‑digit code</div>
           </div>
           <div>
             <label>Phone</label>
-            <input name="contact_number" value="{{ form.contact_number.value }}" required />
-            <div class="hint">Include country code (e.g., +63...)</div>
+            <input name="contact_number" value="{{ form.contact_number.value|default:'' }}" required />
+            <div class="hint">Include country code (e.g., +63…)</div>
           </div>
           <div>
             <label>Date of birth</label>
@@ -73,7 +51,7 @@
           </div>
           <div>
             <label>Address line</label>
-            <input name="address_line" value="{{ form.address_line.value }}" />
+            <input name="address_line" value="{{ form.address_line.value|default:'' }}" />
           </div>
           <div>
             <label>Barangay</label>
@@ -89,7 +67,7 @@
           </div>
           <div>
             <label>Postal code</label>
-            <input name="postal_code" value="{{ form.postal_code.value }}" />
+            <input name="postal_code" value="{{ form.postal_code.value|default:'' }}" />
           </div>
           <div>
             <label>Password</label>
@@ -104,9 +82,8 @@
           <button class="btn btn-primary" type="submit">Create account</button>
         </div>
       </form>
-    </main>
-  </div>
-</body>
-</html>
+    </div>
+  </section>
+{% endblock %}
 
 

@@ -44,8 +44,7 @@ def register(request: HttpRequest) -> HttpResponse:
 
 def verify(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
-        email_code = request.POST.get('email_code', '').strip()
-        phone_code = request.POST.get('phone_code', '').strip()
+        action = request.POST.get('action') or 'otp'
 
         now = timezone.now()
         user = request.user if request.user.is_authenticated else None
@@ -53,30 +52,53 @@ def verify(request: HttpRequest) -> HttpResponse:
             messages.error(request, 'Please log in to verify your account.')
             return redirect('accounts:register')
 
-        def check_code(purpose: str, code_value: str) -> bool:
-            if not code_value:
-                return False
-            try:
-                otp = OneTimeCode.objects.filter(user=user, purpose=purpose, is_used=False).latest('created_at')
-            except OneTimeCode.DoesNotExist:
-                return False
-            if otp.code != code_value:
-                return False
-            if otp.expires_at < now:
-                return False
-            otp.mark_used()
-            return True
+        if action == 'barangay':
+            id_type = request.POST.get('id_type', '').strip()
+            id_number = request.POST.get('id_number', '').strip()
+            agree = request.POST.get('agree') == 'on'
+            # file = request.FILES.get('id_photo')  # Could be stored if storage configured
 
-        if check_code('email', email_code):
-            user.is_email_verified = True
-        if check_code('phone', phone_code):
-            user.is_phone_verified = True
+            if not id_type or id_type == '':
+                messages.error(request, 'Please select the Type of ID.')
+            elif not id_number:
+                messages.error(request, 'Please enter your ID Number.')
+            elif not agree:
+                messages.error(request, 'You must certify the statement to continue.')
+            else:
+                # In Sprint 1 we accept submission and mark the barangay verification as complete
+                user.is_barangay_verified = True
+                user.save(update_fields=['is_barangay_verified'])
+                messages.success(request, 'Barangay Labangon verification submitted successfully.')
 
-        # Barangay verification simple flag (since barangay checked at registration)
-        if user.barangay and user.barangay.lower() == 'labangon':
+        else:
+            email_code = request.POST.get('email_code', '').strip()
+            phone_code = request.POST.get('phone_code', '').strip()
+
+            def check_code(purpose: str, code_value: str) -> bool:
+                if not code_value:
+                    return False
+                try:
+                    otp = OneTimeCode.objects.filter(user=user, purpose=purpose, is_used=False).latest('created_at')
+                except OneTimeCode.DoesNotExist:
+                    return False
+                if otp.code != code_value:
+                    return False
+                if otp.expires_at < now:
+                    return False
+                otp.mark_used()
+                return True
+
+            # Only update the one they provided; both can still work
+            if check_code('email', email_code):
+                user.is_email_verified = True
+            if check_code('phone', phone_code):
+                user.is_phone_verified = True
+            user.save(update_fields=['is_email_verified', 'is_phone_verified'])
+
+        # Auto mark barangay as eligible if profile barangay is Labangon, unless already verified via modal
+        if not user.is_barangay_verified and user.barangay and user.barangay.lower() == 'labangon':
             user.is_barangay_verified = True
-
-        user.save(update_fields=['is_email_verified', 'is_phone_verified', 'is_barangay_verified'])
+            user.save(update_fields=['is_barangay_verified'])
 
         if user.is_email_verified and user.is_phone_verified and user.is_barangay_verified:
             # Send welcome email
@@ -90,12 +112,37 @@ def verify(request: HttpRequest) -> HttpResponse:
             messages.success(request, 'Verification complete. Welcome to Labang Online!')
             return redirect('accounts:welcome')
 
-        messages.info(request, 'Codes processed. Complete all verifications to continue.')
+        messages.info(request, 'Verification updated. Complete all steps to continue.')
 
     return render(request, 'accounts/verify.html')
 
 
 def welcome(request: HttpRequest) -> HttpResponse:
     return render(request, 'accounts/welcome.html')
+
+def barangay_certification(request: HttpRequest) -> HttpResponse:
+    user = request.user if request.user.is_authenticated else None
+    if not user:
+        messages.error(request, 'Please log in to continue.')
+        return redirect('accounts:register')
+
+    if request.method == 'POST':
+        id_type = request.POST.get('id_type', '').strip()
+        id_number = request.POST.get('id_number', '').strip()
+        agree = request.POST.get('agree') == 'on'
+
+        if not id_type:
+            messages.error(request, 'Please select the Type of ID.')
+        elif not id_number:
+            messages.error(request, 'Please enter your ID Number.')
+        elif not agree:
+            messages.error(request, 'You must agree to the terms & regulations.')
+        else:
+            user.is_barangay_verified = True
+            user.save(update_fields=['is_barangay_verified'])
+            messages.success(request, 'Barangay Labangon verification submitted successfully.')
+            return redirect('accounts:verify')
+
+    return render(request, 'accounts/barangay_cert.html')
 
 # Create your views here.
