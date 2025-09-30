@@ -36,6 +36,30 @@ py manage.py runserver
 
 Open `http://127.0.0.1:8000/accounts/register/` to register and verify.
 
+## Supabase (Session Pooler) setup
+
+1) Install packages:
+```
+py -m pip install --user psycopg2-binary dj-database-url python-dotenv
+```
+
+2) In the Supabase dashboard → Project → Connect → Connection Info, copy the Session Pooler URL. It looks like:
+```
+postgresql://postgres:YOUR_PASSWORD@aws-0-<project-ref>.pooler.supabase.com:5432/postgres
+```
+Append `?sslmode=require`.
+
+3) Create a `.env` in the project root:
+```
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@aws-0-<project-ref>.pooler.supabase.com:5432/postgres?sslmode=require
+```
+
+4) Migrate and run to verify the connection:
+```
+py manage.py migrate
+py manage.py runserver
+```
+
 ## Tech Stack
 - Django
 - SQLite (default; can be replaced)
