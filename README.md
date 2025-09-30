@@ -62,5 +62,5 @@ py manage.py runserver
 
 ## Tech Stack
 - Django
-- SQLite (default; can be replaced)
+- Supabase
 - HTML/CSS/JavaScript
