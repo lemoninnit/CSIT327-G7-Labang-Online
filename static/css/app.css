@@ -317,3 +317,31 @@ select:focus {
 .center-actions {
   justify-content: center;
 }
+
+
+/* Forgot Password Page */
+.hint-text {
+  text-align: center;
+  color: var(--muted);
+  font-size: 15px;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.back-to-login {
+  text-align: center;
+  margin-top: 18px;
+}
+
+.back-to-login a,
+.back-to-login a:visited,
+.back-to-login a:link {
+  color: var(--brand);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.back-to-login a:hover {
+  color: var(--brand-700);
+  text-decoration: underline;
+}

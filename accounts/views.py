@@ -9,6 +9,11 @@ from django.core.mail import send_mail
 from .models import User, OneTimeCode
 from .forms import RegistrationForm
 
+from django.contrib.auth.tokens import default_token_generator
+from django.template.loader import render_to_string
+
+from django.urls import path
+from django.views.generic import TemplateView
 
 def login(request):
     if request.method == 'POST':
@@ -160,4 +165,13 @@ def barangay_certification(request: HttpRequest) -> HttpResponse:
 
     return render(request, 'accounts/barangay_cert.html')
 
-# Create your views here.
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        # TODO: Add logic to send password reset instructions here
+        messages.success(request, f"Instructions have been sent to {email}!")
+    return render(request, 'accounts/forgot_password.html')
+
+
+def personal_info(request):
+    return render(request, 'accounts/personal_info.html')
