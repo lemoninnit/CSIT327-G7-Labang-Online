@@ -1,5 +1,5 @@
+from django.contrib.auth import authenticate, login as auth_login  # rename imported login
 from django.contrib import messages
-from django.contrib.auth import login
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -9,6 +9,21 @@ from django.core.mail import send_mail
 from .models import User, OneTimeCode
 from .forms import RegistrationForm
 
+
+def login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            auth_login(request, user)  # use the renamed import
+            messages.success(request, "Welcome back!")
+            return redirect('accounts:welcome')
+        else:
+            messages.error(request, "Invalid username or password.")
+            
+    return render(request, 'accounts/login.html')
 
 def register(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
