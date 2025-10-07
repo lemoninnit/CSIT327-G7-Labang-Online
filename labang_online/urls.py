@@ -22,4 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('accounts/', include('accounts.urls')),
+    
 ]

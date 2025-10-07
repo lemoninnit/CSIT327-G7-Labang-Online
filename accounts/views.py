@@ -175,3 +175,6 @@ def forgot_password(request):
 
 def personal_info(request):
     return render(request, 'accounts/personal_info.html')
+
+def logout_confirm(request):
+    return render(request, 'accounts/logout_confirm.html')

@@ -149,3 +149,6 @@ LOGOUT_REDIRECT_URL = '/'
 
 # Custom user model
 AUTH_USER_MODEL = 'accounts.User'
+
+
+

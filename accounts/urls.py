@@ -12,6 +12,8 @@ urlpatterns = [
     path('welcome/', views.welcome, name='welcome'),
     path('barangay-certification/', views.barangay_certification, name='barangay_certification'),
     path('personal_info/', views.personal_info, name='personal_info'),
+    path('logout_confirm/', views.logout_confirm, name='logout_confirm'),
+
 ]
 
 
