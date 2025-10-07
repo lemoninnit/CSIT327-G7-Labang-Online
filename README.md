@@ -11,6 +11,24 @@ The primary purpose of Labang Online is to digitize barangay-level services in B
 - Error handling & input validation
 - Welcome message / confirmation email
 
+
+## Sprint 2 Scope
+
+- Login form       
+- Barangay Labangon verification
+- Authentication backend
+- Session management
+- Password reset
+- Error messages for failed login
+
+- Resident ID photo upload
+- Edit/update resident profile information
+- View complete resident profile (including ID photo & dependents)
+
+- Define entities and relationships (ERD creation)
+
+
+
 ## Quickstart (Windows, using Python launcher)
 
 1) Ensure Python 3.13+ is installed. Verify: `py -V`
