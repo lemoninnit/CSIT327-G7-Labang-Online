@@ -20,9 +20,8 @@
             {% csrf_token %}
             <button type="submit" class="btn-action btn-logout">Yes</button>
           </form>
-          <a href="/accounts/personal_info" class="btn-action btn-cancel"
-            >Cancel</a
-          >
+          <a href="{% url 'accounts:personal_info' %}" class="btn-action btn-cancel">Cancel</a>
+          
         </div>
       </div>
     </div>

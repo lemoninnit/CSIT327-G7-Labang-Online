@@ -21,9 +21,12 @@ def login(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            auth_login(request, user)
-            messages.success(request, f"Welcome back, {user.full_name}!")
-            return redirect('accounts:welcome')
+            if user.resident_confirmation:  # Optional: only allow verified users
+                auth_login(request, user)
+                messages.success(request, f"Welcome back, {user.full_name}!")
+                return redirect('accounts:welcome')
+            else:
+                messages.warning(request, "Your account is pending verification by the admin.")
         else:
             messages.error(request, "Invalid username or password.")
 
@@ -98,3 +101,12 @@ def forgot_password(request):
 # -------------------- LOGOUT CONFIRM --------------------
 def logout_confirm(request):
     return render(request, 'accounts/logout_confirm.html')
+
+
+
+def personal_info(request):
+    # Example context, you can customize it later
+    context = {
+        'user': request.user
+    }
+    return render(request, 'accounts/personal_info.html', context)
