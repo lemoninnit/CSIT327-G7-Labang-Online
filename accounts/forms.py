@@ -3,15 +3,21 @@ from .models import User
 
 
 class RegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
-    password_confirm = forms.CharField(widget=forms.PasswordInput)
-
     class Meta:
         model = User
         fields = [
-            'full_name', 'username', 'email', 'contact_number',
-            'date_of_birth', 'address_line', 'barangay', 'city', 'province', 'postal_code',
+            'username',
+            'email',
+            'full_name',
+            'date_of_birth',
+            'address_line',
+            'barangay',
+            'city',
+            'province',
+            'contact_number',
+            'password'
         ]
+
 
     def clean(self):
         cleaned = super().clean()

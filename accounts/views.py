@@ -1,20 +1,19 @@
-from django.contrib.auth import authenticate, login as auth_login  # rename imported login
+from django.contrib.auth import authenticate, login as auth_login
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse
-from django.utils import timezone
 from django.core.mail import send_mail
 
-from .models import User, OneTimeCode
+from .models import User
 from .forms import RegistrationForm
 
-from django.contrib.auth.tokens import default_token_generator
-from django.template.loader import render_to_string
+from django.shortcuts import render, redirect
+from django.contrib.auth import get_user_model
+from django.contrib import messages
 
-from django.urls import path
-from django.views.generic import TemplateView
+User = get_user_model()
 
+# -------------------- LOGIN --------------------
 def login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -22,159 +21,79 @@ def login(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            auth_login(request, user)  # use the renamed import
-            messages.success(request, "Welcome back!")
+            auth_login(request, user)
+            messages.success(request, f"Welcome back, {user.full_name}!")
             return redirect('accounts:welcome')
         else:
             messages.error(request, "Invalid username or password.")
-            
+
     return render(request, 'accounts/login.html')
 
-def register(request: HttpRequest) -> HttpResponse:
-    if request.method == 'POST':
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            user: User = form.save(commit=False)
-            password = form.cleaned_data['password']
-            user.set_password(password)
-            user.is_active = True
-            user.save()
 
-            email_otp = OneTimeCode.create_code(user, 'email')
-            phone_otp = OneTimeCode.create_code(user, 'phone')
-
-            # Send verification email (console backend in development)
-            send_mail(
-                subject='Verify your email - Labang Online',
-                message=f'Hi {user.full_name}, your email verification code is {email_otp.code}.',
-                from_email=None,
-                recipient_list=[user.email],
-                fail_silently=True,
-            )
-
-            messages.success(request, 'Account created. Please verify your email and phone with the codes sent (console backend in dev).')
-            login(request, user)
-            return redirect('accounts:verify')
-        else:
-            return render(request, 'accounts/register.html', {'form': form})
-
-    form = RegistrationForm()
-    return render(request, 'accounts/register.html', {'form': form})
+# -------------------- REGISTER --------------------
 
 
-def verify(request: HttpRequest) -> HttpResponse:
-    if request.method == 'POST':
-        action = request.POST.get('action') or 'otp'
+def register(request):
+    if request.method == "POST":
+        # Get form data
+        full_name = request.POST.get("full_name")
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        contact_number = request.POST.get("contact_number")
+        date_of_birth = request.POST.get("date_of_birth")
+        address_line = request.POST.get("address_line")
+        barangay = request.POST.get("barangay", "Labangon")
+        city = request.POST.get("city", "Cebu City")
+        province = request.POST.get("province", "Cebu")
+        postal_code = request.POST.get("postal_code", "6000")
+        password = request.POST.get("password")
+        resident_confirmation = request.POST.get("resident_confirmation") == "on"
+        nso_document = request.FILES.get("nso_document")
 
-        now = timezone.now()
-        user = request.user if request.user.is_authenticated else None
-        if not user:
-            messages.error(request, 'Please log in to verify your account.')
-            return redirect('accounts:register')
+        # Check if email or username already exists
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email is already registered.")
+            return render(request, "accounts/register.html")
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username is already taken.")
+            return render(request, "accounts/register.html")
 
-        if action == 'barangay':
-            id_type = request.POST.get('id_type', '').strip()
-            id_number = request.POST.get('id_number', '').strip()
-            agree = request.POST.get('agree') == 'on'
-            # file = request.FILES.get('id_photo')  # Could be stored if storage configured
+        # Create the user
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            full_name=full_name,
+            contact_number=contact_number,
+            date_of_birth=date_of_birth,
+            address_line=address_line,
+            barangay=barangay,
+            city=city,
+            province=province,
+            postal_code=postal_code,
+            resident_confirmation=resident_confirmation,
+            nso_document=nso_document
+        )
 
-            if not id_type or id_type == '':
-                messages.error(request, 'Please select the Type of ID.')
-            elif not id_number:
-                messages.error(request, 'Please enter your ID Number.')
-            elif not agree:
-                messages.error(request, 'You must certify the statement to continue.')
-            else:
-                # In Sprint 1 we accept submission and mark the barangay verification as complete
-                user.is_barangay_verified = True
-                user.save(update_fields=['is_barangay_verified'])
-                messages.success(request, 'Barangay Labangon verification submitted successfully.')
+        messages.success(request, "Account created successfully! Please log in.")
+        return redirect("accounts:login")  # Update with your login URL
 
-        else:
-            email_code = request.POST.get('email_code', '').strip()
-            phone_code = request.POST.get('phone_code', '').strip()
-
-            def check_code(purpose: str, code_value: str) -> bool:
-                if not code_value:
-                    return False
-                try:
-                    otp = OneTimeCode.objects.filter(user=user, purpose=purpose, is_used=False).latest('created_at')
-                except OneTimeCode.DoesNotExist:
-                    return False
-                if otp.code != code_value:
-                    return False
-                if otp.expires_at < now:
-                    return False
-                otp.mark_used()
-                return True
-
-            # Only update the one they provided; both can still work
-            if check_code('email', email_code):
-                user.is_email_verified = True
-            if check_code('phone', phone_code):
-                user.is_phone_verified = True
-            user.save(update_fields=['is_email_verified', 'is_phone_verified'])
-
-        # Auto mark barangay as eligible if profile barangay is Labangon, unless already verified via modal
-        if not user.is_barangay_verified and user.barangay and user.barangay.lower() == 'labangon':
-            user.is_barangay_verified = True
-            user.save(update_fields=['is_barangay_verified'])
-
-        if user.is_email_verified and user.is_phone_verified and user.is_barangay_verified:
-            # Send welcome email
-            send_mail(
-                subject='Welcome to Labang Online',
-                message=f'Hi {user.full_name}, welcome to Labang Online! Your account is now verified.',
-                from_email=None,
-                recipient_list=[user.email],
-                fail_silently=True,
-            )
-            messages.success(request, 'Verification complete. Welcome to Labang Online!')
-            return redirect('accounts:welcome')
-
-        messages.info(request, 'Verification updated. Complete all steps to continue.')
-
-    return render(request, 'accounts/verify.html')
+    return render(request, "accounts/register.html")
 
 
+# -------------------- WELCOME PAGE --------------------
 def welcome(request: HttpRequest) -> HttpResponse:
     return render(request, 'accounts/welcome.html')
 
-def barangay_certification(request: HttpRequest) -> HttpResponse:
-    user = request.user if request.user.is_authenticated else None
-    if not user:
-        messages.error(request, 'Please log in to continue.')
-        return redirect('accounts:register')
 
-    if request.method == 'POST':
-        id_type = request.POST.get('id_type', '').strip()
-        id_number = request.POST.get('id_number', '').strip()
-        agree = request.POST.get('agree') == 'on'
-
-        if not id_type:
-            messages.error(request, 'Please select the Type of ID.')
-        elif not id_number:
-            messages.error(request, 'Please enter your ID Number.')
-        elif not agree:
-            messages.error(request, 'You must agree to the terms & regulations.')
-        else:
-            user.is_barangay_verified = True
-            user.save(update_fields=['is_barangay_verified'])
-            messages.success(request, 'Barangay Labangon verification submitted successfully.')
-            return redirect('accounts:verify')
-
-    return render(request, 'accounts/barangay_cert.html')
-
+# -------------------- FORGOT PASSWORD --------------------
 def forgot_password(request):
     if request.method == 'POST':
         email = request.POST.get('email')
-        # TODO: Add logic to send password reset instructions here
-        messages.success(request, f"Instructions have been sent to {email}!")
+        messages.success(request, f"If an account with {email} exists, reset instructions have been sent.")
     return render(request, 'accounts/forgot_password.html')
 
 
-def personal_info(request):
-    return render(request, 'accounts/personal_info.html')
-
+# -------------------- LOGOUT CONFIRM --------------------
 def logout_confirm(request):
     return render(request, 'accounts/logout_confirm.html')
