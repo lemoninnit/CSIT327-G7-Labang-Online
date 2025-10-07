@@ -72,10 +72,11 @@ def register(request):
             province=province,
             postal_code=postal_code,
             resident_confirmation=resident_confirmation,
-            nso_document=nso_document
+            nso_document=nso_document,
+        
         )
 
-        messages.success(request, "Account created successfully! Please log in.")
+        messages.info(request, "Your account will be verified within 24 hours. Your NSO/PSA document will be reviewed by the admin. You will be notified via email once verification is complete.")
         return redirect("accounts:login")  # Update with your login URL
 
     return render(request, "accounts/register.html")
