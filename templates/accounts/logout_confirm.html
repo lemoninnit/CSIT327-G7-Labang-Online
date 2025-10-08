@@ -12,16 +12,21 @@
     <div class="logout-wrapper">
       <div class="logout-box">
         <h2>Are you sure you want to log out?</h2>
-        <p>Please confirm that you want to log out.<br> You will need to sign-in again to access your dashboard.</p>
-
+        <p>
+          Please confirm that you want to log out.<br />
+          You will need to sign-in again to access your dashboard.
+        </p>
 
         <div class="logout-actions">
-          <form method="post" action="{% url 'accounts:login' %}">
+          <form method="post" action="{% url 'accounts:logout_confirm' %}">
             {% csrf_token %}
             <button type="submit" class="btn-action btn-logout">Yes</button>
           </form>
-          <a href="{% url 'accounts:personal_info' %}" class="btn-action btn-cancel">Cancel</a>
-          
+          <a
+            href="{% url 'accounts:personal_info' %}"
+            class="btn-action btn-cancel"
+            >Cancel</a
+          >
         </div>
       </div>
     </div>

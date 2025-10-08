@@ -12,13 +12,14 @@ from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
+from django.views.decorators.cache import never_cache
 
 
 
 User = get_user_model()
 
 # -------------------- LOGIN --------------------
-# -------------------- LOGIN --------------------
+@never_cache
 def login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -106,12 +107,21 @@ def forgot_password(request):
 
 
 # -------------------- LOGOUT CONFIRM --------------------
+@login_required(login_url='accounts:login')
+@never_cache
 def logout_confirm(request):
+    if request.method == 'POST':
+        # User clicked Yes → end session
+        auth_logout(request)  # <-- this ends the session
+        messages.success(request, "You have successfully logged out.")
+        return redirect('accounts:login')  # Redirect to login page
+    # GET request → just show the confirmation page
     return render(request, 'accounts/logout_confirm.html')
 
 
 
 @login_required(login_url='accounts:login')
+@never_cache
 def personal_info(request):
     context = {
         'user': request.user
