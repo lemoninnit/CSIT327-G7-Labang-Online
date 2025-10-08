@@ -23,12 +23,12 @@ def login(request):
         if user is not None:
             if user.resident_confirmation:  # Optional: only allow verified users
                 auth_login(request, user)
-                messages.success(request, f"Welcome back, {user.full_name}!")
+                messages.success(request, f"Welcome back, {user.full_name}! You have successfully logged in.")
                 return redirect('accounts:welcome')
             else:
-                messages.warning(request, "Your account is pending verification by the admin.")
+                messages.warning(request, "Account verification pending. Please visit Barangay Hall of Labangon to complete your account verification.")
         else:
-            messages.error(request, "Invalid username or password.")
+            messages.error(request, "Invalid credentials. Please check your username and password and try again.")
 
     return render(request, 'accounts/login.html')
 
@@ -55,10 +55,10 @@ def register(request):
 
         # Check if email or username already exists
         if User.objects.filter(email=email).exists():
-            messages.error(request, "Email is already registered.")
+            messages.error(request, "This email address is already registered. Please use a different email or log in to your existing account.")
             return render(request, "accounts/register.html")
         if User.objects.filter(username=username).exists():
-            messages.error(request, "Username is already taken.")
+            messages.error(request, "This username is already taken. Please choose a different username.")
             return render(request, "accounts/register.html")
 
         # Create the user
@@ -79,7 +79,7 @@ def register(request):
         
         )
 
-        messages.info(request, "Your account will be verified within 24 hours. Your NSO/PSA document will be reviewed by the admin. You will be notified via email once verification is complete.")
+        messages.success(request, "Account created successfully! Please proceed to Barangay Hall of Labangon for verification.")
         return redirect("accounts:login")  # Update with your login URL
 
     return render(request, "accounts/register.html")
@@ -94,7 +94,7 @@ def welcome(request: HttpRequest) -> HttpResponse:
 def forgot_password(request):
     if request.method == 'POST':
         email = request.POST.get('email')
-        messages.success(request, f"If an account with {email} exists, reset instructions have been sent.")
+        messages.success(request, f"Password reset instructions have been sent to {email} if an account exists with this email address.")
     return render(request, 'accounts/forgot_password.html')
 
 
