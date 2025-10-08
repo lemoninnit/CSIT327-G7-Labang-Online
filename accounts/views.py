@@ -10,6 +10,10 @@ from .forms import RegistrationForm
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout as auth_logout
+
+
 
 User = get_user_model()
 
@@ -107,9 +111,10 @@ def logout_confirm(request):
 
 
 
+@login_required(login_url='accounts:login')
 def personal_info(request):
-    # Example context, you can customize it later
     context = {
         'user': request.user
     }
     return render(request, 'accounts/personal_info.html', context)
+
