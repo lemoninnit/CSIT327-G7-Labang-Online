@@ -29,7 +29,7 @@ def login(request):
         if user is not None:
             if user.resident_confirmation:  # Only allow verified users
                 auth_login(request, user)
-                messages.success(request, f"Welcome back, {user.full_name}! You have successfully logged in.")
+
                 return redirect('accounts:personal_info')  # Redirect to personal_info
             else:
                 messages.warning(request, "Account verification pending. Please visit Barangay Hall of Labangon to complete your account verification.")
@@ -43,7 +43,7 @@ def login(request):
 
 # -------------------- REGISTER --------------------
 
-
+@never_cache
 def register(request):
     if request.method == "POST":
         # Get form data
