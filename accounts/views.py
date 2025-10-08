@@ -14,6 +14,7 @@ from django.contrib import messages
 User = get_user_model()
 
 # -------------------- LOGIN --------------------
+# -------------------- LOGIN --------------------
 def login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -21,16 +22,18 @@ def login(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            if user.resident_confirmation:  # Optional: only allow verified users
+            if user.resident_confirmation:  # Only allow verified users
                 auth_login(request, user)
                 messages.success(request, f"Welcome back, {user.full_name}! You have successfully logged in.")
-                return redirect('accounts:welcome')
+                return redirect('accounts:personal_info')  # Redirect to personal_info
             else:
                 messages.warning(request, "Account verification pending. Please visit Barangay Hall of Labangon to complete your account verification.")
         else:
             messages.error(request, "Invalid credentials. Please check your username and password and try again.")
 
     return render(request, 'accounts/login.html')
+
+
 
 
 # -------------------- REGISTER --------------------
