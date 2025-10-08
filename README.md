@@ -14,12 +14,12 @@ The primary purpose of Labang Online is to digitize barangay-level services in B
 
 ## Sprint 2 Scope
 
-- Login form       
-- Barangay Labangon verification
-- Authentication backend
-- Session management
+- Login form       (Done)
+- Barangay Labangon verification (Done)
+- Authentication backend (Done)
+- Session management (Done)
 - Password reset
-- Error messages for failed login
+- Error messages for failed login (Done)
 
 - Resident ID photo upload
 - Edit/update resident profile information
