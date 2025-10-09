@@ -2,16 +2,12 @@
 
 The primary purpose of Labang Online is to digitize barangay-level services in Barangay Labangon, Cebu City. This project targets long queues and paper-based processes by enabling online access to services like certificate requests, complaints, and inquiries.
 
-## Sprint 1 Scope
+## Tech stack used
+- Django
+- Supabase
+- HTML/CSS/JavaScript
 
-- Registration form (name, DOB, address, contact)
-- Barangay Labangon verification
-- Email/phone verification (OTP)
-- Password setup & encryption
-- Error handling & input validation
-- Welcome message / confirmation email
-
-## Quickstart (Windows, using Python launcher)
+## Setup & run instructions
 
 1) Ensure Python 3.13+ is installed. Verify: `py -V`
 2) Option A: Virtual environment (recommended)
@@ -36,7 +32,7 @@ py manage.py runserver
 
 Open `http://127.0.0.1:8000/accounts/register/` to register and verify.
 
-## Supabase (Session Pooler) setup
+**Supabase (Session Pooler) setup**
 
 1) Install packages:
 ```
@@ -60,7 +56,15 @@ py manage.py migrate
 py manage.py runserver
 ```
 
-## Tech Stack
-- Django
-- Supabase
-- HTML/CSS/JavaScript
+## Team members
+- Lenon Lee O. Natividad 
+- Fullstack Developer
+- lenonlee.natividad@cit.edu
+
+- Bryne Kendrick P. Nuñez
+- FrontEnd Developer
+- brynekendrick.nuñez@cit.edu
+
+- Moniquo Nicole C. Mosende
+- BackEnd Developer
+- moniquonicole.mosende@cit.edu
