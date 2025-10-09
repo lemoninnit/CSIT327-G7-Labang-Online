@@ -63,7 +63,7 @@ py manage.py runserver
 
 - Bryne Kendrick P. Nuñez
 - FrontEnd Developer
-- brynekendrick.nuñez@cit.edu
+- brynekendrick.nunez@cit.edu
 
 - Moniquo Nicole C. Mosende
 - BackEnd Developer
