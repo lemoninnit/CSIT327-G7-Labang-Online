@@ -3,6 +3,7 @@
 The primary purpose of Labang Online is to digitize barangay-level services in Barangay Labangon, Cebu City. This project targets long queues and paper-based processes by enabling online access to services like certificate requests, complaints, and inquiries.
 
 ## Tech stack used
+
 - Django
 - Supabase
 - HTML/CSS/JavaScript
@@ -58,13 +59,13 @@ py manage.py runserver
 
 ## Team members
 - Lenon Lee O. Natividad 
-- Fullstack Developer
+- Lead Developer
 - lenonlee.natividad@cit.edu
 
 - Bryne Kendrick P. Nuñez
-- FrontEnd Developer
+- Frontend Developer
 - brynekendrick.nunez@cit.edu
 
 - Moniquo Nicole C. Mosende
-- BackEnd Developer
+- Backend Developer
 - moniquonicole.mosende@cit.edu
