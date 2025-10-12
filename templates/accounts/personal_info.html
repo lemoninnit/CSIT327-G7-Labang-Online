@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - LabangOnline</title>
+
+    <link rel="stylesheet" href="{% static 'css/app.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+  </head>
+  <body>
+    <div class="dashboard-wrapper">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="logo">
+          <img src="{% static 'logo.png' %}" alt="Labang Logo" />
+          <span>LabangOnline</span>
+        </div>
+
+        <!-- Notification with badge -->
+        <div class="notification-item">
+          <div class="notification-icon-wrapper">
+            <img
+              src="{% static 'icons/notification.png' %}"
+              alt="Notification"
+            />
+            <span class="notification-badge">5</span>
+          </div>
+          <span>Notification</span>
+        </div>
+
+        <ul class="menu">
+          <li class="menu-item active">
+            <img src="{% static 'icons/user-info.png' %}" alt="" />
+            <span>Personal Info</span>
+          </li>
+          <li class="menu-item">
+            <img src="{% static 'icons/request-records.png' %}" alt="" />
+            <span>Request Records</span>
+          </li>
+          <li class="menu-item">
+            <img src="{% static 'icons/resident-record.png' %}" alt="" />
+            <span>Resident Records</span>
+          </li>
+          <li class="menu-item">
+            <img src="{% static 'icons/incident-report.png' %}" alt="" />
+            <span>Report Records</span>
+          </li>
+          <li class="menu-item">
+            <img src="{% static 'icons/file-report.png' %}" alt="" />
+            <span>File Report</span>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Top bar -->
+        <header class="topbar">
+          <span></span>
+          <button id="mode-toggle" class="btn">Toggle</button>
+          <div class="user-profile">
+            <img src="{% static 'icons/default_user.png' %}" alt="User Icon" />
+            <span>{{ request.user.full_name }}</span>
+          </div>
+        </header>
+
+        <div class="content-wrapper">
+          <!-- Left: User Information -->
+          <div class="content-left">
+            <div class="user-header">
+              <img
+                src="{% static 'icons/default_user.png' %}"
+                alt="User Profile"
+              />
+              <div class="user-name">
+                <h2>{{ request.user.full_name }}</h2>
+                <span class="role">Resident</span>
+              </div>
+            </div>
+
+            <div class="info-section">
+              <h3>USER INFORMATION</h3>
+              <table class="user-info-table">
+                <tr>
+                  <td>Full Name:</td>
+                  <td>{{ request.user.full_name }}</td>
+                </tr>
+                <tr>
+                  <td>Username:</td>
+                  <td>{{ request.user.username }}</td>
+                </tr>
+                <tr>
+                  <td>Email:</td>
+                  <td>{{ request.user.email }}</td>
+                </tr>
+                <tr>
+                  <td>Date of Birth:</td>
+                  <td>{{ request.user.date_of_birth }}</td>
+                </tr>
+                <tr>
+                  <td>Address:</td>
+                  <td>
+                    Address: {{ request.user.address_line }}, {{ request.user.barangay }}, {{ request.user.city }}, {{ request.user.province }} {{ request.user.postal_code }}
+
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td>Resident Confirmed:</td>
+                  <td>
+                    {% if request.user.resident_confirmation %}Yes{% else %}No{% endif %}
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <div class="info-section">
+              <h3>CONTACT INFORMATION</h3>
+              <table class="user-info-table">
+               
+                <tr>
+                  <td>Mobile:</td>
+                  <td>{{ request.user.contact_number }}</td>
+                </tr>
+                <tr>
+                  <td>Email:</td>
+                  <td>{{ request.user.email }}</td>
+                </tr>
+              </table>
+
+              <!-- Updated Logout Button -->
+              <form method="get" action="{% url 'accounts:logout_confirm' %}">
+                <button type="submit" class="btn-logout">LOGOUT</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Right: Action Buttons -->
+          <div class="content-right">
+            <button class="action-btn">EDIT INFORMATION</button>
+            <button class="action-btn">DOCUMENT REQUEST</button>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+  </body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Labang Online{% endblock %}</title>
+  <title>{% block title %}LabangOnline{% endblock %}</title>
   {% load static %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,11 +15,12 @@
   <header class="site-header">
     <div class="container flex between center" style="padding-top:10px; padding-bottom:10px;">
       <a class="brand" href="/">
-        <img src="{% static 'logo.png' %}" alt="Labang Online" class="logo">
-        <span>Labang Online</span>
+        <img src="{% static 'logo.png' %}" alt="LabangOnline" class="logo">
+        <span>LabangOnline</span>
       </a>
       <nav class="nav" style="display:flex;align-items:center;gap:16px">
         <a href="/accounts/register/">Register</a>
+        <a href="/accounts/login/">Login</a>
         <button id="mode-toggle" class="btn" style="padding:8px 12px">Toggle</button>
       </nav>
     </div>
@@ -33,7 +34,7 @@
 
   <footer class="site-footer">
     <div class="container">
-      <p>© {% now 'Y' %} Barangay Labangon • Labang Online</p>
+      <p>© {% now 'Y' %} Barangay Labangon • LabangOnline</p>
     </div>
   </footer>
 

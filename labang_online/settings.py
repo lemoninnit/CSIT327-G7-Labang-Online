@@ -14,11 +14,14 @@ from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
+import dj_database_url
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-# Load .env explicitly from project root
-load_dotenv(dotenv_path=BASE_DIR / '.env')
+
+
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -77,18 +80,26 @@ WSGI_APPLICATION = 'labang_online.wsgi.application'
 
 # Database
 # Use Supabase when DATABASE_URL is present; otherwise fall back to SQLite
+load_dotenv()
+
+
+
 db_url = os.environ.get('DATABASE_URL')
-if db_url:
-    DATABASES = {
-        'default': dj_database_url.parse(db_url, conn_max_age=600, ssl_require=True)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres.lyldygmfasfwdcshgdxi',
+        'PASSWORD': 'TcsezrZHJyLg3q4o',
+        'HOST': 'aws-1-ap-southeast-1.pooler.supabase.com',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',  # Supabase requires SSL
+        },
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
+
+
 
 
 # Password validation
@@ -149,3 +160,6 @@ LOGOUT_REDIRECT_URL = '/'
 
 # Custom user model
 AUTH_USER_MODEL = 'accounts.User'
+
+
+
