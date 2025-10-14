@@ -55,7 +55,7 @@ DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@aws-0-<project-ref>.pooler.supa
 ```
 py manage.py migrate
 py manage.py runserver
-```
+```.
 
 ## Team members
 - Lenon Lee O. Natividad 
