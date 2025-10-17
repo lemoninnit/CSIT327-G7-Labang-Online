@@ -152,25 +152,23 @@ def edit_profile(request):
         user.province = request.POST.get('province', user.province)
         user.postal_code = request.POST.get('postal_code', user.postal_code)
         
-
-
         
-        if request.method == 'POST':
-    
-         if 'profile_photo' in request.FILES:
+        if 'profile_photo' in request.FILES:
             user.profile_photo = request.FILES['profile_photo']
         if 'resident_id_photo' in request.FILES:
             user.resident_id_photo = request.FILES['resident_id_photo']
+
         user.save()
         
         messages.success(request, "Profile updated successfully!")
         return redirect('accounts:personal_info')
-
+    
     context = { 
         'user': request.user, 
         }
     
     return render(request, 'accounts/edit_profile.html', context)
+
 
 # -------------------- VIEW COMPLETE PROFILE --------------------
 @login_required(login_url='accounts:login')

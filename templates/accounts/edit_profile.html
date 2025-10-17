@@ -91,6 +91,13 @@
           </div>
 
           <!-- User Information (as editable form) -->
+           {% if messages %}
+  {% for message in messages %}
+    <div class="flash-message {% if message.tags %}{{ message.tags }}{% endif %}">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
           <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
@@ -163,7 +170,7 @@
             </div>
           </form>
 
-          <!-- Contact Information (read-only, same look) -->
+          <!-- Contact Information -->
           <div class="info-section">
             <h3>CONTACT INFORMATION</h3>
             <table class="user-info-table">
@@ -176,6 +183,7 @@
                 <td>{{ request.user.email }}</td>
               </tr>
             </table>
+            
           </div>
 
           </form>

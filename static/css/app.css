@@ -345,3 +345,28 @@ select:focus {
   color: var(--brand-700);
   text-decoration: underline;
 }
+.flash-message {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--success);
+  color: white;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  animation: fadeInOut 1.5s ease forwards;
+  z-index: 9999;
+}
+
+.flash-message.error {
+  background-color: var(--danger);
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, -20px); }
+  10%, 70% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -20px); }
+}
