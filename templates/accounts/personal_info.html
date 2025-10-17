@@ -61,8 +61,12 @@
           <span></span>
           <button id="mode-toggle" class="btn">Toggle</button>
           <div class="user-profile">
-            <img src="{% static 'icons/default_user.png' %}" alt="User Icon" />
+            <img src="{% if request.user.profile_photo %}{{ request.user.profile_photo.url }}{% else %}{% static 'icons/default_user.png' %}{% endif %}" alt="User Icon" />
             <span>{{ request.user.full_name }}</span>
+            <!-- Updated Logout Button -->
+            <form method="get" action="{% url 'accounts:logout_confirm' %}">
+                <button type="submit" class="btn-logout">LOGOUT</button>
+              </form>
           </div>
         </header>
 
@@ -70,10 +74,7 @@
           <!-- Left: User Information -->
           <div class="content-left">
             <div class="user-header">
-              <img
-                src="{% static 'icons/default_user.png' %}"
-                alt="User Profile"
-              />
+              <img src="{% if request.user.profile_photo %}{{ request.user.profile_photo.url }}{% else %}{% static 'icons/default_user.png' %}{% endif %}" alt="User Profile" />
               <div class="user-name">
                 <h2>{{ request.user.full_name }}</h2>
                 <span class="role">Resident</span>
@@ -98,6 +99,10 @@
                 <tr>
                   <td>Date of Birth:</td>
                   <td>{{ request.user.date_of_birth }}</td>
+                </tr>
+                <tr>
+                  <td>Civil Status:</td>
+                  <td href="{% url 'accounts:personal_info' %}">{{ request.user.civil_status }}</td>
                 </tr>
                 <tr>
                   <td>Address:</td>
@@ -128,18 +133,28 @@
                   <td>Email:</td>
                   <td>{{ request.user.email }}</td>
                 </tr>
+                 <tr>
+              <td>
+               <h2>Resident ID</h2>
+                <img src="{% if request.user.resident_id_photo %}{{ request.user.resident_id_photo.url }}
+                {% else %}{% static 'icons/file-report.png' %}
+                {% endif %}" 
+                alt="Resident ID"
+                style="height:200px; width:500px; border-radius:12px; border:1px solid rgba(255,255,255,.1); background:#0f172a; padding:6px;"/>
+                </td>
+                </tr>
               </table>
-
-              <!-- Updated Logout Button -->
-              <form method="get" action="{% url 'accounts:logout_confirm' %}">
-                <button type="submit" class="btn-logout">LOGOUT</button>
-              </form>
             </div>
           </div>
-
+          
           <!-- Right: Action Buttons -->
           <div class="content-right">
-            <button class="action-btn">EDIT INFORMATION</button>
+            
+            
+           <!-- <button class="action-btn">EDIT INFORMATION</button>-->
+
+           <a href="{% url 'accounts:edit_profile' %}" class="action-btn">EDIT INFORMATION</a>
+           
             <button class="action-btn">DOCUMENT REQUEST</button>
           </div>
         </div>

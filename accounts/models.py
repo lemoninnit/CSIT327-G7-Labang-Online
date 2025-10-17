@@ -13,10 +13,16 @@ class User(AbstractUser):
     province = models.CharField(max_length=100, default="Cebu")
     postal_code = models.CharField(max_length=10, default="6000")
     nso_document = models.FileField(upload_to="nso_documents/")
+    profile_photo = models.FileField(upload_to='profile_photos/', blank=True, null=True)
+    resident_id_photo = models.FileField(upload_to='resident_ids/', blank=True, null=True)
     resident_confirmation = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
+    
 
     REQUIRED_FIELDS = ["email", "full_name", "contact_number", "date_of_birth"]
+    civil_status = models.CharField(max_length=20, blank=True, null=True, choices=[
+        ('Single','Single'), ('Married','Married'), ('Widowed','Widowed'), ('Separated','Separated'),
+    ])
 
     def __str__(self):
         return self.username

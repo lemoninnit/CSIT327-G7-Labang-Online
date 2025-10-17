@@ -10,4 +10,12 @@ urlpatterns = [
     path('welcome/', views.welcome, name='welcome'),
     path('logout_confirm/', views.logout_confirm, name='logout_confirm'),
     path('personal_info/', views.personal_info, name='personal_info'),
+    path('edit_profile/', views.edit_profile, name='edit_profile'),
+    path('complete_profile/', views.complete_profile, name='complete_profile'),
+    path('edit_profile/', views.edit_profile, name='edit_profile'),
+    path('complete_profile/', views.complete_profile, name='complete_profile'),
+    path('personal_info/', views.personal_info, name='personal_info'),
+    path('edit_profile/', views.edit_profile, name='edit_profile'),
+
+    
 ]

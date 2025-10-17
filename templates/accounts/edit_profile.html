@@ -1,0 +1,188 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Profile - LabangOnline</title>
+
+    <link rel="stylesheet" href="{% static 'css/app.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+    <style>
+      /* Keep the same look; only small helpers for inputs */
+      .user-info-table td:first-child{width:220px;color:#a8b3cf;}
+      .user-info-table input,.user-info-table select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #2a2f3b;background:#0f1420;color:#e5e7eb;}
+      .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+      .btn-row{display:flex;gap:12px;justify-content:flex-end;margin-top:16px;}
+      .btn-primary{background:#3b82f6;color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;}
+      .btn-secondary{background:transparent;border:1px solid #3b82f6;color:#3b82f6;padding:10px 14px;border-radius:8px;cursor:pointer;text-decoration:none;}
+      .content-right .action-btn{display:none;} /* hide dashboard's right buttons on edit page */
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-wrapper">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="logo">
+          <img src="{% static 'logo.png' %}" alt="Labang Logo" />
+          <span>LabangOnline</span>
+        </div>
+
+        <div class="notification-item">
+          <div class="notification-icon-wrapper">
+            <img src="{% static 'icons/notification.png' %}" alt="Notification" />
+            <span class="notification-badge">5</span>
+          </div>
+          <span>Notification</span>
+        </div>
+
+        <ul class="menu">
+          <li class="menu-item active">
+            <img src="{% static 'icons/user-info.png' %}" alt="" />
+            <span>Personal Info</span>
+          </li>
+          <li class="menu-item">
+            <img src="{% static 'icons/request-records.png' %}" alt="" />
+            <span>Request Records</span>
+          </li>
+          <li class="menu-item">
+            <img src="{% static 'icons/resident-record.png' %}" alt="" />
+            <span>Resident Records</span>
+          </li>
+          <li class="menu-item">
+            <img src="{% static 'icons/incident-report.png' %}" alt="" />
+            <span>Report Records</span>
+          </li>
+          <li class="menu-item">
+            <img src="{% static 'icons/file-report.png' %}" alt="" />
+            <span>File Report</span>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Top bar -->
+        <header class="topbar">
+          <span></span>
+          <button id="mode-toggle" class="btn">Toggle</button>
+          <div class="user-profile">
+            <img
+                src="{% if request.user.profile_photo %}{{ request.user.profile_photo.url }}{% else %}{% static 'icons/default_user.png' %}{% endif %}"
+                alt="User Profile"
+              />
+            <span>{{ request.user.full_name }}</span>
+          </div>
+        </header>
+
+        <div class="content-wrapper">
+          <!-- Header card (same look) -->
+
+            <div class="content-left">
+            <div class="user-header">
+              <img
+                src="{% if request.user.profile_photo %}{{ request.user.profile_photo.url }}{% else %}{% static 'icons/default_user.png' %}{% endif %}"
+                alt="User Profile"
+              />
+            <div class="user-name">
+              <h2>{{ request.user.full_name|default:"User" }}</h2>
+              <span class="role">{% if request.user.resident_confirmation %}Resident{% else %}Pending Verification{% endif %}</span>
+            </div>
+          </div>
+
+          <!-- User Information (as editable form) -->
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="info-section">
+              <h3>USER INFORMATION</h3>
+              <table class="user-info-table">
+                <tr>
+                  <td>Profile Picture:</td>
+                  <td><input type="file" name="profile_photo" accept="image/*" /></td>
+                </tr>
+                <tr>
+                  <td>Resident ID:</td>
+                    <td><input type="file" name="resident_id_photo" accept="image/*" /></td>
+                </tr>
+                <tr>
+                  <td>Full Name:</td>
+                  <td><input type="text" name="full_name" value="{{ request.user.full_name }}" required /></td>
+                </tr>
+                <tr>
+                  <td>Username:</td>
+                  <td><input type="text" value="{{ request.user.username }}" /></td>
+                </tr>
+                <tr>
+                  <td>Email:</td>
+                  <td><input type="email" value="{{ request.user.email }}" /></td>
+                </tr>
+                <tr>
+                  <td>Date of Birth:</td>
+                  <td><input type="date" name="date_of_birth" value="{{ request.user.date_of_birth|date:'Y-m-d' }}" /></td>
+                </tr>
+                <tr>
+                  <td>Civil Status:</td>
+                  <td>
+                    <select name="civil_status">
+                      <option value="">Select status</option>
+                      <option value="Single">Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Widowed">Widowed</option>
+                      <option value="Separated">Separated</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Address:</td>
+                  <td>
+                    <div class="two-col" style="margin-bottom:12px;">
+                      <input type="text" name="address_line" placeholder="Street Address" value="{{ request.user.address_line }}" required />
+                      <input type="tel" name="contact_number" placeholder="Contact Number" value="{{ request.user.contact_number }}" required />
+                    </div>
+                    <div class="two-col">
+                      <input type="text" name="barangay" placeholder="Barangay" value="{{ request.user.barangay|default:'Labangon' }}" disabled />
+                      <input type="text" name="city" placeholder="City" value="{{ request.user.city|default:'Cebu City' }}" disabled />
+                    </div>
+                    <div class="two-col" style="margin-top:12px;">
+                      <input type="text" name="province" placeholder="Province" value="{{ request.user.province|default:'Cebu' }}" disabled />
+                      <input type="text" name="postal_code" placeholder="Postal Code" value="{{ request.user.postal_code|default:'6000' }}" disabled />
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Resident Confirmed:</td>
+                  <td>{% if request.user.resident_confirmation %}Yes{% else %}No{% endif %}</td>
+                </tr>
+              </table>
+
+              <div class="btn-row">
+                <a href="{% url 'accounts:personal_info' %}" class="btn-secondary">Cancel</a>
+                <button type="submit" class="btn-primary">Save Changes</button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Contact Information (read-only, same look) -->
+          <div class="info-section">
+            <h3>CONTACT INFORMATION</h3>
+            <table class="user-info-table">
+              <tr>
+                <td>Mobile:</td>
+                <td>{{ request.user.contact_number }}</td>
+              </tr>
+              <tr>
+                <td>Email:</td>
+                <td>{{ request.user.email }}</td>
+              </tr>
+            </table>
+          </div>
+
+          </form>
+        </div>
+      </main>
+    </div>
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+  </body>
+</html> 

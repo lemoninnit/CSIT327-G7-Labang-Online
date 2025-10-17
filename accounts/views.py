@@ -123,8 +123,71 @@ def logout_confirm(request):
 @login_required(login_url='accounts:login')
 @never_cache
 def personal_info(request):
+    user = request.user
     context = {
-        'user': request.user
+        'user': request.user,
+      
     }
     return render(request, 'accounts/personal_info.html', context)
 
+# -------------------- EDIT PROFILE --------------------
+@login_required(login_url='accounts:login')
+@never_cache
+def edit_profile(request):
+    user = request.user
+    
+    # Handle profile editing including ID photo upload
+    
+    if request.method == 'POST':
+
+        
+        # Update basic information
+        user.full_name = request.POST.get('full_name', user.full_name)
+        user.contact_number = request.POST.get('contact_number', user.contact_number)
+        user.date_of_birth = request.POST.get('date_of_birth', user.date_of_birth)
+        user.civil_status = request.POST.get('civil_status', user.civil_status)
+        user.address_line = request.POST.get('address_line', user.address_line)
+        user.barangay = request.POST.get('barangay', user.barangay)
+        user.city = request.POST.get('city', user.city)
+        user.province = request.POST.get('province', user.province)
+        user.postal_code = request.POST.get('postal_code', user.postal_code)
+        
+
+
+        
+        if request.method == 'POST':
+    
+         if 'profile_photo' in request.FILES:
+            user.profile_photo = request.FILES['profile_photo']
+        if 'resident_id_photo' in request.FILES:
+            user.resident_id_photo = request.FILES['resident_id_photo']
+        user.save()
+        
+        messages.success(request, "Profile updated successfully!")
+        return redirect('accounts:personal_info')
+
+    context = { 
+        'user': request.user, 
+        }
+    
+    return render(request, 'accounts/edit_profile.html', context)
+
+# -------------------- VIEW COMPLETE PROFILE --------------------
+@login_required(login_url='accounts:login')
+@never_cache
+def complete_profile(request):
+    
+        # Display complete profile including ID photo and dependents
+    
+        user = request.user
+    
+
+        # If you don't have a Dependent model yet, you'll need to create one
+        dependents = []
+        # Example: dependents = user.dependents.all() if you have related_name='dependents'
+    
+        context = {
+        'user': user,
+        
+    }
+        return render(request, 'accounts/complete_profile.html', context)
