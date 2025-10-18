@@ -26,7 +26,6 @@ pip install dj-database-url
 pip install python-dotenv
 pip install psycopg2-binary
 pip install psycopg
-
 ```
 
 4) Initialize database and run server
