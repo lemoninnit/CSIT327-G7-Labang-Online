@@ -142,7 +142,35 @@
     }
   });
 
+  // Function to show styled error messages
+  function showError(message) {
+    // Remove existing error messages
+    const existingErrors = document.querySelectorAll('.validation-error');
+    existingErrors.forEach(error => error.remove());
+    
+    // Create new error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'msg error validation-error';
+    errorDiv.textContent = message;
+    
+    // Insert at the top of the form
+    const form = document.querySelector('form');
+    const messagesDiv = document.querySelector('.messages');
+    if (messagesDiv) {
+      messagesDiv.appendChild(errorDiv);
+    } else {
+      form.insertBefore(errorDiv, form.firstChild);
+    }
+    
+    // Scroll to error
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
   document.querySelector("form").addEventListener("submit", function (e) {
+    // Clear existing validation errors
+    const existingErrors = document.querySelectorAll('.validation-error');
+    existingErrors.forEach(error => error.remove());
+
     const requiredFields = [
       { id: "full_name", label: "Full name" },
       { id: "username", label: "Username" },
@@ -158,7 +186,7 @@
       const input = document.getElementById(field.id);
       if (!input.value.trim()) {
         e.preventDefault();
-        alert(`${field.label} is required. Please fill in all required fields marked with *.`);
+        showError(`${field.label} is required. Please fill in all required fields marked with *.`);
         input.focus();
         return false;
       }
@@ -169,7 +197,7 @@
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       e.preventDefault();
-      alert("Please enter a valid email address.");
+      showError("Please enter a valid email address.");
       document.getElementById("email").focus();
       return false;
     }
@@ -178,14 +206,14 @@
     const phone = document.getElementById("contact_number").value;
     if (!phone.startsWith("+63")) {
       e.preventDefault();
-      alert("Phone number must start with +63 (Philippine country code)");
+      showError("Phone number must start with +63 (Philippine country code)");
       document.getElementById("contact_number").focus();
       return false;
     }
     
     if (phone.length !== 13) {
       e.preventDefault();
-      alert("Phone number must be exactly 13 characters (+63 followed by 10 digits, e.g., +639171234567)");
+      showError("Phone number must be exactly 13 characters (+63 followed by 10 digits, e.g., +639171234567)");
       document.getElementById("contact_number").focus();
       return false;
     }
@@ -194,7 +222,7 @@
     const phoneDigits = phone.substring(3);
     if (!/^\d{10}$/.test(phoneDigits)) {
       e.preventDefault();
-      alert("Phone number must contain only digits after +63");
+      showError("Phone number must contain only digits after +63");
       document.getElementById("contact_number").focus();
       return false;
     }
@@ -203,7 +231,7 @@
     const addressLine = document.getElementById("address_line").value.trim();
     if (addressLine.length < 10) {
       e.preventDefault();
-      alert("Address line is too short. Please provide a complete address (at least 10 characters).");
+      showError("Address line is too short. Please provide a complete address (at least 10 characters).");
       document.getElementById("address_line").focus();
       return false;
     }
@@ -213,7 +241,7 @@
     const hasNumbers = /\d/.test(addressLine);
     if (!hasLetters) {
       e.preventDefault();
-      alert("Address line must contain street or location name.");
+      showError("Address line must contain street or location name.");
       document.getElementById("address_line").focus();
       return false;
     }
@@ -222,7 +250,7 @@
     const validAddressPattern = /^[a-zA-Z0-9\s,.\-#\/]+$/;
     if (!validAddressPattern.test(addressLine)) {
       e.preventDefault();
-      alert("Address line contains invalid characters. Please use only letters, numbers, spaces, and common punctuation (,.-#/).");
+      showError("Address line contains invalid characters. Please use only letters, numbers, spaces, and common punctuation (,.-#/).");
       document.getElementById("address_line").focus();
       return false;
     }
@@ -231,7 +259,7 @@
     const password = document.getElementById("password").value;
     if (password.length < 8) {
       e.preventDefault();
-      alert("Password must be at least 8 characters long.");
+      showError("Password must be at least 8 characters long.");
       document.getElementById("password").focus();
       return false;
     }
@@ -240,7 +268,7 @@
     const passwordConfirm = document.getElementById("password_confirm").value;
     if (password !== passwordConfirm) {
       e.preventDefault();
-      alert("Passwords do not match. Please make sure both password fields are identical.");
+      showError("Passwords do not match. Please make sure both password fields are identical.");
       document.getElementById("password_confirm").focus();
       return false;
     }
@@ -253,7 +281,7 @@
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) age--;
     if (age < 13) {
       e.preventDefault();
-      alert("You must be at least 13 years old to register.");
+      showError("You must be at least 13 years old to register.");
       document.getElementById("date_of_birth").focus();
       return false;
     }
