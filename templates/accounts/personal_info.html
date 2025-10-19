@@ -8,6 +8,111 @@
 
     <link rel="stylesheet" href="{% static 'css/app.css' %}" />
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+    <style>
+      /* Enhanced profile photo styling */
+      .user-profile img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #10b981;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+      }
+
+      .user-header img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #10b981;
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .user-header img:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 24px rgba(16, 185, 129, 0.6);
+      }
+
+      .user-header {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 24px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border-radius: 16px;
+        margin-bottom: 24px;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+      }
+
+      .user-name h2 {
+        margin: 0 0 8px 0;
+        font-size: 28px;
+        font-weight: 600;
+        color: #e5e7eb;
+      }
+
+      .role {
+        display: inline-block;
+        padding: 6px 16px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+      }
+
+      .role.pending {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      }
+
+      /* Resident ID Card Styling */
+      .resident-id-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        padding: 20px;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      }
+
+      .resident-id-container img {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        transition: transform 0.3s ease;
+      }
+
+      .resident-id-container img:hover {
+        transform: scale(1.02);
+      }
+
+      .id-placeholder {
+        padding: 60px 20px;
+        text-align: center;
+        color: #64748b;
+        background: rgba(15, 23, 32, 0.5);
+        border-radius: 12px;
+        border: 2px dashed rgba(100, 116, 139, 0.3);
+      }
+
+      .id-placeholder img {
+        opacity: 0.3;
+        height: 80px;
+        margin-bottom: 16px;
+        filter: grayscale(100%);
+      }
+
+      .id-placeholder p {
+        margin: 0;
+        font-size: 14px;
+      }
+    </style>
   </head>
   <body>
     <div class="dashboard-wrapper">
@@ -61,7 +166,11 @@
           <span></span>
           <button id="mode-toggle" class="btn">Toggle</button>
           <div class="user-profile">
-            <img src="{% if request.user.profile_photo %}{{ request.user.profile_photo.url }}{% else %}{% static 'icons/default_user.png' %}{% endif %}" alt="User Icon" />
+            {% if profile_pic_base64 %}
+              <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
+            {% else %}
+              <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
+            {% endif %}
             <span>{{ request.user.full_name }}</span>
             <!-- Updated Logout Button -->
             <form method="get" action="{% url 'accounts:logout_confirm' %}">
@@ -69,6 +178,7 @@
               </form>
           </div>
         </header>
+        
         {% if messages %}
         <div class="messages">
             {% for message in messages %}
@@ -77,15 +187,22 @@
           {% endif %}
           {% endfor %}
         </div>
-          {% endif %}
+        {% endif %}
+        
         <div class="content-wrapper">
           <!-- Left: User Information -->
           <div class="content-left">
             <div class="user-header">
-              <img src="{% if request.user.profile_photo %}{{ request.user.profile_photo.url }}{% else %}{% static 'icons/default_user.png' %}{% endif %}" alt="User Profile" />
+              {% if profile_pic_base64 %}
+                <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
+              {% else %}
+                <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
+              {% endif %}
               <div class="user-name">
                 <h2>{{ request.user.full_name }}</h2>
-                <span class="role">Resident</span>
+                <span class="role {% if not request.user.resident_confirmation %}pending{% endif %}">
+                  {% if request.user.resident_confirmation %}Resident{% else %}Pending Verification{% endif %}
+                </span>
               </div>
             </div>
 
@@ -110,20 +227,22 @@
                 </tr>
                 <tr>
                   <td>Civil Status:</td>
-                  <td href="{% url 'accounts:personal_info' %}">{{ request.user.civil_status }}</td>
+                  <td>{{ request.user.civil_status|default:"Not specified" }}</td>
                 </tr>
                 <tr>
                   <td>Address:</td>
                   <td>
-                    Address: {{ request.user.address_line }}, {{ request.user.barangay }}, {{ request.user.city }}, {{ request.user.province }} {{ request.user.postal_code }}
-
+                    {{ request.user.address_line }}, {{ request.user.barangay }}, {{ request.user.city }}, {{ request.user.province }} {{ request.user.postal_code }}
                   </td>
                 </tr>
-                
                 <tr>
                   <td>Resident Confirmed:</td>
                   <td>
-                    {% if request.user.resident_confirmation %}Yes{% else %}No{% endif %}
+                    {% if request.user.resident_confirmation %}
+                      <span style="color: #10b981; font-weight: 600;">✓ Yes</span>
+                    {% else %}
+                      <span style="color: #f59e0b; font-weight: 600;">⏳ No</span>
+                    {% endif %}
                   </td>
                 </tr>
               </table>
@@ -132,7 +251,6 @@
             <div class="info-section">
               <h3>CONTACT INFORMATION</h3>
               <table class="user-info-table">
-               
                 <tr>
                   <td>Mobile:</td>
                   <td>{{ request.user.contact_number }}</td>
@@ -141,28 +259,28 @@
                   <td>Email:</td>
                   <td>{{ request.user.email }}</td>
                 </tr>
-                 <tr>
-              <td>
-               <h2>Resident ID</h2>
-                <img src="{% if request.user.resident_id_photo %}{{ request.user.resident_id_photo.url }}
-                {% else %}{% static 'icons/file-report.png' %}
-                {% endif %}" 
-                alt="Resident ID"
-                style="height:200px; width:500px; border-radius:12px; border:1px solid rgba(255,255,255,.1); background:#0f172a; padding:6px;"/>
-                </td>
-                </tr>
               </table>
+            </div>
+
+            <div class="info-section">
+              <h3>RESIDENT ID</h3>
+              <div class="resident-id-container">
+                {% if resident_id_base64 %}
+                  <img src="data:image/jpeg;base64,{{ resident_id_base64 }}" 
+                       alt="Resident ID"/>
+                {% else %}
+                  <div class="id-placeholder">
+                    <img src="{% static 'icons/file-report.png' %}" alt="No ID"/>
+                    <p>No Resident ID uploaded yet</p>
+                  </div>
+                {% endif %}
+              </div>
             </div>
           </div>
           
           <!-- Right: Action Buttons -->
           <div class="content-right">
-            
-            
-           <!-- <button class="action-btn">EDIT INFORMATION</button>-->
-
-           <a href="{% url 'accounts:edit_profile' %}" class="action-btn">EDIT INFORMATION</a>
-           
+            <a href="{% url 'accounts:edit_profile' %}" class="action-btn">EDIT INFORMATION</a>
             <button class="action-btn">DOCUMENT REQUEST</button>
           </div>
         </div>
