@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
   <title>{% block title %}LabangOnline{% endblock %}</title>
   {% load static %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,33 +41,81 @@
 
   {% block scripts %}{% endblock %}
   <script>
-    // Persistent light/dark mode with clear labelling
-    const btn = document.getElementById('mode-toggle');
-    const key = 'labang-mode';
-    function applyMode(mode){
+    // Enhanced persistent dark/light mode system
+    (function() {
+      const btn = document.getElementById('mode-toggle');
+      const key = 'labang-theme-mode';
       const html = document.documentElement;
-      if(mode === 'light'){
-        html.classList.add('light');
-        if(btn){ btn.textContent = 'Dark mode'; btn.setAttribute('aria-pressed','true'); }
-      } else {
-        html.classList.remove('light');
-        if(btn){ btn.textContent = 'Light mode'; btn.setAttribute('aria-pressed','false'); }
+      
+      // Theme management
+      function applyTheme(theme) {
+        // Remove existing theme classes
+        html.classList.remove('light', 'dark');
+        
+        // Apply new theme
+        html.classList.add(theme);
+        
+        // Update button text and state
+        if (btn) {
+          btn.textContent = theme === 'light' ? 'Dark Mode' : 'Light Mode';
+          btn.setAttribute('aria-pressed', theme === 'light' ? 'false' : 'true');
+          btn.setAttribute('data-theme', theme);
+        }
+        
+        // Update meta theme-color for mobile browsers
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+          metaThemeColor.content = theme === 'light' ? '#ffffff' : '#0b1020';
+        }
       }
-    }
-    // Determine initial mode: saved -> system preference -> dark
-    const saved = localStorage.getItem(key);
-    if(saved){
-      applyMode(saved);
-    } else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches){
-      applyMode('light');
-    } else {
-      applyMode('dark');
-    }
-    btn?.addEventListener('click', ()=>{
-      const next = document.documentElement.classList.contains('light') ? 'dark' : 'light';
-      localStorage.setItem(key, next);
-      applyMode(next);
-    });
+      
+      // Initialize theme
+      function initTheme() {
+        const saved = localStorage.getItem(key);
+        const systemPrefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        
+        // Priority: saved preference -> system preference -> dark (default)
+        const initialTheme = saved || (systemPrefersLight ? 'light' : 'dark');
+        applyTheme(initialTheme);
+      }
+      
+      // Toggle theme
+      function toggleTheme() {
+        const currentTheme = html.classList.contains('light') ? 'light' : 'dark';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        localStorage.setItem(key, newTheme);
+        applyTheme(newTheme);
+        
+        // Add smooth transition
+        html.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+        setTimeout(() => {
+          html.style.transition = '';
+        }, 300);
+      }
+      
+      // Initialize on DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initTheme);
+      } else {
+        initTheme();
+      }
+      
+      // Add click listener
+      if (btn) {
+        btn.addEventListener('click', toggleTheme);
+      }
+      
+      // Listen for system theme changes
+      if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+          // Only update if no saved preference
+          if (!localStorage.getItem(key)) {
+            applyTheme(e.matches ? 'light' : 'dark');
+          }
+        });
+      }
+    })();
   </script>
 </body>
 </html>
