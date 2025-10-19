@@ -13,10 +13,20 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
 from django.views.decorators.cache import never_cache
+import base64
 
+from django.shortcuts import render
 
 
 User = get_user_model()
+
+# -------------------- HELPER FUNCTION --------------------
+def get_base64_image(data):
+    """Convert binary image data to base64 string WITHOUT data URI prefix"""
+    if data:
+        return base64.b64encode(data).decode('utf-8')
+    return None
+
 
 # -------------------- LOGIN --------------------
 @never_cache
@@ -29,8 +39,7 @@ def login(request):
         if user is not None:
             if user.resident_confirmation:  # Only allow verified users
                 auth_login(request, user)
-
-                return redirect('accounts:personal_info')  # Redirect to personal_info
+                return redirect('accounts:personal_info')
             else:
                 messages.warning(request, "Account verification pending. Please visit Barangay Hall of Labangon to complete your account verification.")
         else:
@@ -39,10 +48,7 @@ def login(request):
     return render(request, 'accounts/login.html')
 
 
-
-
 # -------------------- REGISTER --------------------
-
 @never_cache
 def register(request):
     if request.method == "POST":
@@ -83,12 +89,11 @@ def register(request):
             province=province,
             postal_code=postal_code,
             resident_confirmation=resident_confirmation,
-            nso_document=nso_document,
-        
+            nso_document=nso_document.read() if nso_document else None,
         )
 
         messages.success(request, "Account created successfully! Please proceed to Barangay Hall of Labangon for verification.")
-        return redirect("accounts:login")  # Update with your login URL
+        return redirect("accounts:login")
 
     return render(request, "accounts/register.html")
 
@@ -111,62 +116,78 @@ def forgot_password(request):
 @never_cache
 def logout_confirm(request):
     if request.method == 'POST':
-        # User clicked Yes → end session
-        auth_logout(request)  # <-- this ends the session
+        auth_logout(request)
         messages.success(request, "You have successfully logged out.")
-        return redirect('accounts:login')  # Redirect to login page
-    # GET request → just show the confirmation page
+        return redirect('accounts:login')
     return render(request, 'accounts/logout_confirm.html')
 
 
-
+# -------------------- PERSONAL INFO --------------------
 @login_required(login_url='accounts:login')
 @never_cache
 def personal_info(request):
     user = request.user
+
+    # Convert to base64 (without data URI prefix - template adds it)
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    resident_id_base64 = get_base64_image(user.resident_id_photo)
+
     context = {
-        'user': request.user,
-      
-    }
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+        'resident_id_base64': resident_id_base64,
+    }   
     return render(request, 'accounts/personal_info.html', context)
+
 
 # -------------------- EDIT PROFILE --------------------
 @login_required(login_url='accounts:login')
 @never_cache
 def edit_profile(request):
     user = request.user
-    
-    # Handle profile editing including ID photo upload
-    
-    if request.method == 'POST':
 
-        
-        # Update basic information
+    if request.method == 'POST':
+        # Update text fields
         user.full_name = request.POST.get('full_name', user.full_name)
         user.contact_number = request.POST.get('contact_number', user.contact_number)
-        user.date_of_birth = request.POST.get('date_of_birth', user.date_of_birth)
-        user.civil_status = request.POST.get('civil_status', user.civil_status)
         user.address_line = request.POST.get('address_line', user.address_line)
-        user.barangay = request.POST.get('barangay', user.barangay)
-        user.city = request.POST.get('city', user.city)
-        user.province = request.POST.get('province', user.province)
-        user.postal_code = request.POST.get('postal_code', user.postal_code)
         
-        
-        if 'profile_photo' in request.FILES:
-            user.profile_photo = request.FILES['profile_photo']
-        if 'resident_id_photo' in request.FILES:
-            user.resident_id_photo = request.FILES['resident_id_photo']
+        # Handle date_of_birth
+        date_of_birth = request.POST.get('date_of_birth')
+        if date_of_birth:
+            user.date_of_birth = date_of_birth
+            
+        # Handle civil_status
+        civil_status = request.POST.get('civil_status')
+        if civil_status:
+            user.civil_status = civil_status
+
+        # Handle file uploads
+        profile_photo = request.FILES.get('profile_photo')
+        if profile_photo:
+            user.profile_photo = profile_photo.read()
+
+        resident_id_photo = request.FILES.get('resident_id_photo')
+        if resident_id_photo:
+            user.resident_id_photo = resident_id_photo.read()
+
+        nso_document = request.FILES.get('nso_document')
+        if nso_document:
+            user.nso_document = nso_document.read()
 
         user.save()
-        
         messages.success(request, "Profile updated successfully!")
-        return redirect('accounts:personal_info')
-    
-    context = { 
-        'user': request.user, 
-        }
-    
+        return redirect('accounts:personal_info')  # Redirect to personal_info after save
+
+    # Convert images to base64 for display
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    resident_id_base64 = get_base64_image(user.resident_id_photo)
+
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+        'resident_id_base64': resident_id_base64,
+    }
     return render(request, 'accounts/edit_profile.html', context)
 
 
@@ -174,18 +195,19 @@ def edit_profile(request):
 @login_required(login_url='accounts:login')
 @never_cache
 def complete_profile(request):
+    user = request.user
     
-        # Display complete profile including ID photo and dependents
+    # Convert images to base64
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    resident_id_base64 = get_base64_image(user.resident_id_photo)
     
-        user = request.user
+    # If you have a Dependent model, fetch dependents here
+    dependents = []
     
-
-        # If you don't have a Dependent model yet, you'll need to create one
-        dependents = []
-        # Example: dependents = user.dependents.all() if you have related_name='dependents'
-    
-        context = {
+    context = {
         'user': user,
-        
+        'profile_pic_base64': profile_pic_base64,
+        'resident_id_base64': resident_id_base64,
+        'dependents': dependents,
     }
-        return render(request, 'accounts/complete_profile.html', context)
+    return render(request, 'accounts/complete_profile.html', context)

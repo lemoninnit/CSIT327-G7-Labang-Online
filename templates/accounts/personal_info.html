@@ -61,7 +61,11 @@
           <span></span>
           <button id="mode-toggle" class="btn">Toggle</button>
           <div class="user-profile">
-            <img src="{% if request.user.profile_photo %}{{ request.user.profile_photo.url }}{% else %}{% static 'icons/default_user.png' %}{% endif %}" alt="User Icon" />
+            {% if profile_pic_base64 %}
+              <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
+            {% else %}
+              <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
+            {% endif %}
             <span>{{ request.user.full_name }}</span>
             <!-- Updated Logout Button -->
             <form method="get" action="{% url 'accounts:logout_confirm' %}">
@@ -69,6 +73,7 @@
               </form>
           </div>
         </header>
+        
         {% if messages %}
         <div class="messages">
             {% for message in messages %}
@@ -77,15 +82,20 @@
           {% endif %}
           {% endfor %}
         </div>
-          {% endif %}
+        {% endif %}
+        
         <div class="content-wrapper">
           <!-- Left: User Information -->
           <div class="content-left">
             <div class="user-header">
-              <img src="{% if request.user.profile_photo %}{{ request.user.profile_photo.url }}{% else %}{% static 'icons/default_user.png' %}{% endif %}" alt="User Profile" />
+              {% if profile_pic_base64 %}
+                <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
+              {% else %}
+                <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
+              {% endif %}
               <div class="user-name">
                 <h2>{{ request.user.full_name }}</h2>
-                <span class="role">Resident</span>
+                <span class="role">{% if request.user.resident_confirmation %}Resident{% else %}Pending Verification{% endif %}</span>
               </div>
             </div>
 
@@ -110,16 +120,14 @@
                 </tr>
                 <tr>
                   <td>Civil Status:</td>
-                  <td href="{% url 'accounts:personal_info' %}">{{ request.user.civil_status }}</td>
+                  <td>{{ request.user.civil_status|default:"Not specified" }}</td>
                 </tr>
                 <tr>
                   <td>Address:</td>
                   <td>
-                    Address: {{ request.user.address_line }}, {{ request.user.barangay }}, {{ request.user.city }}, {{ request.user.province }} {{ request.user.postal_code }}
-
+                    {{ request.user.address_line }}, {{ request.user.barangay }}, {{ request.user.city }}, {{ request.user.province }} {{ request.user.postal_code }}
                   </td>
                 </tr>
-                
                 <tr>
                   <td>Resident Confirmed:</td>
                   <td>
@@ -132,7 +140,6 @@
             <div class="info-section">
               <h3>CONTACT INFORMATION</h3>
               <table class="user-info-table">
-               
                 <tr>
                   <td>Mobile:</td>
                   <td>{{ request.user.contact_number }}</td>
@@ -141,15 +148,25 @@
                   <td>Email:</td>
                   <td>{{ request.user.email }}</td>
                 </tr>
-                 <tr>
-              <td>
-               <h2>Resident ID</h2>
-                <img src="{% if request.user.resident_id_photo %}{{ request.user.resident_id_photo.url }}
-                {% else %}{% static 'icons/file-report.png' %}
-                {% endif %}" 
-                alt="Resident ID"
-                style="height:200px; width:500px; border-radius:12px; border:1px solid rgba(255,255,255,.1); background:#0f172a; padding:6px;"/>
-                </td>
+              </table>
+            </div>
+
+            <div class="info-section">
+              <h3>RESIDENT ID</h3>
+              <table class="user-info-table">
+                <tr>
+                  <td colspan="2">
+                    {% if resident_id_base64 %}
+                      <img src="data:image/jpeg;base64,{{ resident_id_base64 }}" 
+                           alt="Resident ID"
+                           style="max-width:100%; height:auto; border-radius:12px; border:1px solid rgba(255,255,255,.1); background:#0f172a; padding:6px;"/>
+                    {% else %}
+                      <div style="padding:20px; text-align:center; color:#a8b3cf;">
+                        <img src="{% static 'icons/file-report.png' %}" alt="No ID" style="opacity:0.5; height:100px;"/>
+                        <p>No Resident ID uploaded</p>
+                      </div>
+                    {% endif %}
+                  </td>
                 </tr>
               </table>
             </div>
@@ -157,12 +174,7 @@
           
           <!-- Right: Action Buttons -->
           <div class="content-right">
-            
-            
-           <!-- <button class="action-btn">EDIT INFORMATION</button>-->
-
-           <a href="{% url 'accounts:edit_profile' %}" class="action-btn">EDIT INFORMATION</a>
-           
+            <a href="{% url 'accounts:edit_profile' %}" class="action-btn">EDIT INFORMATION</a>
             <button class="action-btn">DOCUMENT REQUEST</button>
           </div>
         </div>
