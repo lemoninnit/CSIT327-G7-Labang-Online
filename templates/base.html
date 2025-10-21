@@ -22,7 +22,7 @@
       <nav class="nav" style="display:flex;align-items:center;gap:16px">
         <a href="/accounts/register/">Register</a>
         <a href="/accounts/login/">Login</a>
-        <button id="mode-toggle" class="btn" style="padding:8px 12px">Toggle</button>
+        <button id="mode-toggle" class="btn" style="padding:8px 12px">Light mode</button>
       </nav>
     </div>
   </header>
@@ -40,83 +40,7 @@
   </footer>
 
   {% block scripts %}{% endblock %}
-  <script>
-    // Enhanced persistent dark/light mode system
-    (function() {
-      const btn = document.getElementById('mode-toggle');
-      const key = 'labang-theme-mode';
-      const html = document.documentElement;
-      
-      // Theme management
-      function applyTheme(theme) {
-        // Remove existing theme classes
-        html.classList.remove('light', 'dark');
-        
-        // Apply new theme
-        html.classList.add(theme);
-        
-        // Update button text and state
-        if (btn) {
-          btn.textContent = theme === 'light' ? 'Dark Mode' : 'Light Mode';
-          btn.setAttribute('aria-pressed', theme === 'light' ? 'false' : 'true');
-          btn.setAttribute('data-theme', theme);
-        }
-        
-        // Update meta theme-color for mobile browsers
-        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-        if (metaThemeColor) {
-          metaThemeColor.content = theme === 'light' ? '#ffffff' : '#0b1020';
-        }
-      }
-      
-      // Initialize theme
-      function initTheme() {
-        const saved = localStorage.getItem(key);
-        const systemPrefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-        
-        // Priority: saved preference -> system preference -> dark (default)
-        const initialTheme = saved || (systemPrefersLight ? 'light' : 'dark');
-        applyTheme(initialTheme);
-      }
-      
-      // Toggle theme
-      function toggleTheme() {
-        const currentTheme = html.classList.contains('light') ? 'light' : 'dark';
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        
-        localStorage.setItem(key, newTheme);
-        applyTheme(newTheme);
-        
-        // Add smooth transition
-        html.style.transition = 'background-color 0.3s ease, color 0.3s ease';
-        setTimeout(() => {
-          html.style.transition = '';
-        }, 300);
-      }
-      
-      // Initialize on DOM ready
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initTheme);
-      } else {
-        initTheme();
-      }
-      
-      // Add click listener
-      if (btn) {
-        btn.addEventListener('click', toggleTheme);
-      }
-      
-      // Listen for system theme changes
-      if (window.matchMedia) {
-        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
-          // Only update if no saved preference
-          if (!localStorage.getItem(key)) {
-            applyTheme(e.matches ? 'light' : 'dark');
-          }
-        });
-      }
-    })();
-  </script>
+  <script src="{% static 'js/theme.js' %}"></script>
 </body>
 </html>
 

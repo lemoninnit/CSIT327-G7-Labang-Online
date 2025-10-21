@@ -259,29 +259,35 @@ def edit_profile(request):
     # Handle profile editing including ID photo upload
     
     if request.method == 'POST':
+        try:
+            # Update basic information
+            user.full_name = request.POST.get('full_name', user.full_name)
+            user.username = request.POST.get('username', user.username)
+            user.email = request.POST.get('email', user.email)
+            user.contact_number = request.POST.get('contact_number', user.contact_number)
+            user.date_of_birth = request.POST.get('date_of_birth', user.date_of_birth)
+            user.civil_status = request.POST.get('civil_status', user.civil_status)
+            user.address_line = request.POST.get('address_line', user.address_line)
+            user.barangay = request.POST.get('barangay', user.barangay)
+            user.city = request.POST.get('city', user.city)
+            user.province = request.POST.get('province', user.province)
+            user.postal_code = request.POST.get('postal_code', user.postal_code)
+            
+            # Handle file uploads properly
+            if 'profile_photo' in request.FILES:
+                user.profile_photo = request.FILES['profile_photo']
+                
+            if 'resident_id_photo' in request.FILES:
+                user.resident_id_photo = request.FILES['resident_id_photo']
 
-        
-        # Update basic information
-        user.full_name = request.POST.get('full_name', user.full_name)
-        user.contact_number = request.POST.get('contact_number', user.contact_number)
-        user.date_of_birth = request.POST.get('date_of_birth', user.date_of_birth)
-        user.civil_status = request.POST.get('civil_status', user.civil_status)
-        user.address_line = request.POST.get('address_line', user.address_line)
-        user.barangay = request.POST.get('barangay', user.barangay)
-        user.city = request.POST.get('city', user.city)
-        user.province = request.POST.get('province', user.province)
-        user.postal_code = request.POST.get('postal_code', user.postal_code)
-        
-        
-        if 'profile_photo' in request.FILES:
-            user.profile_photo = request.FILES['profile_photo']
-        if 'resident_id_photo' in request.FILES:
-            user.resident_id_photo = request.FILES['resident_id_photo']
-
-        user.save()
-        
-        messages.success(request, "Profile updated successfully!")
-        return redirect('accounts:personal_info')
+            user.save()
+            
+            messages.success(request, "Profile updated successfully!")
+            return redirect('accounts:personal_info')
+            
+        except Exception as e:
+            messages.error(request, f"Error updating profile: {str(e)}")
+            return redirect('accounts:edit_profile')
     
     context = { 
         'user': request.user, 
