@@ -59,7 +59,7 @@
         <!-- Top bar -->
         <header class="topbar">
           <span></span>
-          <button id="mode-toggle" class="btn">Toggle</button>
+          <button id="mode-toggle" class="btn">Light mode</button>
           <div class="user-profile">
             <img src="{% if request.user.profile_photo %}{{ request.user.profile_photo.url }}{% else %}{% static 'icons/default_user.png' %}{% endif %}" alt="User Icon" />
             <span>{{ request.user.full_name }}</span>
@@ -168,6 +168,6 @@
         </div>
       </main>
     </div>
-    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script src="{% static 'js/theme.js' %}"></script>
   </body>
 </html>

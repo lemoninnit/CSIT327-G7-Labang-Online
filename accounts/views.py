@@ -1,22 +1,20 @@
-from django.contrib.auth import authenticate, login as auth_login
+"""
+Views for Labang Online application
+Handles authentication, user management, and password recovery
+"""
+
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.core.mail import send_mail
-
-from .models import User
-from .forms import RegistrationForm
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import get_user_model
-from django.contrib import messages
+from django.conf import settings
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout as auth_logout
 from django.views.decorators.cache import never_cache
 
-
-
-User = get_user_model()
+from .models import User, PasswordResetCode
+from .forms import RegistrationForm
 
 # -------------------- LOGIN --------------------
 @never_cache
@@ -102,8 +100,130 @@ def welcome(request: HttpRequest) -> HttpResponse:
 def forgot_password(request):
     if request.method == 'POST':
         email = request.POST.get('email')
-        messages.success(request, f"Password reset instructions have been sent to {email} if an account exists with this email address.")
+        
+        try:
+            user = User.objects.get(email=email)
+            
+            # Generate verification code
+            reset_code = PasswordResetCode.generate_code(user)
+            
+            # Send email with verification code
+            subject = 'Password Reset Verification Code - Labang Online'
+            message = f"""
+            Hello {user.full_name},
+            
+            You requested a password reset for your Labang Online account.
+            
+            Your verification code is: {reset_code.code}
+            
+            This code will expire in 10 minutes.
+            
+            If you didn't request this password reset, please ignore this email.
+            
+            Best regards,
+            Labang Online Team
+            """
+            
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=False,
+                )
+                messages.success(request, f"Verification code sent to {email}. Please check your email and enter the 6-digit code.")
+                return redirect('accounts:verify_code', user_id=user.id)
+            except Exception as e:
+                messages.error(request, f"Failed to send email. Please try again later. Error: {str(e)}")
+                
+        except User.DoesNotExist:
+            # Don't reveal if email exists or not for security
+            messages.success(request, f"If an account exists with {email}, a verification code has been sent.")
+            return redirect('accounts:login')
+    
     return render(request, 'accounts/forgot_password.html')
+
+
+# -------------------- VERIFY CODE --------------------
+def verify_code(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    
+    if request.method == 'POST':
+        entered_code = request.POST.get('code')
+        
+        try:
+            reset_code = PasswordResetCode.objects.get(
+                user=user, 
+                code=entered_code, 
+                is_used=False
+            )
+            
+            if reset_code.is_valid():
+                # Store the code in session for password reset
+                request.session['reset_code_id'] = reset_code.id
+                messages.success(request, "Code verified successfully! Please enter your new password.")
+                return redirect('accounts:reset_password')
+            else:
+                messages.error(request, "Code has expired. Please request a new code.")
+                return redirect('accounts:forgot_password')
+                
+        except PasswordResetCode.DoesNotExist:
+            messages.error(request, "Invalid verification code. Please try again.")
+    
+    context = {'user': user}
+    return render(request, 'accounts/verify_code.html', context)
+
+
+# -------------------- RESET PASSWORD --------------------
+def reset_password(request):
+    if 'reset_code_id' not in request.session:
+        messages.error(request, "No active password reset session. Please start over.")
+        return redirect('accounts:forgot_password')
+    
+    try:
+        reset_code = PasswordResetCode.objects.get(
+            id=request.session['reset_code_id'],
+            is_used=False
+        )
+        
+        if not reset_code.is_valid():
+            messages.error(request, "Reset session expired. Please request a new code.")
+            del request.session['reset_code_id']
+            return redirect('accounts:forgot_password')
+            
+    except PasswordResetCode.DoesNotExist:
+        messages.error(request, "Invalid reset session. Please start over.")
+        del request.session['reset_code_id']
+        return redirect('accounts:forgot_password')
+    
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        if new_password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return render(request, 'accounts/reset_password.html')
+        
+        if len(new_password) < 8:
+            messages.error(request, "Password must be at least 8 characters long.")
+            return render(request, 'accounts/reset_password.html')
+        
+        # Update user password
+        reset_code.user.set_password(new_password)
+        reset_code.user.save()
+        
+        # Mark code as used
+        reset_code.is_used = True
+        reset_code.save()
+        
+        # Clear session
+        del request.session['reset_code_id']
+        
+        messages.success(request, "Password updated successfully! You can now log in with your new password.")
+        return redirect('accounts:login')
+    
+    return render(request, 'accounts/reset_password.html')
 
 
 # -------------------- LOGOUT CONFIRM --------------------
@@ -139,29 +259,35 @@ def edit_profile(request):
     # Handle profile editing including ID photo upload
     
     if request.method == 'POST':
+        try:
+            # Update basic information
+            user.full_name = request.POST.get('full_name', user.full_name)
+            user.username = request.POST.get('username', user.username)
+            user.email = request.POST.get('email', user.email)
+            user.contact_number = request.POST.get('contact_number', user.contact_number)
+            user.date_of_birth = request.POST.get('date_of_birth', user.date_of_birth)
+            user.civil_status = request.POST.get('civil_status', user.civil_status)
+            user.address_line = request.POST.get('address_line', user.address_line)
+            user.barangay = request.POST.get('barangay', user.barangay)
+            user.city = request.POST.get('city', user.city)
+            user.province = request.POST.get('province', user.province)
+            user.postal_code = request.POST.get('postal_code', user.postal_code)
+            
+            # Handle file uploads properly
+            if 'profile_photo' in request.FILES:
+                user.profile_photo = request.FILES['profile_photo']
+                
+            if 'resident_id_photo' in request.FILES:
+                user.resident_id_photo = request.FILES['resident_id_photo']
 
-        
-        # Update basic information
-        user.full_name = request.POST.get('full_name', user.full_name)
-        user.contact_number = request.POST.get('contact_number', user.contact_number)
-        user.date_of_birth = request.POST.get('date_of_birth', user.date_of_birth)
-        user.civil_status = request.POST.get('civil_status', user.civil_status)
-        user.address_line = request.POST.get('address_line', user.address_line)
-        user.barangay = request.POST.get('barangay', user.barangay)
-        user.city = request.POST.get('city', user.city)
-        user.province = request.POST.get('province', user.province)
-        user.postal_code = request.POST.get('postal_code', user.postal_code)
-        
-        
-        if 'profile_photo' in request.FILES:
-            user.profile_photo = request.FILES['profile_photo']
-        if 'resident_id_photo' in request.FILES:
-            user.resident_id_photo = request.FILES['resident_id_photo']
-
-        user.save()
-        
-        messages.success(request, "Profile updated successfully!")
-        return redirect('accounts:personal_info')
+            user.save()
+            
+            messages.success(request, "Profile updated successfully!")
+            return redirect('accounts:personal_info')
+            
+        except Exception as e:
+            messages.error(request, f"Error updating profile: {str(e)}")
+            return redirect('accounts:edit_profile')
     
     context = { 
         'user': request.user, 
