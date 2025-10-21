@@ -32,6 +32,7 @@ pip install psycopg
 
 ```
 py manage.py migrate
+python setup_gmail_recovery.py
 py manage.py runserver
 ```
 
