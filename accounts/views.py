@@ -14,8 +14,17 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 import base64
 
+from django.shortcuts import render
 from .models import User, PasswordResetCode
 from .forms import RegistrationForm
+
+# -------------------- HELPER FUNCTION --------------------
+def get_base64_image(data):
+    """Convert binary image data to base64 string WITHOUT data URI prefix"""
+    if data:
+        return base64.b64encode(data).decode('utf-8')
+    return None
+
 
 # -------------------- LOGIN --------------------
 @never_cache
@@ -256,44 +265,49 @@ def personal_info(request):
 @never_cache
 def edit_profile(request):
     user = request.user
-    
-    # Handle profile editing including ID photo upload
-    
-    if request.method == 'POST':
-        try:
-            # Update basic information
-            user.full_name = request.POST.get('full_name', user.full_name)
-            user.username = request.POST.get('username', user.username)
-            user.email = request.POST.get('email', user.email)
-            user.contact_number = request.POST.get('contact_number', user.contact_number)
-            user.date_of_birth = request.POST.get('date_of_birth', user.date_of_birth)
-            user.civil_status = request.POST.get('civil_status', user.civil_status)
-            user.address_line = request.POST.get('address_line', user.address_line)
-            user.barangay = request.POST.get('barangay', user.barangay)
-            user.city = request.POST.get('city', user.city)
-            user.province = request.POST.get('province', user.province)
-            user.postal_code = request.POST.get('postal_code', user.postal_code)
-            
-            # Handle file uploads properly
-            if 'profile_photo' in request.FILES:
-                user.profile_photo = request.FILES['profile_photo']
-                
-            if 'resident_id_photo' in request.FILES:
-                user.resident_id_photo = request.FILES['resident_id_photo']
 
-            user.save()
+    if request.method == 'POST':
+        # Update text fields
+        user.full_name = request.POST.get('full_name', user.full_name)
+        user.contact_number = request.POST.get('contact_number', user.contact_number)
+        user.address_line = request.POST.get('address_line', user.address_line)
+        
+        # Handle date_of_birth
+        date_of_birth = request.POST.get('date_of_birth')
+        if date_of_birth:
+            user.date_of_birth = date_of_birth
             
-            messages.success(request, "Profile updated successfully!")
-            return redirect('accounts:personal_info')
-            
-        except Exception as e:
-            messages.error(request, f"Error updating profile: {str(e)}")
-            return redirect('accounts:edit_profile')
-    
-    context = { 
-        'user': request.user, 
-        }
-    
+        # Handle civil_status
+        civil_status = request.POST.get('civil_status')
+        if civil_status:
+            user.civil_status = civil_status
+
+        # Handle file uploads
+        profile_photo = request.FILES.get('profile_photo')
+        if profile_photo:
+            user.profile_photo = profile_photo.read()
+
+        resident_id_photo = request.FILES.get('resident_id_photo')
+        if resident_id_photo:
+            user.resident_id_photo = resident_id_photo.read()
+
+        nso_document = request.FILES.get('nso_document')
+        if nso_document:
+            user.nso_document = nso_document.read()
+
+        user.save()
+        messages.success(request, "Profile updated successfully!")
+        return redirect('accounts:personal_info')  # Redirect to personal_info after save
+
+    # Convert images to base64 for display
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    resident_id_base64 = get_base64_image(user.resident_id_photo)
+
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+        'resident_id_base64': resident_id_base64,
+    }
     return render(request, 'accounts/edit_profile.html', context)
 
 
