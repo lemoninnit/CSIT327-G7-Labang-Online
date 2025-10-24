@@ -9,14 +9,89 @@
     <link rel="stylesheet" href="{% static 'css/app.css' %}" />
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
     <style>
-      /* Keep the same look; only small helpers for inputs */
-      .user-info-table td:first-child{width:220px;color:#a8b3cf;}
-      .user-info-table input,.user-info-table select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #2a2f3b;background:#0f1420;color:#e5e7eb;}
-      .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-      .btn-row{display:flex;gap:12px;justify-content:flex-end;margin-top:16px;}
-      .btn-primary{background:#3b82f6;color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;}
-      .btn-secondary{background:transparent;border:1px solid #3b82f6;color:#3b82f6;padding:10px 14px;border-radius:8px;cursor:pointer;text-decoration:none;}
+      /* Modern form styling */
+      .user-info-table {width: 100%;}
+      .user-info-table td:first-child{width:220px;color:#a8b3cf;font-weight:500;padding:12px 0;}
+      .user-info-table td {padding:12px 0;}
+      .form-control {width:100%;padding:12px 15px;border-radius:8px;border:1px solid #2a2f3b;background:#0f1420;color:#e5e7eb;transition:all 0.3s ease;}
+      .form-control:focus {border-color:#3b82f6;outline:none;box-shadow:0 0 0 2px rgba(59,130,246,0.3);}
+      .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+      
+      /* Button styling */
+      .btn-row{display:flex;gap:16px;justify-content:flex-end;margin-top:32px;}
+      .btn-primary{background:#3b82f6;color:#fff;border:0;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:500;box-shadow:0 2px 4px rgba(0,0,0,0.2);transition:all 0.2s ease;}
+      .btn-primary:hover {background:#2563eb;transform:translateY(-1px);box-shadow:0 4px 6px rgba(0,0,0,0.2);}
+      .btn-secondary{background:transparent;border:1px solid #3b82f6;color:#3b82f6;padding:12px 24px;border-radius:8px;cursor:pointer;text-decoration:none;font-weight:500;transition:all 0.2s ease;}
+      .btn-secondary:hover {background:rgba(59,130,246,0.1);}
       .content-right .action-btn{display:none;} /* hide dashboard's right buttons on edit page */
+      
+      /* Improved section headers */
+      .info-section {
+        margin-bottom: 30px;
+      }
+      .info-section h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        color: #e5e7eb;
+        border-bottom: 1px solid #2a2f3b;
+        padding-bottom: 12px;
+        letter-spacing: 0.5px;
+      }
+      
+      /* Status badges */
+      .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .status-badge.confirmed {
+        background-color: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+      }
+      .status-badge.pending {
+        background-color: rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+      }
+      
+      /* Light mode styles */
+      html.light .form-control {
+        background: #fff;
+        color: #333;
+        border: 1px solid #ddd;
+      }
+      html.light .form-control:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+      }
+      html.light .user-info-table td:first-child {
+        color: #555;
+      }
+      html.light .info-section h3 {
+        color: #333;
+        border-bottom: 1px solid #ddd;
+      }
+      html.light .btn-primary {
+        background: #3b82f6;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      html.light .btn-primary:hover {
+        background: #2563eb;
+      }
+      html.light .btn-secondary {
+        border: 1px solid #3b82f6;
+      }
+      html.light .btn-secondary:hover {
+        background: rgba(59,130,246,0.1);
+      }
+      html.light .status-badge.confirmed {
+        background-color: rgba(16, 185, 129, 0.1);
+      }
+      html.light .status-badge.pending {
+        background-color: rgba(245, 158, 11, 0.1);
+      }
     </style>
   </head>
   <body>
@@ -65,7 +140,7 @@
         <!-- Top bar -->
         <header class="topbar">
           <span></span>
-          <button id="mode-toggle" class="btn">Toggle</button>
+          <button id="mode-toggle" class="btn">Light mode</button>
           <div class="user-profile">
             {% if profile_pic_base64 %}
               <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
@@ -90,80 +165,16 @@
               </div>
             </div>
 
-            <!-- Flash Messages -->
-            {% if messages %}
-              {% for message in messages %}
-                <div class="flash-message {% if message.tags %}{{ message.tags }}{% endif %}">
-                  {{ message }}
-                </div>
-              {% endfor %}
-            {% endif %}
-
-            <!-- Edit Form -->
-            <form method="post" enctype="multipart/form-data">
-              {% csrf_token %}
-
-              <div class="info-section">
-                <h3>USER INFORMATION</h3>
-                <table class="user-info-table">
-                  <tr>
-                    <td>Profile Picture:</td>
-                    <td><input type="file" name="profile_photo" accept="image/*" /></td>
-                  </tr>
-                  <tr>
-                    <td>Resident ID:</td>
-                    <td><input type="file" name="resident_id_photo" accept="image/*" /></td>
-                  </tr>
-                  <tr>
-                    <td>Full Name:</td>
-                    <td><input type="text" name="full_name" value="{{ request.user.full_name }}" required /></td>
-                  </tr>
-                  <tr>
-                    <td>Username:</td>
-                    <td><input type="text" value="{{ request.user.username }}" disabled /></td>
-                  </tr>
-                  <tr>
-                    <td>Email:</td>
-                    <td><input type="email" value="{{ request.user.email }}" disabled /></td>
-                  </tr>
-                  <tr>
-                    <td>Date of Birth:</td>
-                    <td><input type="date" name="date_of_birth" value="{{ request.user.date_of_birth|date:'Y-m-d' }}" /></td>
-                  </tr>
-                  <tr>
-                    <td>Civil Status:</td>
-                    <td>
-                      <select name="civil_status">
-                        <option value="">Select status</option>
-                        <option value="Single" {% if request.user.civil_status == "Single" %}selected{% endif %}>Single</option>
-                        <option value="Married" {% if request.user.civil_status == "Married" %}selected{% endif %}>Married</option>
-                        <option value="Widowed" {% if request.user.civil_status == "Widowed" %}selected{% endif %}>Widowed</option>
-                        <option value="Separated" {% if request.user.civil_status == "Separated" %}selected{% endif %}>Separated</option>
-                      </select>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Address:</td>
-                    <td>
-                      <div class="two-col" style="margin-bottom:12px;">
-                        <input type="text" name="address_line" placeholder="Street Address" value="{{ request.user.address_line }}" required />
-                        <input type="tel" name="contact_number" placeholder="Contact Number" value="{{ request.user.contact_number }}" required />
-                      </div>
-                      <div class="two-col">
-                        <input type="text" name="barangay" placeholder="Barangay" value="{{ request.user.barangay|default:'Labangon' }}" disabled />
-                        <input type="text" name="city" placeholder="City" value="{{ request.user.city|default:'Cebu City' }}" disabled />
-                      </div>
-                      <div class="two-col" style="margin-top:12px;">
-                        <input type="text" name="province" placeholder="Province" value="{{ request.user.province|default:'Cebu' }}" disabled />
-                        <input type="text" name="postal_code" placeholder="Postal Code" value="{{ request.user.postal_code|default:'6000' }}" disabled />
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Resident Confirmed:</td>
-                    <td>{% if request.user.resident_confirmation %}Yes{% else %}No{% endif %}</td>
-                  </tr>
-                </table>
+          <!-- User Information (as editable form) -->
+           {% if messages %}
+  {% for message in messages %}
+    <div class="flash-message {% if message.tags %}{{ message.tags }}{% endif %}">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+          <form method="post" enctype="multipart/form-data" action="{% url 'accounts:edit_profile' %}">
+            {% csrf_token %}
 
                 <div class="btn-row">
                   <a href="{% url 'accounts:personal_info' %}" class="btn-secondary">Cancel</a>
@@ -177,12 +188,61 @@
               <h3>CONTACT INFORMATION</h3>
               <table class="user-info-table">
                 <tr>
-                  <td>Mobile:</td>
-                  <td>{{ request.user.contact_number }}</td>
+                  <td>Profile Picture:</td>
+                  <td><input type="file" name="profile_photo" accept="image/*" class="form-control" /></td>
+                </tr>
+                <tr>
+                  <td>Resident ID:</td>
+                  <td><input type="file" name="resident_id_photo" accept="image/*" class="form-control" /></td>
+                </tr>
+                <tr>
+                  <td>Full Name:</td>
+                  <td><input type="text" name="full_name" value="{{ request.user.full_name }}" required class="form-control" /></td>
+                </tr>
+                <tr>
+                  <td>Username:</td>
+                  <td><input type="text" name="username" value="{{ request.user.username }}" class="form-control" /></td>
                 </tr>
                 <tr>
                   <td>Email:</td>
-                  <td>{{ request.user.email }}</td>
+                  <td><input type="email" name="email" value="{{ request.user.email }}" class="form-control" /></td>
+                </tr>
+                <tr>
+                  <td>Date of Birth:</td>
+                  <td><input type="date" name="date_of_birth" value="{{ request.user.date_of_birth|date:'Y-m-d' }}" class="form-control" /></td>
+                </tr>
+                <tr>
+                  <td>Civil Status:</td>
+                  <td>
+                    <select name="civil_status" class="form-control">
+                      <option value="">Select status</option>
+                      <option value="Single" {% if request.user.civil_status == 'Single' %}selected{% endif %}>Single</option>
+                      <option value="Married" {% if request.user.civil_status == 'Married' %}selected{% endif %}>Married</option>
+                      <option value="Widowed" {% if request.user.civil_status == 'Widowed' %}selected{% endif %}>Widowed</option>
+                      <option value="Separated" {% if request.user.civil_status == 'Separated' %}selected{% endif %}>Separated</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Address:</td>
+                  <td>
+                    <div class="two-col" style="margin-bottom:12px;">
+                      <input type="text" name="address_line" placeholder="Street Address" value="{{ request.user.address_line }}" required class="form-control" />
+                      <input type="tel" name="contact_number" placeholder="Contact Number" value="{{ request.user.contact_number }}" required class="form-control" />
+                    </div>
+                    <div class="two-col">
+                      <input type="text" name="barangay" placeholder="Barangay" value="{{ request.user.barangay|default:'Labangon' }}" readonly class="form-control" />
+                      <input type="text" name="city" placeholder="City" value="{{ request.user.city|default:'Cebu City' }}" readonly class="form-control" />
+                    </div>
+                    <div class="two-col" style="margin-top:12px;">
+                      <input type="text" name="province" placeholder="Province" value="{{ request.user.province|default:'Cebu' }}" readonly class="form-control" />
+                      <input type="text" name="postal_code" placeholder="Postal Code" value="{{ request.user.postal_code|default:'6000' }}" readonly class="form-control" />
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Resident Confirmed:</td>
+                  <td>{% if request.user.resident_confirmation %}<span class="status-badge confirmed">Yes</span>{% else %}<span class="status-badge pending">No</span>{% endif %}</td>
                 </tr>
               </table>
             </div>
@@ -191,6 +251,6 @@
       </main>
     </div>
 
-    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script src="{% static 'js/theme.js' %}"></script>
   </body>
 </html>

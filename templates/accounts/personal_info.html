@@ -164,7 +164,7 @@
         <!-- Top bar -->
         <header class="topbar">
           <span></span>
-          <button id="mode-toggle" class="btn">Toggle</button>
+          <button id="mode-toggle" class="btn">Light mode</button>
           <div class="user-profile">
             {% if profile_pic_base64 %}
               <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
@@ -286,6 +286,6 @@
         </div>
       </main>
     </div>
-    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script src="{% static 'js/theme.js' %}"></script>
   </body>
 </html>

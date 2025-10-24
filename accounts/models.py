@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 import secrets
 import string
+import os
+
 
 class User(AbstractUser):
     full_name = models.CharField(max_length=255)
@@ -21,14 +23,28 @@ class User(AbstractUser):
 
     resident_confirmation = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
-    
+
     REQUIRED_FIELDS = ["email", "full_name", "contact_number", "date_of_birth"]
     civil_status = models.CharField(max_length=20, blank=True, null=True, choices=[
-        ('Single','Single'), ('Married','Married'), ('Widowed','Widowed'), ('Separated','Separated'),
+        ('Single', 'Single'), 
+        ('Married', 'Married'), 
+        ('Widowed', 'Widowed'), 
+        ('Separated', 'Separated'),
     ])
 
     def __str__(self):
         return self.username
+
+    def delete(self, *args, **kwargs):
+        # Delete associated files when user is deleted
+        for file_field in [self.profile_photo, self.resident_id_photo, self.nso_document]:
+            if file_field:
+                try:
+                    if os.path.isfile(file_field.path):
+                        os.remove(file_field.path)
+                except (ValueError, OSError):
+                    pass
+        super().delete(*args, **kwargs)
 
 
 class PasswordResetCode(models.Model):
@@ -48,7 +64,6 @@ class PasswordResetCode(models.Model):
         code = ''.join(secrets.choice(string.digits) for _ in range(6))
         
         # Create the reset code (expires in 10 minutes)
-        from django.utils import timezone
         expires_at = timezone.now() + timezone.timedelta(minutes=10)
         
         return cls.objects.create(
@@ -59,7 +74,6 @@ class PasswordResetCode(models.Model):
     
     def is_valid(self):
         """Check if the code is still valid (not expired and not used)"""
-        from django.utils import timezone
         return not self.is_used and timezone.now() < self.expires_at
     
     def __str__(self):
