@@ -142,28 +142,28 @@
           <span></span>
           <button id="mode-toggle" class="btn">Light mode</button>
           <div class="user-profile">
-            <img
-                src="{% if request.user.profile_photo %}{{ request.user.profile_photo.url }}{% else %}{% static 'icons/default_user.png' %}{% endif %}"
-                alt="User Profile"
-              />
+            {% if profile_pic_base64 %}
+              <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
+            {% else %}
+              <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
+            {% endif %}
             <span>{{ request.user.full_name }}</span>
           </div>
         </header>
 
         <div class="content-wrapper">
-          <!-- Header card (same look) -->
-
-            <div class="content-left">
+          <div class="content-left">
             <div class="user-header">
-              <img
-                src="{% if request.user.profile_photo %}{{ request.user.profile_photo.url }}{% else %}{% static 'icons/default_user.png' %}{% endif %}"
-                alt="User Profile"
-              />
-            <div class="user-name">
-              <h2>{{ request.user.full_name|default:"User" }}</h2>
-              <span class="role">{% if request.user.resident_confirmation %}Resident{% else %}Pending Verification{% endif %}</span>
+              {% if profile_pic_base64 %}
+                <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
+              {% else %}
+                <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
+              {% endif %}
+              <div class="user-name">
+                <h2>{{ request.user.full_name|default:"User" }}</h2>
+                <span class="role">{% if request.user.resident_confirmation %}Resident{% else %}Pending Verification{% endif %}</span>
+              </div>
             </div>
-          </div>
 
           <!-- User Information (as editable form) -->
            {% if messages %}
@@ -176,8 +176,16 @@
           <form method="post" enctype="multipart/form-data" action="{% url 'accounts:edit_profile' %}">
             {% csrf_token %}
 
+                <div class="btn-row">
+                  <a href="{% url 'accounts:personal_info' %}" class="btn-secondary">Cancel</a>
+                  <button type="submit" class="btn-primary">Save Changes</button>
+                </div>
+              </div>
+            </form>
+
+            <!-- Contact Information -->
             <div class="info-section">
-              <h3>USER INFORMATION</h3>
+              <h3>CONTACT INFORMATION</h3>
               <table class="user-info-table">
                 <tr>
                   <td>Profile Picture:</td>
@@ -237,31 +245,8 @@
                   <td>{% if request.user.resident_confirmation %}<span class="status-badge confirmed">Yes</span>{% else %}<span class="status-badge pending">No</span>{% endif %}</td>
                 </tr>
               </table>
-
-              <div class="btn-row">
-                <a href="{% url 'accounts:personal_info' %}" class="btn-secondary">Cancel</a>
-                <button type="submit" class="btn-primary">Save Changes</button>
-              </div>
             </div>
-          </form>
-
-          <!-- Contact Information -->
-          <div class="info-section">
-            <h3>CONTACT INFORMATION</h3>
-            <table class="user-info-table">
-              <tr>
-                <td>Mobile:</td>
-                <td>{{ request.user.contact_number }}</td>
-              </tr>
-              <tr>
-                <td>Email:</td>
-                <td>{{ request.user.email }}</td>
-              </tr>
-            </table>
-            
           </div>
-
-          </form>
         </div>
       </main>
     </div>

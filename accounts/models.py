@@ -16,9 +16,11 @@ class User(AbstractUser):
     city = models.CharField(max_length=100, default="Cebu City")
     province = models.CharField(max_length=100, default="Cebu")
     postal_code = models.CharField(max_length=10, default="6000")
-    nso_document = models.FileField(upload_to="nso_documents/")
-    profile_photo = models.FileField(upload_to="user_directory_path", blank=True, null=True)
-    resident_id_photo = models.FileField(upload_to="user_directory_path", blank=True, null=True)
+
+    nso_document = models.BinaryField(blank=True, null=True)
+    profile_photo = models.BinaryField(blank=True, null=True)
+    resident_id_photo = models.BinaryField(blank=True, null=True)
+
     resident_confirmation = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
 

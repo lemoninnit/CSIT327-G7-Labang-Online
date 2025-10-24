@@ -12,6 +12,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
+import base64
 
 from .models import User, PasswordResetCode
 from .forms import RegistrationForm
@@ -27,8 +28,7 @@ def login(request):
         if user is not None:
             if user.resident_confirmation:  # Only allow verified users
                 auth_login(request, user)
-
-                return redirect('accounts:personal_info')  # Redirect to personal_info
+                return redirect('accounts:personal_info')
             else:
                 messages.warning(request, "Account verification pending. Please visit Barangay Hall of Labangon to complete your account verification.")
         else:
@@ -37,10 +37,7 @@ def login(request):
     return render(request, 'accounts/login.html')
 
 
-
-
 # -------------------- REGISTER --------------------
-
 @never_cache
 def register(request):
     if request.method == "POST":
@@ -81,12 +78,11 @@ def register(request):
             province=province,
             postal_code=postal_code,
             resident_confirmation=resident_confirmation,
-            nso_document=nso_document,
-        
+            nso_document=nso_document.read() if nso_document else None,
         )
 
         messages.success(request, "Account created successfully! Please proceed to Barangay Hall of Labangon for verification.")
-        return redirect("accounts:login")  # Update with your login URL
+        return redirect("accounts:login")
 
     return render(request, "accounts/register.html")
 
@@ -231,24 +227,29 @@ def reset_password(request):
 @never_cache
 def logout_confirm(request):
     if request.method == 'POST':
-        # User clicked Yes → end session
-        auth_logout(request)  # <-- this ends the session
+        auth_logout(request)
         messages.success(request, "You have successfully logged out.")
-        return redirect('accounts:login')  # Redirect to login page
-    # GET request → just show the confirmation page
+        return redirect('accounts:login')
     return render(request, 'accounts/logout_confirm.html')
 
 
-
+# -------------------- PERSONAL INFO --------------------
 @login_required(login_url='accounts:login')
 @never_cache
 def personal_info(request):
     user = request.user
+
+    # Convert to base64 (without data URI prefix - template adds it)
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    resident_id_base64 = get_base64_image(user.resident_id_photo)
+
     context = {
-        'user': request.user,
-      
-    }
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+        'resident_id_base64': resident_id_base64,
+    }   
     return render(request, 'accounts/personal_info.html', context)
+
 
 # -------------------- EDIT PROFILE --------------------
 @login_required(login_url='accounts:login')
@@ -300,18 +301,19 @@ def edit_profile(request):
 @login_required(login_url='accounts:login')
 @never_cache
 def complete_profile(request):
+    user = request.user
     
-        # Display complete profile including ID photo and dependents
+    # Convert images to base64
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    resident_id_base64 = get_base64_image(user.resident_id_photo)
     
-        user = request.user
+    # If you have a Dependent model, fetch dependents here
+    dependents = []
     
-
-        # If you don't have a Dependent model yet, you'll need to create one
-        dependents = []
-        # Example: dependents = user.dependents.all() if you have related_name='dependents'
-    
-        context = {
+    context = {
         'user': user,
-        
+        'profile_pic_base64': profile_pic_base64,
+        'resident_id_base64': resident_id_base64,
+        'dependents': dependents,
     }
-        return render(request, 'accounts/complete_profile.html', context)
+    return render(request, 'accounts/complete_profile.html', context)
