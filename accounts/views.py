@@ -331,3 +331,33 @@ def complete_profile(request):
         'dependents': dependents,
     }
     return render(request, 'accounts/complete_profile.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def document_request(request):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+    }
+    return render(request, 'accounts/document_request.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def certificate_requests(request):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    
+    # Fetch user's certificate requests here
+    # requests = CertificateRequest.objects.filter(user=user).order_by('-created_at')
+    
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+        # 'requests': requests,
+    }
+    return render(request, 'accounts/certificate_requests.html', context)

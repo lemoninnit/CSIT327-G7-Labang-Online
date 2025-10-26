@@ -9,6 +9,48 @@
     <link rel="stylesheet" href="{% static 'css/app.css' %}" />
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
     <style>
+      /* Fix scrolling issues */
+      html, body {
+        overflow: hidden;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .dashboard-wrapper {
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+      }
+
+      .main-content {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .content-wrapper {
+        flex: 1;
+        display: flex;
+        padding: 20px;
+        gap: 20px;
+        overflow: hidden;
+        height: 100%;
+      }
+
+      /* Left column - User info */
+      .content-left {
+        flex: 1;
+        background-color: var(--panel);
+        border-radius: 12px;
+        padding: 24px;
+        overflow-y: auto;
+        max-height: 100%;
+      }
+
       /* Enhanced profile photo styling */
       .user-profile img {
         width: 45px;
@@ -50,6 +92,12 @@
         font-size: 28px;
         font-weight: 600;
         color: #e5e7eb;
+      }
+
+      /* Light mode - user name needs strong contrast */
+      .light .user-name h2 {
+        color: #111827 !important;
+        font-weight: 700;
       }
 
       .role {
@@ -112,6 +160,25 @@
         margin: 0;
         font-size: 14px;
       }
+
+      /* Ensure info sections have proper spacing */
+      .info-section {
+        margin-bottom: 24px;
+      }
+
+      .info-section:last-child {
+        margin-bottom: 60px;
+      }
+
+      /* Make menu items clickable links */
+      .sidebar .menu-item a {
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+      }
     </style>
   </head>
   <body>
@@ -137,24 +204,34 @@
 
         <ul class="menu">
           <li class="menu-item active">
-            <img src="{% static 'icons/user-info.png' %}" alt="" />
-            <span>Personal Info</span>
+            <a href="{% url 'accounts:personal_info' %}">
+              <img src="{% static 'icons/user-info.png' %}" alt="" />
+              <span>Personal Info</span>
+            </a>
           </li>
           <li class="menu-item">
-            <img src="{% static 'icons/request-records.png' %}" alt="" />
-            <span>Request Records</span>
+            <a href="{% url 'accounts:document_request' %}">
+              <img src="{% static 'icons/request-records.png' %}" alt="" />
+              <span>Document Request</span>
+            </a>
           </li>
           <li class="menu-item">
-            <img src="{% static 'icons/resident-record.png' %}" alt="" />
-            <span>Resident Records</span>
+            <a href="#">
+              <img src="{% static 'icons/resident-record.png' %}" alt="" />
+              <span>Resident Records</span>
+            </a>
           </li>
           <li class="menu-item">
-            <img src="{% static 'icons/incident-report.png' %}" alt="" />
-            <span>Report Records</span>
+            <a href="#">
+              <img src="{% static 'icons/incident-report.png' %}" alt="" />
+              <span>Report Records</span>
+            </a>
           </li>
           <li class="menu-item">
-            <img src="{% static 'icons/file-report.png' %}" alt="" />
-            <span>File Report</span>
+            <a href="#">
+              <img src="{% static 'icons/file-report.png' %}" alt="" />
+              <span>File Report</span>
+            </a>
           </li>
         </ul>
       </aside>
@@ -281,7 +358,7 @@
           <!-- Right: Action Buttons -->
           <div class="content-right">
             <a href="{% url 'accounts:edit_profile' %}" class="action-btn">EDIT INFORMATION</a>
-            <button class="action-btn">DOCUMENT REQUEST</button>
+            
           </div>
         </div>
       </main>
