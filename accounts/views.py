@@ -17,6 +17,7 @@ import base64
 from django.shortcuts import render
 from .models import User, PasswordResetCode
 from .forms import RegistrationForm
+from .models import User, PasswordResetCode, CertificateRequest
 
 # -------------------- HELPER FUNCTION --------------------
 def get_base64_image(data):
@@ -361,3 +362,91 @@ def certificate_requests(request):
         # 'requests': requests,
     }
     return render(request, 'accounts/certificate_requests.html', context)
+
+
+# Add this view to your views.py file
+
+@login_required(login_url='accounts:login')
+@never_cache
+def barangay_clearance_request(request):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    
+    if request.method == 'POST':
+        purpose = request.POST.get('purpose')
+        
+        # Validate purpose
+        if not purpose or len(purpose.strip()) < 10:
+            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/barangay_clearance_request.html', context)
+        
+        # Create the certificate request
+        cert_request = CertificateRequest.objects.create(
+            user=user,
+            certificate_type='barangay_clearance',
+            purpose=purpose,
+            payment_amount=50.00,  # Barangay Clearance fee
+        )
+        
+        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
+        
+        # Redirect to payment mode selection
+        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
+    
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+    }
+    return render(request, 'accounts/barangay_clearance_request.html', context)
+
+
+
+# Add this view to your views.py file
+
+@login_required(login_url='accounts:login')
+@never_cache
+def payment_mode_selection(request, request_id):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    
+    # Get the certificate request
+    cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
+    
+    # Check if already paid
+    if cert_request.payment_status == 'paid':
+        messages.info(request, "This request has already been paid.")
+        return redirect('accounts:certificate_requests')
+    
+    if request.method == 'POST':
+        payment_mode = request.POST.get('payment_mode')
+        
+        # Validate payment mode
+        if payment_mode not in ['gcash', 'counter']:
+            messages.error(request, "Invalid payment mode selected.")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+                'cert_request': cert_request,
+            }
+            return render(request, 'accounts/payment_mode_selection.html', context)
+        
+        # Update certificate request with payment mode
+        cert_request.payment_mode = payment_mode
+        cert_request.save()
+        
+        # Redirect based on payment mode
+        if payment_mode == 'gcash':
+            return redirect('accounts:gcash_payment', request_id=cert_request.request_id)
+        else:  # counter
+            return redirect('accounts:counter_payment', request_id=cert_request.request_id)
+    
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+        'cert_request': cert_request,
+    }
+    return render(request, 'accounts/payment_mode_selection.html', context)
