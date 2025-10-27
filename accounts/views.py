@@ -236,6 +236,9 @@ def reset_password(request):
 @login_required(login_url='accounts:login')
 @never_cache
 def logout_confirm(request):
+    storage = messages.get_messages(request)
+    storage.used = True
+    
     if request.method == 'POST':
         auth_logout(request)
         messages.success(request, "You have successfully logged out.")
@@ -246,7 +249,11 @@ def logout_confirm(request):
 # -------------------- PERSONAL INFO --------------------
 @login_required(login_url='accounts:login')
 @never_cache
+
 def personal_info(request):
+    storage = messages.get_messages(request)
+    storage.used = True
+
     user = request.user
 
     # Convert to base64 (without data URI prefix - template adds it)
@@ -514,3 +521,57 @@ def gcash_payment(request, request_id):
         'cert_request': cert_request,
     }
     return render(request, 'accounts/gcash_payment.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def certificate_requests(request):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    
+    # Get filter parameters - use .get() with empty string default
+    certificate_type = request.GET.get('certificate_type', '').strip()
+    payment_status = request.GET.get('payment_status', '').strip()
+    claim_status = request.GET.get('claim_status', '').strip()
+    payment_mode = request.GET.get('payment_mode', '').strip()
+    
+    # Base queryset - all user's requests ordered by most recent first
+    requests = CertificateRequest.objects.filter(user=user)
+    
+    # Apply filters only if values are provided and valid
+    valid_cert_types = ['barangay_clearance', 'residency', 'indigency', 'good_moral', 'business_clearance']
+    if certificate_type and certificate_type in valid_cert_types:
+        requests = requests.filter(certificate_type=certificate_type)
+    
+    valid_payment_statuses = ['unpaid', 'pending', 'paid', 'failed']
+    if payment_status and payment_status in valid_payment_statuses:
+        requests = requests.filter(payment_status=payment_status)
+    
+    valid_claim_statuses = ['processing', 'ready', 'claimed']
+    if claim_status and claim_status in valid_claim_statuses:
+        requests = requests.filter(claim_status=claim_status)
+    
+    valid_payment_modes = ['gcash', 'counter']
+    if payment_mode and payment_mode in valid_payment_modes:
+        requests = requests.filter(payment_mode=payment_mode)
+    
+    # Order by most recent first
+    requests = requests.order_by('-created_at')
+    
+    # Calculate summary statistics (always from all user requests, not filtered)
+    all_requests = CertificateRequest.objects.filter(user=user)
+    total_requests = all_requests.count()
+    pending_count = all_requests.filter(payment_status='pending').count()
+    paid_count = all_requests.filter(payment_status='paid').count()
+    unpaid_count = all_requests.filter(payment_status='unpaid').count()
+    
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+        'requests': requests,
+        'total_requests': total_requests,
+        'pending_count': pending_count,
+        'paid_count': paid_count,
+        'unpaid_count': unpaid_count,
+    }
+    return render(request, 'accounts/certificate_requests.html', context)
