@@ -450,3 +450,67 @@ def payment_mode_selection(request, request_id):
         'cert_request': cert_request,
     }
     return render(request, 'accounts/payment_mode_selection.html', context)
+
+
+# Add this view to your views.py file
+
+@login_required(login_url='accounts:login')
+@never_cache
+def gcash_payment(request, request_id):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    
+    # Get the certificate request
+    cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
+    
+    # Check if already paid
+    if cert_request.payment_status == 'paid':
+        messages.info(request, "This request has already been paid.")
+        return redirect('accounts:certificate_requests')
+    
+    # Verify payment mode is GCash
+    if cert_request.payment_mode != 'gcash':
+        messages.error(request, "Invalid payment mode for this request.")
+        return redirect('accounts:payment_mode_selection', request_id=request_id)
+    
+    if request.method == 'POST':
+        reference_number = request.POST.get('reference_number', '').strip()
+        
+        # Validate reference number
+        if not reference_number:
+            messages.error(request, "Please enter your GCash reference number.")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+                'cert_request': cert_request,
+            }
+            return render(request, 'accounts/gcash_payment.html', context)
+        
+        if len(reference_number) < 10:
+            messages.error(request, "Invalid reference number. Please check and try again.")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+                'cert_request': cert_request,
+            }
+            return render(request, 'accounts/gcash_payment.html', context)
+        
+        # Save reference number and update status to pending verification
+        cert_request.payment_reference = reference_number
+        cert_request.payment_status = 'pending'  # Wait for admin verification
+        cert_request.save()
+        
+        messages.success(request, 
+            f"Payment reference submitted successfully! Your reference number {reference_number} "
+            "is now pending verification by our staff. You will be notified once verified."
+        )
+        
+        # Redirect to certificate requests page
+        return redirect('accounts:certificate_requests')
+    
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+        'cert_request': cert_request,
+    }
+    return render(request, 'accounts/gcash_payment.html', context)

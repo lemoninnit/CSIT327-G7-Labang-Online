@@ -430,7 +430,8 @@
           <!-- Certificates Grid -->
           <div class="certificates-grid">
             <!-- Barangay Clearance -->
-            <div class="certificate-card" onclick="window.location.href='#'">
+            <div class="certificate-card" onclick="window.location.href='{% url 'accounts:barangay_clearance_request' %}'">
+
               <div class="card-icon">
                 <img src="{% static 'icons/file-report.png' %}" alt="Certificate" />
               </div>

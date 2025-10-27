@@ -67,6 +67,8 @@ class PasswordResetCode(models.Model):
 
 # Add this to your models.py file
 
+# Update the PAYMENT_STATUS in your CertificateRequest model
+
 class CertificateRequest(models.Model):
     CERTIFICATE_TYPES = [
         ('barangay_clearance', 'Barangay Clearance'),
@@ -77,7 +79,8 @@ class CertificateRequest(models.Model):
     ]
     
     PAYMENT_STATUS = [
-        ('pending', 'Pending Payment'),
+        ('unpaid', 'Unpaid'),
+        ('pending', 'Pending Verification'),  # Added for GCash verification
         ('paid', 'Paid'),
         ('failed', 'Failed Payment Verification'),
     ]
@@ -102,7 +105,7 @@ class CertificateRequest(models.Model):
     purpose = models.TextField()
     
     # Payment Info
-    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='pending')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='unpaid')
     payment_mode = models.CharField(max_length=20, choices=PAYMENT_MODE, blank=True, null=True)
     payment_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_reference = models.CharField(max_length=50, blank=True, null=True)

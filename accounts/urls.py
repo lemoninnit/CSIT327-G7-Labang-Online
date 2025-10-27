@@ -16,6 +16,8 @@ urlpatterns = [
     path('complete_profile/', views.complete_profile, name='complete_profile'),
     path('document_request/', views.document_request, name='document_request'),
     path('certificate_requests/', views.certificate_requests, name='certificate_requests'),
-    path('request/barangay-clearance/', views.barangay_clearance_request, name='barangay_clearance_request'),
     path('payment/mode-selection/<str:request_id>/', views.payment_mode_selection, name='payment_mode_selection'),
+    path('barangay-clearance-request/', views.barangay_clearance_request, name='barangay_clearance_request'),
+    path('payment-mode/<str:request_id>/', views.payment_mode_selection, name='payment_mode_selection'),
+    path('gcash-payment/<str:request_id>/', views.gcash_payment, name='gcash_payment'),
 ]

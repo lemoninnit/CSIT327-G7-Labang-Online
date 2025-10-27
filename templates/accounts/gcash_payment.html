@@ -1,0 +1,573 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCash Payment - LabangOnline</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+        html, body {
+            overflow: hidden;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .dashboard-wrapper {
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .payment-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px;
+            padding-bottom: 60px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #e5e7eb;
+            margin: 0 0 8px 0;
+        }
+
+        .light .page-header h1 {
+            color: #111827;
+        }
+
+        .page-header p {
+            color: #9ca3af;
+            font-size: 15px;
+            margin: 0;
+        }
+
+        .light .page-header p {
+            color: #374151;
+        }
+
+        /* Payment Instructions */
+        .instructions-card {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .instructions-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #3b82f6;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instructions-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .instructions-list li {
+            color: #cbd5e1;
+            font-size: 14px;
+            padding: 10px 0;
+            display: flex;
+            gap: 12px;
+            line-height: 1.6;
+        }
+
+        .light .instructions-list li {
+            color: #475569;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* QR Code Section */
+        .qr-section {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .light .qr-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .qr-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e5e7eb;
+            margin-bottom: 8px;
+        }
+
+        .light .qr-title {
+            color: #111827;
+        }
+
+        .qr-subtitle {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-bottom: 24px;
+        }
+
+        .light .qr-subtitle {
+            color: #64748b;
+        }
+
+        .qr-code-wrapper {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            display: inline-block;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .qr-code-wrapper img {
+            display: block;
+            width: 280px;
+            height: 280px;
+        }
+
+        .amount-display {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: inline-block;
+            margin-top: 16px;
+        }
+
+        .amount-label {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-bottom: 4px;
+        }
+
+        .light .amount-label {
+            color: #64748b;
+        }
+
+        .amount-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #10b981;
+        }
+
+        /* Reference Number Form */
+        .reference-form {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .light .reference-form {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .form-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e5e7eb;
+            margin-bottom: 8px;
+        }
+
+        .light .form-title {
+            color: #111827;
+        }
+
+        .form-subtitle {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-bottom: 24px;
+        }
+
+        .light .form-subtitle {
+            color: #64748b;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+        }
+
+        .light .form-group label {
+            color: #1e293b;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            color: #e5e7eb;
+            font-size: 15px;
+            font-family: monospace;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .light .form-group input {
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #1e293b;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .input-hint {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-top: 6px;
+        }
+
+        .light .input-hint {
+            color: #64748b;
+        }
+
+        /* Warning Box */
+        .warning-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .warning-icon {
+            color: #f59e0b;
+            flex-shrink: 0;
+        }
+
+        .warning-content p {
+            margin: 0;
+            color: #cbd5e1;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .light .warning-content p {
+            color: #475569;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-back {
+            padding: 16px 32px;
+            background: rgba(148, 163, 184, 0.1);
+            color: #cbd5e1;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .light .btn-back {
+            background: white;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+
+        .btn-back:hover {
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .light .btn-back:hover {
+            background: #f1f5f9;
+        }
+
+        /* Request Info */
+        .request-info {
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 32px;
+        }
+
+        .light .request-info {
+            background: rgba(241, 245, 249, 0.5);
+            border: 1px solid rgba(203, 213, 225, 0.5);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .light .info-label {
+            color: #64748b;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #e5e7eb;
+            font-weight: 500;
+        }
+
+        .light .info-value {
+            color: #1e293b;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="{% static 'logo.png' %}" alt="Labang Logo">
+                <span>LabangOnline</span>
+            </div>
+
+            <div class="notification-item">
+                <div class="notification-icon-wrapper">
+                    <img src="{% static 'icons/notification.png' %}" alt="Notification">
+                    <span class="notification-badge">5</span>
+                </div>
+                <span>Notification</span>
+            </div>
+
+            <ul class="menu">
+                <li class="menu-item" onclick="window.location.href='{% url 'accounts:personal_info' %}'">
+                    <img src="{% static 'icons/user-info.png' %}" alt="">
+                    <span>Personal Info</span>
+                </li>
+                <li class="menu-item active">
+                    <img src="{% static 'icons/request-records.png' %}" alt="">
+                    <span>Document Request</span>
+                </li>
+                <li class="menu-item">
+                    <img src="{% static 'icons/resident-record.png' %}" alt="">
+                    <span>Resident Records</span>
+                </li>
+                <li class="menu-item">
+                    <img src="{% static 'icons/incident-report.png' %}" alt="">
+                    <span>Report Records</span>
+                </li>
+                <li class="menu-item">
+                    <img src="{% static 'icons/file-report.png' %}" alt="">
+                    <span>File Report</span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top bar -->
+            <header class="topbar">
+                <span></span>
+                <button id="mode-toggle" class="btn">Toggle</button>
+                <div class="user-profile">
+                    {% if profile_pic_base64 %}
+                        <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile">
+                    {% else %}
+                        <img src="{% static 'icons/default_user.png' %}" alt="User Profile">
+                    {% endif %}
+                    <span>{{ request.user.full_name }}</span>
+                    <form method="get" action="{% url 'accounts:logout_confirm' %}">
+                        <button type="submit" class="btn-logout">LOGOUT</button>
+                    </form>
+                </div>
+            </header>
+
+            <div class="payment-container">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1>GCash Payment</h1>
+                    <p>Complete your payment using GCash</p>
+                </div>
+
+                <!-- Request Info -->
+                <div class="request-info">
+                    <div class="info-row">
+                        <span class="info-label">Request ID</span>
+                        <span class="info-value">{{ cert_request.request_id }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Certificate Type</span>
+                        <span class="info-value">{{ cert_request.get_certificate_type_display }}</span>
+                    </div>
+                </div>
+
+                <!-- Payment Instructions -->
+                <div class="instructions-card">
+                    <h3 class="instructions-title">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Payment Instructions
+                    </h3>
+                    <ol class="instructions-list">
+                        <li>
+                            <span class="step-number">1</span>
+                            <span>Open your GCash app on your mobile device</span>
+                        </li>
+                        <li>
+                            <span class="step-number">2</span>
+                            <span>Tap "Scan QR" and scan the QR code below</span>
+                        </li>
+                        <li>
+                            <span class="step-number">3</span>
+                            <span>Verify the payment amount matches ₱{{ cert_request.payment_amount }}</span>
+                        </li>
+                        <li>
+                            <span class="step-number">4</span>
+                            <span>Complete the payment in your GCash app</span>
+                        </li>
+                        <li>
+                            <span class="step-number">5</span>
+                            <span>Enter your GCash reference number below after payment</span>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- QR Code Section -->
+                <div class="qr-section">
+                    <h3 class="qr-title">Scan QR Code with GCash</h3>
+                    <p class="qr-subtitle">Use your GCash app to scan this QR code</p>
+                    
+                    <div class="qr-code-wrapper">
+                        <!-- Replace with your actual GCash QR code image -->
+                        <img src="{% static 'images/gcash-qr-code.png' %}" alt="GCash QR Code">
+                    </div>
+
+                    <div class="amount-display">
+                        <div class="amount-label">Amount to Pay</div>
+                        <div class="amount-value">₱{{ cert_request.payment_amount }}</div>
+                    </div>
+                </div>
+
+                <!-- Reference Number Form -->
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="reference-form">
+                        <h3 class="form-title">Enter GCash Reference Number</h3>
+                        <p class="form-subtitle">After completing the payment, enter the reference number from your GCash receipt</p>
+
+                        <div class="warning-box">
+                            <svg class="warning-icon" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            <div class="warning-content">
+                                <p><strong>Important:</strong> Make sure to enter the correct reference number. Your payment will be verified by our staff within 24 hours.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>GCash Reference Number <span style="color: #ef4444;">*</span></label>
+                            <input 
+                                type="text" 
+                                name="reference_number" 
+                                placeholder="Enter your GCash reference number"
+                                required
+                                pattern="[0-9A-Za-z]{10,}"
+                                title="Reference number must be at least 10 characters"
+                            >
+                            <p class="input-hint">Example: 1234567890ABC (usually 13 characters)</p>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <a href="{% url 'accounts:payment_mode_selection' cert_request.request_id %}" class="btn-back">Back</a>
+                        <button type="submit" class="btn-submit">Submit Payment Reference</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+</body>
+</html>
