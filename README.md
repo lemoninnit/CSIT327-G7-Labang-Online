@@ -31,7 +31,6 @@ pip install psycopg
 4) Initialize database and run server
 
 ```
-python setup_gmail_recovery.py
 py manage.py migrate
 py manage.py runserver
 ```
@@ -50,6 +49,11 @@ Paste this in the .env
 EMAIL_HOST_USER=lenonleenatividad4@gmail.com
 EMAIL_HOST_PASSWORD=xsvv kuet jktf wrtd
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+```
+
+```
+python setup_gmail_recovery.py
+py manage.py runserver
 ```
 
 **Supabase (Session Pooler) setup**
