@@ -31,7 +31,7 @@ pip install psycopg
 4) Initialize database and run server
 
 ```
-py python setup_gmail_recovery.py
+python setup_gmail_recovery.py
 py manage.py migrate
 py manage.py runserver
 ```
