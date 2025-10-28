@@ -412,6 +412,44 @@ def barangay_clearance_request(request):
 
 
 
+@login_required(login_url='accounts:login')
+@never_cache
+def brgy_residency_cert(request):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    
+    if request.method == 'POST':
+        purpose = request.POST.get('purpose')
+        
+        # Validate purpose
+        if not purpose or len(purpose.strip()) < 10:
+            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/brgy_residency_cert.html', context)
+        
+        # Create the certificate request
+        cert_request = CertificateRequest.objects.create(
+            user=user,
+            certificate_type='certificate of residency',
+            purpose=purpose,
+            payment_amount=30.00,  # Certificate of Residency fee
+        )
+        
+        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
+        
+        # Redirect to payment mode selection
+        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
+    
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+    }
+    return render(request, 'accounts/brgy_residency_cert.html', context)
+
+
 # Add this view to your views.py file
 
 @login_required(login_url='accounts:login')
