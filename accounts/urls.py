@@ -26,6 +26,7 @@ urlpatterns = [
     path('brgy_business_cert/', views.brgy_business_cert, name='brgy_business_cert'),
 
     # Payments 
-    path('payment-mode/<str:request_id>/', views.payment_mode_selection, name='payment_mode_selection'),
+    path('payment/method/<str:request_id>/', views.payment_method, name='payment_method'),
     path('gcash-payment/<str:request_id>/', views.gcash_payment, name='gcash_payment'),
+    
 ]
