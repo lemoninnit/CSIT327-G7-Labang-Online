@@ -17,7 +17,12 @@ urlpatterns = [
     path('document_request/', views.document_request, name='document_request'),
     path('certificate_requests/', views.certificate_requests, name='certificate_requests'),
     path('payment/mode-selection/<str:request_id>/', views.payment_mode_selection, name='payment_mode_selection'),
+
+    # Request pages
     path('barangay-clearance-request/', views.barangay_clearance_request, name='barangay_clearance_request'),
+    path('brgy_residency_cert/', views.brgy_residency_cert, name='brgy_residency_cert'),
+
+    # Payments 
     path('payment-mode/<str:request_id>/', views.payment_mode_selection, name='payment_mode_selection'),
     path('gcash-payment/<str:request_id>/', views.gcash_payment, name='gcash_payment'),
 ]
