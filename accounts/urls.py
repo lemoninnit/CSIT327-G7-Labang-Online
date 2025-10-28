@@ -22,6 +22,7 @@ urlpatterns = [
     path('barangay-clearance-request/', views.barangay_clearance_request, name='barangay_clearance_request'),
     path('brgy_residency_cert/', views.brgy_residency_cert, name='brgy_residency_cert'),
     path('brgy_indigency_cert/', views.brgy_indigency_cert, name='brgy_indigency_cert'),
+    path('brgy_goodmoral_character/', views.brgy_goodmoral_character, name='brgy_goodmoral_character'),
 
     # Payments 
     path('payment-mode/<str:request_id>/', views.payment_mode_selection, name='payment_mode_selection'),
