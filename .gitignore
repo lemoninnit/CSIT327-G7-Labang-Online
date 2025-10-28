@@ -1,4 +1,9 @@
 # Django
+
+# Environment and secrets
+.env
+*.env
+.env.*
 __pycache__/
 *.py[cod]
 *.sqlite3
