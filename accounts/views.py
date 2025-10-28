@@ -488,6 +488,44 @@ def brgy_indigency_cert(request):
     return render(request, 'accounts/brgy_indigency_cert.html', context)
 
 
+@login_required(login_url='accounts:login')
+@never_cache
+def brgy_goodmoral_character(request):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    
+    if request.method == 'POST':
+        purpose = request.POST.get('purpose')
+        
+        # Validate purpose
+        if not purpose or len(purpose.strip()) < 10:
+            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/brgy_goodmoral_character.html', context)
+        
+        # Create the certificate request
+        cert_request = CertificateRequest.objects.create(
+            user=user,
+            certificate_type='Good Moral Character',
+            purpose=purpose,
+            payment_amount=40.00,  # Good Moral Character fee
+        )
+        
+        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
+        
+        # Redirect to payment mode selection
+        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
+    
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+    }
+    return render(request, 'accounts/brgy_goodmoral_character.html', context)
+
+
 # Add this view to your views.py file
 
 @login_required(login_url='accounts:login')
