@@ -730,3 +730,45 @@ def certificate_requests(request):
         'unpaid_count': unpaid_count,
     }
     return render(request, 'accounts/certificate_requests.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def payment_method(request, request_id):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+
+    cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
+
+    # Already paid? Send back to list
+    if cert_request.payment_status == 'paid':
+        messages.info(request, "This request has already been paid.")
+        return redirect('accounts:certificate_requests')
+
+    # Choose the template (use your combined HTML/CSS file)
+    template_name = 'accounts/payment_method_brgy_clearance.html' if cert_request.certificate_type == 'barangay_clearance' else 'accounts/payment_mode_selection.html'
+
+    if request.method == 'POST':
+        payment_mode = request.POST.get('payment_mode')
+        if payment_mode not in ['gcash', 'counter']:
+            messages.error(request, "Please select a valid payment mode.")
+            return render(request, template_name, {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+                'cert_request': cert_request,
+            })
+
+        cert_request.payment_mode = payment_mode
+        cert_request.save()
+
+        if payment_mode == 'gcash':
+            return redirect('accounts:gcash_payment', request_id=cert_request.request_id)
+        # TODO: implement counter payment page if needed
+        return redirect('accounts:certificate_requests')
+
+    return render(request, template_name, {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+        'cert_request': cert_request,
+    })
+    
