@@ -16,7 +16,6 @@ urlpatterns = [
     path('complete_profile/', views.complete_profile, name='complete_profile'),
     path('document_request/', views.document_request, name='document_request'),
     path('certificate_requests/', views.certificate_requests, name='certificate_requests'),
-    path('payment/mode-selection/<str:request_id>/', views.payment_mode_selection, name='payment_mode_selection'),
 
     # Request pages
     path('barangay-clearance-request/', views.barangay_clearance_request, name='barangay_clearance_request'),
@@ -26,7 +25,9 @@ urlpatterns = [
     path('brgy_business_cert/', views.brgy_business_cert, name='brgy_business_cert'),
 
     # Payments 
-    path('payment/method/<str:request_id>/', views.payment_method, name='payment_method'),
+    path('payment/mode-selection/<str:request_id>/', views.payment_mode_selection, name='payment_mode_selection'),
     path('gcash-payment/<str:request_id>/', views.gcash_payment, name='gcash_payment'),
+    path('counter_payment/<str:request_id>/', views.counter_payment, name='counter_payment'),
+    
     
 ]
