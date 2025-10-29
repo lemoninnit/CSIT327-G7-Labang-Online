@@ -19,12 +19,12 @@ from django.contrib import admin
 from django.urls import path, include
 from accounts import views
 from django.conf.urls.static import static
-
+from django.shortcuts import render
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('forgot-password/', views.forgot_password, name='forgot_password'),
-
+    path('', lambda request: render(request, 'welcome.html'), name='welcome'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

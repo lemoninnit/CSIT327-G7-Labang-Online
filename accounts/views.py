@@ -19,6 +19,11 @@ from .models import User, PasswordResetCode
 from .forms import RegistrationForm
 from .models import User, PasswordResetCode, CertificateRequest
 
+
+
+def welcome(request):
+    return render(request, 'welcome.html')
+
 # -------------------- HELPER FUNCTION --------------------
 def get_base64_image(data):
     """Convert binary image data to base64 string WITHOUT data URI prefix"""

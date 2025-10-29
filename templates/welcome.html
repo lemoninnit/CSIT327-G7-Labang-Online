@@ -1,0 +1,109 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome - LabangOnline</title>
+
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+      .welcome-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+        background: linear-gradient(180deg, var(--bg) 0%, var(--bg-secondary) 100%);
+      }
+
+      .welcome-box {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 10px 40px var(--shadow);
+        padding: 50px 60px;
+        max-width: 500px;
+        width: 90%;
+        animation: fadeInUp 0.7s ease;
+      }
+
+      .welcome-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 12px;
+      }
+
+      .welcome-subtitle {
+        font-size: 16px;
+        color: var(--muted);
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+
+      .btn-start {
+        padding: 14px 26px;
+        background: linear-gradient(90deg, var(--brand), var(--brand-700));
+        color: #071118;
+        font-weight: 700;
+        font-size: 15px;
+        border-radius: 12px;
+        text-decoration: none;
+        box-shadow: 0 10px 25px rgba(34, 197, 94, 0.35);
+        transition: all 0.3s ease;
+      }
+
+      .btn-start:hover {
+        filter: brightness(1.05);
+        transform: translateY(-2px);
+        box-shadow: 0 15px 35px rgba(34, 197, 94, 0.4);
+      }
+
+      .footer-text {
+        margin-top: 40px;
+        font-size: 13px;
+        color: var(--muted);
+        opacity: 0.8;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 480px) {
+        .welcome-box {
+          padding: 40px 20px;
+        }
+        .welcome-title {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="welcome-wrapper">
+      <div class="welcome-box">
+        <h1 class="welcome-title">Welcome to LabangOnline</h1>
+        <p class="welcome-subtitle">
+          Your all-in-one platform for managing barangay clearances, requests, and more —
+          streamlined for both residents and officials.
+        </p>
+        <a href="{% url 'accounts:login' %}" class="btn-start">Proceed to Login</a>
+      </div>
+
+      <div class="footer-text">
+        &copy; {{ now|date:"Y" }} LabangOnline. All rights reserved.
+      </div>
+    </div>
+  </body>
+</html>
