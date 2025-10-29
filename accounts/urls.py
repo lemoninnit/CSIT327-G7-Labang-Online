@@ -16,14 +16,18 @@ urlpatterns = [
     path('complete_profile/', views.complete_profile, name='complete_profile'),
     path('document_request/', views.document_request, name='document_request'),
     path('certificate_requests/', views.certificate_requests, name='certificate_requests'),
-    path('payment/mode-selection/<str:request_id>/', views.payment_mode_selection, name='payment_mode_selection'),
 
     # Request pages
     path('barangay-clearance-request/', views.barangay_clearance_request, name='barangay_clearance_request'),
     path('brgy_residency_cert/', views.brgy_residency_cert, name='brgy_residency_cert'),
     path('brgy_indigency_cert/', views.brgy_indigency_cert, name='brgy_indigency_cert'),
+    path('brgy_goodmoral_character/', views.brgy_goodmoral_character, name='brgy_goodmoral_character'),
+    path('brgy_business_cert/', views.brgy_business_cert, name='brgy_business_cert'),
 
     # Payments 
-    path('payment-mode/<str:request_id>/', views.payment_mode_selection, name='payment_mode_selection'),
+    path('payment/mode-selection/<str:request_id>/', views.payment_mode_selection, name='payment_mode_selection'),
     path('gcash-payment/<str:request_id>/', views.gcash_payment, name='gcash_payment'),
+    path('counter_payment/<str:request_id>/', views.counter_payment, name='counter_payment'),
+    
+    
 ]

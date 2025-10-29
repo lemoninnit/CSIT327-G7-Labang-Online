@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Certificate of Residency - LabangOnline</title>
+    <title>Request Certificate of Indigency - LabangOnline</title>
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <style>
@@ -389,14 +389,14 @@
                         <!-- Price Display -->
                         <div class="price-display">
                             <div class="price-label">Processing Fee</div>
-                            <div class="price-amount">Free</div>
+                            <div class="price-amount">₱20.00</div>
                         </div>
                     </div>
 
                     <!-- Form Actions -->
                     <div class="form-actions">
                         <a href="{% url 'accounts:document_request' %}" class="btn-cancel">Cancel</a>
-                        <button type="submit" class="btn-submit">Proceed to Payment</button>
+                        <button href="{% url 'accounts:payment_mode_selection' %}" type="submit" class="btn-submit">Proceed to Payment</button>
                     </div>
                 </form>
             </div>

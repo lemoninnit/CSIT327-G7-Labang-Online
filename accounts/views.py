@@ -488,6 +488,82 @@ def brgy_indigency_cert(request):
     return render(request, 'accounts/brgy_indigency_cert.html', context)
 
 
+@login_required(login_url='accounts:login')
+@never_cache
+def brgy_goodmoral_character(request):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    
+    if request.method == 'POST':
+        purpose = request.POST.get('purpose')
+        
+        # Validate purpose
+        if not purpose or len(purpose.strip()) < 10:
+            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/brgy_goodmoral_character.html', context)
+        
+        # Create the certificate request
+        cert_request = CertificateRequest.objects.create(
+            user=user,
+            certificate_type='Good Moral Character',
+            purpose=purpose,
+            payment_amount=40.00,  # Good Moral Character fee
+        )
+        
+        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
+        
+        # Redirect to payment mode selection
+        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
+    
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+    }
+    return render(request, 'accounts/brgy_goodmoral_character.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def brgy_business_cert(request):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+    
+    if request.method == 'POST':
+        purpose = request.POST.get('purpose')
+        
+        # Validate purpose
+        if not purpose or len(purpose.strip()) < 10:
+            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/brgy_business_cert.html', context)
+        
+        # Create the certificate request
+        cert_request = CertificateRequest.objects.create(
+            user=user,
+            certificate_type='barangay_business_clearance',
+            purpose=purpose,
+            payment_amount=100.00,  # Barangay Business Clearance fee
+        )
+        
+        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
+        
+        # Redirect to payment mode selection
+        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
+    
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+    }
+    return render(request, 'accounts/brgy_business_cert.html', context)
+
+
 # Add this view to your views.py file
 
 @login_required(login_url='accounts:login')
@@ -533,6 +609,9 @@ def payment_mode_selection(request, request_id):
         'cert_request': cert_request,
     }
     return render(request, 'accounts/payment_mode_selection.html', context)
+
+
+
 
 
 # Add this view to your views.py file
@@ -651,3 +730,38 @@ def certificate_requests(request):
         'unpaid_count': unpaid_count,
     }
     return render(request, 'accounts/certificate_requests.html', context)
+
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def counter_payment(request, request_id):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+
+    cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
+
+    # Already paid? Send back to list
+    if cert_request.payment_status == 'paid':
+        messages.info(request, "This request has already been paid.")
+        return redirect('accounts:certificate_requests')
+
+    # Ensure the mode is counter so users can proceed even if they skipped saving it
+    if cert_request.payment_mode != 'counter':
+        cert_request.payment_mode = 'counter'
+        cert_request.save(update_fields=['payment_mode'])
+
+    if request.method == 'POST':
+        cert_request.payment_status = 'pending'
+        cert_request.payment_reference = f"COUNTER-{cert_request.request_id}"
+        cert_request.save(update_fields=['payment_status', 'payment_reference'])
+        messages.success(request, "Your on-site payment has been scheduled. Please proceed to the cashier.")
+        return redirect('accounts:certificate_requests')
+
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+        'cert_request': cert_request,
+    }
+    return render(request, 'accounts/counter_payment.html', context)
+
