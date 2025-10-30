@@ -6,17 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edit Profile - LabangOnline</title>
 
+    {% load static %}
+    <link rel="icon" href="{% static 'logo.png' %}" type="image/png" />
+
     <link rel="stylesheet" href="{% static 'css/app.css' %}" />
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
     <style>
       /* Keep the same look; only small helpers for inputs */
-      .user-info-table td:first-child{width:220px;color:#a8b3cf;}
-      .user-info-table input,.user-info-table select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #2a2f3b;background:#0f1420;color:#e5e7eb;}
+      .user-info-table td:first-child{width:220px;color:var(--muted);} 
+      .user-info-table input,.user-info-table select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--panel);color:var(--text);} 
       .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
       .btn-row{display:flex;gap:12px;justify-content:flex-end;margin-top:16px;}
-      .btn-primary{background:#3b82f6;color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;}
-      .btn-secondary{background:transparent;border:1px solid #3b82f6;color:#3b82f6;padding:10px 14px;border-radius:8px;cursor:pointer;text-decoration:none;}
+      .btn-primary{background:linear-gradient(90deg,var(--brand),var(--brand-700));color:#071118;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;box-shadow:0 8px 20px rgba(34,197,94,0.35);} 
+      .btn-primary:hover{filter:brightness(1.05);transform:translateY(-1px);box-shadow:0 12px 28px rgba(34,197,94,0.4);} 
+      .btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;cursor:pointer;text-decoration:none;} 
+      .btn-secondary:hover{background:var(--panel-hover);border-color:var(--border-hover);} 
       .content-right .action-btn{display:none;} /* hide dashboard's right buttons on edit page */
+      /* Responsive helpers */
+      @media (max-width: 768px){
+        .two-col{grid-template-columns:1fr;}
+        .btn-row{flex-direction:column;}
+      }
     </style>
   </head>
   <body>
@@ -120,11 +130,7 @@
                   </tr>
                   <tr>
                     <td>Username:</td>
-                    <td><input type="text" value="{{ request.user.username }}" disabled /></td>
-                  </tr>
-                  <tr>
-                    <td>Email:</td>
-                    <td><input type="email" value="{{ request.user.email }}" disabled /></td>
+                    <td><input type="text" name="username" value="{{ request.user.username }}" required /></td>
                   </tr>
                   <tr>
                     <td>Date of Birth:</td>

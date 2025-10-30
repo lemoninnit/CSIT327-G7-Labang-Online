@@ -102,6 +102,14 @@ def welcome(request: HttpRequest) -> HttpResponse:
     return render(request, 'accounts/welcome.html')
 
 
+# -------------------- PUBLIC HOME / LANDING --------------------
+def home(request: HttpRequest) -> HttpResponse:
+    """Public landing page with sections, always accessible.
+    Uses base header with Login/Register links.
+    """
+    return render(request, 'home.html')
+
+
 # -------------------- FORGOT PASSWORD --------------------
 def forgot_password(request):
     if request.method == 'POST':
@@ -275,10 +283,20 @@ def edit_profile(request):
     user = request.user
 
     if request.method == 'POST':
+        save_ok = True
         # Update text fields
         user.full_name = request.POST.get('full_name', user.full_name)
         user.contact_number = request.POST.get('contact_number', user.contact_number)
         user.address_line = request.POST.get('address_line', user.address_line)
+        
+        # Handle username with uniqueness check
+        new_username = request.POST.get('username')
+        if new_username and new_username != user.username:
+            if User.objects.filter(username=new_username).exclude(pk=user.pk).exists():
+                messages.error(request, "Username already taken. Please choose another.")
+                save_ok = False
+            else:
+                user.username = new_username
         
         # Handle date_of_birth
         date_of_birth = request.POST.get('date_of_birth')
@@ -303,9 +321,20 @@ def edit_profile(request):
         if nso_document:
             user.nso_document = nso_document.read()
 
-        user.save()
-        messages.success(request, "Profile updated successfully!")
-        return redirect('accounts:personal_info')  # Redirect to personal_info after save
+        if save_ok:
+            user.save()
+            messages.success(request, "Profile updated successfully!")
+            return redirect('accounts:personal_info')  # Redirect to personal_info after save
+        else:
+            # Re-render edit page to show error messages without saving
+            profile_pic_base64 = get_base64_image(user.profile_photo)
+            resident_id_base64 = get_base64_image(user.resident_id_photo)
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+                'resident_id_base64': resident_id_base64,
+            }
+            return render(request, 'accounts/edit_profile.html', context)
 
     # Convert images to base64 for display
     profile_pic_base64 = get_base64_image(user.profile_photo)
@@ -369,6 +398,42 @@ def certificate_requests(request):
         # 'requests': requests,
     }
     return render(request, 'accounts/certificate_requests.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def request_detail(request, request_id):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo)
+
+    cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
+
+    # Determine recommended action for convenience
+    next_action = None
+    if cert_request.payment_status == 'unpaid':
+        if not cert_request.payment_mode:
+            next_action = {
+                'label': 'Select Payment Mode',
+                'url_name': 'accounts:payment_mode_selection',
+            }
+        elif cert_request.payment_mode == 'gcash':
+            next_action = {
+                'label': 'Proceed to GCash Payment',
+                'url_name': 'accounts:gcash_payment',
+            }
+        elif cert_request.payment_mode == 'counter':
+            next_action = {
+                'label': 'Proceed to Counter Payment',
+                'url_name': 'accounts:counter_payment',
+            }
+
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+        'cert_request': cert_request,
+        'next_action': next_action,
+    }
+    return render(request, 'accounts/request_detail.html', context)
 
 
 # Add this view to your views.py file

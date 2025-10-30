@@ -16,6 +16,7 @@ urlpatterns = [
     path('complete_profile/', views.complete_profile, name='complete_profile'),
     path('document_request/', views.document_request, name='document_request'),
     path('certificate_requests/', views.certificate_requests, name='certificate_requests'),
+    path('request-detail/<str:request_id>/', views.request_detail, name='request_detail'),
 
     # Request pages
     path('barangay-clearance-request/', views.barangay_clearance_request, name='barangay_clearance_request'),

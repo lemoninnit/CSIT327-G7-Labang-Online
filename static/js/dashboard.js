@@ -1,17 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('mode-toggle');
-    const key = 'labang-mode';
+    const key = 'labang-theme-mode';
 
     function applyMode(mode) {
         const html = document.documentElement;
         if (mode === 'light') {
             html.classList.add('light');
-            btn.textContent = 'Dark mode';
-            btn.setAttribute('aria-pressed','true');
+            if (btn) {
+                btn.textContent = 'Dark mode';
+                btn.setAttribute('aria-pressed','true');
+            }
         } else {
             html.classList.remove('light');
-            btn.textContent = 'Light mode';
-            btn.setAttribute('aria-pressed','false');
+            if (btn) {
+                btn.textContent = 'Light mode';
+                btn.setAttribute('aria-pressed','false');
+            }
         }
     }
 
@@ -25,10 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
         applyMode('dark');
     }
 
-    // Toggle
-    btn.addEventListener('click', () => {
-        const next = document.documentElement.classList.contains('light') ? 'dark' : 'light';
-        localStorage.setItem(key, next);
-        applyMode(next);
-    });
+    // Toggle (only if button exists on the page)
+    if (btn) {
+        btn.addEventListener('click', () => {
+            const next = document.documentElement.classList.contains('light') ? 'dark' : 'light';
+            localStorage.setItem(key, next);
+            applyMode(next);
+        });
+    }
 });

@@ -7,6 +7,7 @@
     <title>Certificate Requests - LabangOnline</title>
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="icon" href="{% static 'logo.png' %}" type="image/png" />
     <style>
         html, body {
             overflow: hidden;
@@ -666,7 +667,7 @@
                         </thead>
                         <tbody>
                             {% for req in requests %}
-                            <tr onclick="viewRequestDetails('{{ req.request_id }}')">
+                            <tr onclick="window.location.href='{% url 'accounts:request_detail' req.request_id %}'">
                                 <td><span class="request-id">{{ req.request_id }}</span></td>
                                 <td>{{ req.get_certificate_type_display }}</td>
                                 <td>{{ req.created_at|date:"M d, Y - h:i A" }}</td>
@@ -690,7 +691,7 @@
                                 </td>
                                 <td onclick="event.stopPropagation()">
                                     <div class="action-buttons">
-                                        <a href="#" class="btn-action btn-view">
+                                        <a href="{% url 'accounts:request_detail' req.request_id %}" class="btn-action btn-view">
                                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -733,11 +734,6 @@
 
     <script src="{% static 'js/dashboard.js' %}"></script>
     <script>
-        function viewRequestDetails(requestId) {
-            // Navigate to request details page
-            // window.location.href = `/accounts/request-details/${requestId}/`;
-            console.log('View details for:', requestId);
-        }
 
         function clearFilters() {
             // Clear all filter selections
