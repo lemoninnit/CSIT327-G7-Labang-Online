@@ -37,6 +37,25 @@ py manage.py runserver
 
 Open `http://127.0.0.1:8000/accounts/register/` to register and verify.
 
+**Setup Gmail Recovery**
+
+```
+notepad .env
+```
+
+Paste this in the .env
+
+```
+EMAIL_HOST_USER=lenonleenatividad4@gmail.com
+EMAIL_HOST_PASSWORD=xsvv kuet jktf wrtd
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+```
+
+```
+python setup_gmail_recovery.py
+py manage.py runserver
+```
+
 **Supabase (Session Pooler) setup**
 
 1) Install packages:
