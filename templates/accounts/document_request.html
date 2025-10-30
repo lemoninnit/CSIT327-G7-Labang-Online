@@ -373,7 +373,7 @@
             <img src="{% static 'icons/resident-record.png' %}" alt="" />
             <span>Resident Records</span>
           </li>
-          <li class="menu-item">
+          <li class="menu-item" onclick="window.location.href='{% url 'accounts:report_records' %}'">
             <img src="{% static 'icons/incident-report.png' %}" alt="" />
             <span>Report Records</span>
           </li>
