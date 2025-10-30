@@ -1,0 +1,303 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Report Records - LabangOnline</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+    <link rel="icon" href="{% static 'logo.png' %}" type="image/png" />
+    <style>
+      .content-main {
+        flex: 3;
+        background: var(--panel);
+        border-radius: 12px;
+        padding: 32px 24px;
+        overflow-y: auto;
+        margin-left: 20px;
+        min-width: 0;
+      }
+      .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        color: #222940;
+        border-radius: 10px;
+        overflow: hidden;
+        font-size: 15px;
+      }
+      .report-table th, .report-table td {
+        padding: 13px 8px;
+        border: 1px solid #737f9c;
+        text-align: left;
+      }
+      .report-table th {
+        background: #eaf1fb;
+        color: #10b981;
+      }
+      
+      .status-under-investigation { color: #f59e0b; font-weight: 600; }
+      .status-pending { color: #ef4444; font-weight: 600;}
+      .status-resolved { color: #10b981; font-weight: 600;}
+      .status-mediation { color: #3b82f6; font-weight: 600;}
+
+      .search-bar-mt {
+        margin-bottom: 20px;
+        display: flex;
+        grid-template-columns: 1fr auto;
+        gap: 15px;
+        align-items: center;
+      }
+      .search-bar-mt input, .search-bar-mt select {
+        padding: 10px 14px;
+        border-radius: 4px;
+        background: #2d3748;    
+        color: #e5e7eb;
+        border: 1px solid #a2aabb;
+        font-size: 0.95em;
+      }
+      
+      .search-bar-mt button { padding: 7px 20px; border-radius: 2px; border: none; background: #10b981; color: #fff; cursor: pointer;}
+
+      .search-bar-mt input::placeholder {
+        color: #9ca3af;
+      }
+
+      .light .search-bar-mt input {
+        background: #ffffff;
+        color: #111;
+        border: 1px solid #d1d5db;
+      }
+
+      body.light .search-bar-mt input::placeholder {
+        color: #6b7280;
+      }
+
+      .search-bar-mt select {
+        padding: 10px 14px;
+        border-radius: 4px;
+        border: 1px solid #4a5568;
+        background: #2d3748;
+        color: #e5e7eb;
+        font-size: 0.95em;
+        min-width: 200px;
+      }
+
+      .light .search-bar-mt select {
+        background: #f0f4f8;
+        color: #111;
+        border: 1px solid #d1d5db;
+      }
+
+      .search-bar-mt button {
+        padding: 10px 24px;
+        border-radius: 4px;
+        border: none;
+        background: #3b82f6;
+        color: #fff;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: background 0.2s;
+      }
+
+      .search-bar-mt button:hover {
+        background: #2563eb;
+      }
+
+      .search-bar-mt a button {
+        background: #6b7280;
+      }
+
+      .search-bar-mt a button:hover {
+        background: #4b5563;
+      }
+
+
+      body {
+  background: #19243a;
+  color: #e5e7eb;
+}
+.report-table {
+  background: #647083;
+    color: #fff;
+    border-radius: 5px;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+.report-table th {
+  background: #384566;
+  color: #10b981;
+}
+.report-table td {
+  border: 1px solid #384566;
+}
+
+.report-records-title {
+  color: #fff;  /* Very light color for dark background */
+  font-weight: 800;
+  margin-bottom: 18px;
+}
+
+ .light .report-records-title {
+  color: #384566; /* Very dark blue for good contrast on white */
+  font-weight: 800;
+  
+}
+
+ .light {   
+  background: #f3f6fb;
+  color: #111;
+}
+    /* NO RECORDS FOUND */
+ .light .report-table {
+  background: #c4c9d3;
+  color: #ff0000;
+}
+ .light .report-table th {
+  background: #eaf1fb;
+  color: #384566;
+}
+ .light .report-table td {
+  border: 1px solid #ffffff;
+}
+
+      .role {
+        display: inline-block;
+        padding: 6px 16px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+      }
+
+      .role.pending {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-wrapper">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="logo">
+          <img src="{% static 'logo.png' %}" alt="Labang Logo" />
+          <span>LabangOnline</span>
+        </div>
+
+        <div class="notification-item">
+          <div class="notification-icon-wrapper">
+            <img src="{% static 'icons/notification.png' %}" alt="Notification" />
+            <span class="notification-badge">5</span>
+          </div>
+          <span>Notification</span>
+        </div>
+
+        <ul class="menu">
+          <li class="menu-item" onclick="window.location.href='{% url 'accounts:personal_info' %}'">
+            <img src="{% static 'icons/user-info.png' %}" alt="" />
+            <span>Personal Info</span>
+          </li>
+         <li class="menu-item" onclick="window.location.href='{% url 'accounts:document_request' %}'">
+            <img src="{% static 'icons/request-records.png' %}" alt="" />
+            <span>Document Request</span>
+          </li>
+          <li class="menu-item">
+            <img src="{% static 'icons/resident-record.png' %}" alt="" />
+            <span>Resident Records</span>
+          </li>
+          <li class="menu-item active" >
+            <img src="{% static 'icons/incident-report.png' %}" alt="" />
+            <span>Report Records</span>
+          </li>
+          <li class="menu-item">
+            <img src="{% static 'icons/file-report.png' %}" alt="" />
+            <span>File Report</span>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <header class="topbar">
+          <span></span>
+          <button id="mode-toggle" class="btn">Toggle</button>
+          <div class="user-profile">
+            {% if profile_pic_base64 %}
+              <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
+            {% else %}
+              <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
+            {% endif %}
+            <span>{{ request.user.full_name }}</span>
+            <form method="get" action="{% url 'accounts:logout_confirm' %}">
+              <button type="submit" class="btn-logout">LOGOUT</button>
+            </form>
+          </div>
+        </header>
+
+        <div class="content-wrapper">
+          <!-- This is the ONLY part that changes for Report Records! -->
+          <div class="content-main">
+            <h1 class="report-records-title" style="margin: 5; flex-shrink: 0;">Report Records</h1>
+            <form method="get" class="search-bar-mt">
+              <input type="text" name="q" placeholder="Search complaint report records..." value="{{ request.GET.q }}">
+              <select name="status" onchange="this.form.submit()">
+                <option value="">All Status</option>
+                <option value="Under Investigation" {% if request.GET.status == 'Under Investigation' %}selected{% endif %}>Under Investigation</option>
+                <option value="Resolved" {% if request.GET.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                <option value="Pending" {% if request.GET.status == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="Mediation Scheduled" {% if request.GET.status == 'Mediation Scheduled' %}selected{% endif %}>Mediation Scheduled</option>
+              </select>
+              <button type="submit">SEARCH</button>
+              <a href="{% url 'accounts:report_records' %}" style="margin-left:0;"><button type="button">CLEAR</button></a>
+            </form>
+            <table class="report-table">
+              <tr>
+                <th>Report ID</th>
+                <th>Type of Incident</th>
+                <th>Blotter Status</th>
+                <th>Date and Time Reported</th>
+                <th>Place of Incident</th>
+              </tr>
+              {% for r in records %}
+              <tr>
+                <td>{{ r.report_id }}</td>
+                <td>{{ r.incident_type }}</td>
+                <td>
+                  {% if r.status == "Under Investigation" %}
+                    <span class="status-under-investigation">{{ r.status }}</span>
+                  {% elif r.status == "Pending" %}
+                    <span class="status-pending">{{ r.status }}</span>
+                  {% elif r.status == "Resolved" %}
+                    <span class="status-resolved">{{ r.status }}</span>
+                  {% elif r.status == "Mediation Scheduled" %}
+                    <span class="status-mediation">{{ r.status }}</span>
+                  {% else %}
+                    {{ r.status }}
+                  {% endif %}
+                </td>
+                <td>{{ r.date }}</td>
+                <td>{{ r.place }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" style="text-align:center;" >No records found.</td>
+              </tr>
+              {% endfor %}
+            </table>
+          </div>
+          <!-- END MAIN CONTENT -->
+        </div>
+      </main>
+    </div>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+  </body>
+</html>

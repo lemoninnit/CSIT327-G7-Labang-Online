@@ -830,3 +830,24 @@ def counter_payment(request, request_id):
     }
     return render(request, 'accounts/counter_payment.html', context)
 
+
+@login_required(login_url='accounts:login')
+@never_cache
+def report_records(request):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo) if hasattr(user, 'profile_photo') else None
+
+    records = []
+
+    query = request.GET.get('q', '').lower()
+    status = request.GET.get('status', '')
+
+    # No hardcoded filtering needed
+    filtered = records
+
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+        'records': filtered,
+    }
+    return render(request, 'accounts/Report_records.html', context)

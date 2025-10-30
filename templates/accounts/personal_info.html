@@ -210,7 +210,7 @@
               <span>Personal Info</span>
             </a>
           </li>
-          <li class="menu-item">
+          <li class="menu-item" onclick="window.location.href='{% url 'accounts:document_request' %}'">
             <a href="{% url 'accounts:document_request' %}">
               <img src="{% static 'icons/request-records.png' %}" alt="" />
               <span>Document Request</span>
@@ -220,9 +220,9 @@
             <a href="#">
               <img src="{% static 'icons/resident-record.png' %}" alt="" />
               <span>Resident Records</span>
-            </a>
+              </a>
           </li>
-          <li class="menu-item">
+          <li class="menu-item" onclick="window.location.href='{% url 'accounts:report_records' %}'">
             <a href="#">
               <img src="{% static 'icons/incident-report.png' %}" alt="" />
               <span>Report Records</span>
