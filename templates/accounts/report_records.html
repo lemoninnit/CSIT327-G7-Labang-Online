@@ -70,7 +70,7 @@
         border: 1px solid #d1d5db;
       }
 
-      body.light .search-bar-mt input::placeholder {
+      .light .search-bar-mt input::placeholder {
         color: #6b7280;
       }
 
@@ -118,53 +118,53 @@
 
 
       body {
-  background: #19243a;
-  color: #e5e7eb;
-}
-.report-table {
-  background: #647083;
-    color: #fff;
-    border-radius: 5px;
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 15px;
-}
-.report-table th {
-  background: #384566;
-  color: #10b981;
-}
-.report-table td {
-  border: 1px solid #384566;
-}
+        background: #19243a;
+        color: #e5e7eb;
+      }
+      .report-table {
+        background: #647083;
+          color: #fff;
+          border-radius: 5px;
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 15px;
+      }
+      .report-table th {
+        background: #384566;
+        color: #10b981;
+      }
+      .report-table td {
+        border: 1px solid #384566;
+      }
 
-.report-records-title {
-  color: #fff;  /* Very light color for dark background */
-  font-weight: 800;
-  margin-bottom: 18px;
-}
+      .report-records-title {
+        color: #fff;  /* Very light color for dark background */
+        font-weight: 800;
+        margin-bottom: 18px;
+      }
 
- .light .report-records-title {
-  color: #384566; /* Very dark blue for good contrast on white */
-  font-weight: 800;
-  
-}
+      .light .report-records-title {
+        color: #384566; /* Very dark blue for good contrast on white */
+        font-weight: 800;
+        
+      }
 
- .light {   
-  background: #f3f6fb;
-  color: #111;
-}
-    /* NO RECORDS FOUND */
- .light .report-table {
-  background: #c4c9d3;
-  color: #ff0000;
-}
- .light .report-table th {
-  background: #eaf1fb;
-  color: #384566;
-}
- .light .report-table td {
-  border: 1px solid #ffffff;
-}
+      .light {   
+        background: #f3f6fb;
+        color: #111;
+      }
+          /* NO RECORDS FOUND */
+      .light .report-table {
+        background: #c4c9d3;
+        color: #ff0000;
+      }
+      .light .report-table th {
+        background: #eaf1fb;
+        color: #384566;
+      }
+      .light .report-table td {
+        border: 1px solid #ffffff;
+      }
 
       .role {
         display: inline-block;
@@ -218,7 +218,7 @@
             <img src="{% static 'icons/incident-report.png' %}" alt="" />
             <span>Report Records</span>
           </li>
-          <li class="menu-item">
+          <li class="menu-item" onclick="window.location.href='{% url 'accounts:file_report' %}'">
             <img src="{% static 'icons/file-report.png' %}" alt="" />
             <span>File Report</span>
           </li>

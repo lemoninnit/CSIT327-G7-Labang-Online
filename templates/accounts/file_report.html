@@ -1,0 +1,575 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - LabangOnline</title>
+
+    <link rel="stylesheet" href="{% static 'css/app.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+    <link rel="icon" href="{% static 'logo.png' %}" type="image/png" />
+    <style>
+      /* Fix scrolling issues */
+       .html, 
+       .body {
+        background-color: #0b1220;
+        overflow: hidden;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .dashboard-wrapper {
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+      }
+
+      .main-content {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .content-wrapper {
+        flex: 1;
+        display: flex;
+        padding: 20px;
+        gap: 20px;
+        overflow: hidden;
+        height: 100%;
+      }
+
+      /* Right column - Submit report form (full width) */
+      .content-right {
+        flex: 1;
+        background-color: var(--panel);
+        border-radius: 10px;
+        padding: 20px;
+        overflow-y: auto;
+        max-height: 100%;
+      }
+
+      .report-header {
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .report-header h2 {
+        font-size: 32px;
+        margin: 0 0 4px 0;
+      }
+
+      .report-subtitle {
+        text-align: center;
+        color: #94a3b8;
+        margin-bottom: 16px;
+      }
+
+      .notice-banner {
+        background: #fef3c7;
+        border: 1px solid #fbbf24;
+        color: #92400e;
+        padding: 16px 20px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        margin-bottom: 10px;
+      }
+
+        .notice-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 5px;
+      }
+
+      .notice-description {
+        margin: 0;
+        font-size: 13px;
+        color: #92400e;
+        line-height: 1.5;
+        }
+
+      .notice-title {
+        font-weight: 700;
+        color: #92400e;
+        font-size: 14px;
+        }
+
+
+
+    /* Light mode - user name needs strong contrast */
+      .light .user-name h2 {
+        color: #111827 !important;
+        font-weight: 700;
+      }
+
+      .light body {
+  background-color: #f8fafc; /* light background */
+  color: #1e293b;
+}
+
+/* Panels and containers */
+.light .content-right {
+  background-color: #ffffff;
+  color: #1e293b;
+  border-color: #e2e8f0;
+}
+
+/* Text fields and selects */
+.light .form-control,
+.light .form-select,
+.light .form-textarea {
+  background-color: #ffffff;
+  color: #1e293b;
+  border-color: #cbd5e1;
+  /* keep original radius and padding */
+}
+
+/* Buttons */
+.light .btn-primary {
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+}
+
+/* Clear Form + Save Draft identical in light mode */
+.light .btn-secondary,
+.light .btn-accent {
+  background-color: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+}
+
+
+/* Form label contrast */
+.light .form-label {
+  color: #475569;
+}
+
+/* Notice banner */
+.light .notice-banner {
+  background: #fff8e1;
+  border-color: #facc15;
+  color: #78350f;
+}
+
+/* Tables (optional) */
+.light table {
+  background-color: #ffffff;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+/* Sidebar and text color corrections */
+.light .sidebar,
+.light .topbar {
+  background-color: #f1f5f9;
+  color: #1e293b;
+}
+
+.light .user-name h2 {
+  color: #111827 !important;
+}
+
+
+      .form-row { 
+        margin-bottom: 14px; 
+    }
+      .form-label {
+        font-weight: 600;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        color: #9ca3af;
+     }
+      .form-control,
+      .form-select,
+      .form-textarea {
+            width: 100%;
+            background: var(--panelElevated, #0b1220);
+            color: var(--text, #e5e7eb);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 10px;
+            padding: 15px 16px;
+            outline: none;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+      .form-select { 
+        appearance: none; 
+    }
+      .form-textarea { 
+        min-height: 150px; 
+        resize: vertical; 
+    }
+
+      .btn-primary { 
+        background:#5b86ff; 
+        color:#fff; 
+        border:none; 
+        padding:14px 16px; 
+        border-radius:10px; 
+        font-weight:700; 
+        width:100%; 
+    }
+
+
+      .btn-secondary,
+.btn-accent,
+.btn-accept {
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #cbd5e1;
+  padding: 12px 16px;
+  border-radius: 10px;
+  width: 100%;
+  transition: all 0.25s ease;
+}
+
+      .btn-top { 
+        margin-top: 6px; 
+        margin-bottom: 10px; 
+    }
+      .btn-pair { 
+        display:grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap: 20px; 
+    }
+
+      @media (
+        min-width: 720px) 
+        {
+        .btn-row { 
+            grid-template-columns: 1fr 1fr 1fr; 
+        }
+      }
+
+      .support { 
+        text-align:center; 
+        font-size: 12px; 
+        color:#94a3b8; 
+        margin-top: 10px; 
+    }
+
+      .support a { 
+        color:#93c5fd; 
+        text-decoration:none; 
+    }
+
+      .counter { 
+        text-align:right; 
+        font-size:12px; 
+        color:#94a3b8; 
+        margin-top:6px; 
+    }
+
+      /* Enhanced profile photo styling */
+      .user-profile img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #10b981;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+      }
+
+      .user-header img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #10b981;
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .user-header img:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 24px rgba(16, 185, 129, 0.6);
+      }
+
+      .user-header {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        padding: 24px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border-radius: 16px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+      }
+
+      .user-name h2 {
+        margin: 0 0 8px 0;
+        font-size: 28px;
+        font-weight: 600;
+        color: #e5e7eb;
+      }
+
+      .role {
+        display: inline-block;
+        padding: 6px 16px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+      }
+
+      .role.pending {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      }
+
+      /* Resident ID Card Styling */
+      .resident-id-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        padding: 20px;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      }
+
+      .resident-id-container img {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        transition: transform 0.3s ease;
+      }
+
+      .resident-id-container img:hover {
+        transform: scale(1.02);
+      }
+
+      .id-placeholder {
+        padding: 60px 20px;
+        text-align: center;
+        color: #64748b;
+        background: rgba(15, 23, 32, 0.5);
+        border-radius: 12px;
+        border: 2px dashed rgba(100, 116, 139, 0.3);
+      }
+
+      .id-placeholder img {
+        opacity: 0.3;
+        height: 80px;
+        margin-bottom: 16px;
+        filter: grayscale(100%);
+      }
+
+      .id-placeholder p {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      /* Ensure info sections have proper spacing */
+      .info-section {
+        margin-bottom: 20px;
+      }
+
+      .info-section:last-child {
+        margin-bottom: 60px;
+      }
+
+      /* Make menu items clickable links */
+      .sidebar .menu-item a {
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-wrapper">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="logo">
+          <img src="{% static 'logo.png' %}" alt="Labang Logo" />
+          <span>LabangOnline</span>
+        </div>
+
+        <!-- Notification with badge -->
+        <div class="notification-item">
+          <div class="notification-icon-wrapper">
+            <img
+              src="{% static 'icons/notification.png' %}"
+              alt="Notification"
+            />
+            <span class="notification-badge">5</span>
+          </div>
+          <span>Notification</span>
+        </div>
+
+        <ul class="menu">
+          <li class="menu-item" onclick="window.location.href='{% url 'accounts:personal_info' %}'">
+            <a href="{% url 'accounts:personal_info' %}">
+              <img src="{% static 'icons/user-info.png' %}" alt="" />
+              <span>Personal Info</span>
+            </a>
+          </li>
+          <li class="menu-item" onclick="window.location.href='{% url 'accounts:certificate_requests' %}'">
+            <a href="{% url 'accounts:certificate_requests' %}">
+              <img src="{% static 'icons/request-records.png' %}" alt="" />
+              <span>Document Request</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="#">
+              <img src="{% static 'icons/resident-record.png' %}" alt="" />
+              <span>Resident Records</span>
+              </a>
+          </li>
+          <li class="menu-item" onclick="window.location.href='{% url 'accounts:report_records' %}'">
+            <a href="{% url 'accounts:report_records' %}">
+              <img src="{% static 'icons/incident-report.png' %}" alt="" />
+              <span>Report Records</span>
+            </a>
+          </li>
+          <li class="menu-item active">
+            <a href="{% url 'accounts:file_report' %}">
+              <img src="{% static 'icons/file-report.png' %}" alt="" />
+              <span>File Report</span>
+            </a>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Top bar -->
+        <header class="topbar">
+          <span></span>
+          <button id="mode-toggle" class="btn">Toggle</button>
+          <div class="user-profile">
+            {% if profile_pic_base64 %}
+              <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
+            {% else %}
+              <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
+            {% endif %}
+            <span>{{ request.user.full_name }}</span>
+            <!-- Updated Logout Button -->
+            <form method="get" action="{% url 'accounts:logout_confirm' %}">
+                <button type="submit" class="btn-logout">LOGOUT</button>
+              </form>
+          </div>
+        </header>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            {% if message.tags == 'success' %}
+            <div class="msg success">{{ message }}</div>
+          {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="content-wrapper">
+          <!-- Submit New Report (full width) -->
+          <div class="content-right">
+            <div class="report-header">
+              <h2>Submit New Report</h2>
+            </div>
+            <p class="report-subtitle">Please provide the report details and select the appropriate category.</p>
+
+            <div class="notice-banner">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">&nbsp&nbsp&nbsp
+    <img src="{% static 'icons/notice.png' %}" alt="!" style="height:20px; opacity:.9;"/>
+    <strong style="font-weight: 700; color: #92400e;">Important Notice</strong>
+  </div>
+  <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.5;">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+    All reports are confidential and will be reviewed within 24 hours. Emergency situations should be reported immediately to authorities.
+  </p>
+</div>
+
+            <form method="post" action="#" id="reportForm">
+              {% csrf_token %}
+
+              <div class="form-row">
+                <div class="form-label">REPORT TYPE</div>
+                <select class="form-select" name="report_type" id="reportType" >
+                  <option value="" disabled>Report Type</option>
+                  <option value="Theft">Theft</option>
+                  <option value="Assault">Assault</option>
+                  <option value="Vandalism">Vandalism</option>
+                  <option value="Disturbance">Disturbance</option>
+                  <option value="Other">Other</option>
+                </select>   
+              </div>
+
+              <div class="form-row">
+                <div class="form-label">PLACE OF INCIDENT</div>
+                <input class="form-control" type="text" name="place" id="place" placeholder="e.g., Mako’s Bistro on Tres de Abril, Labangon" />
+              </div>
+
+              <div class="form-row">
+                <div class="form-label">REPORT MESSAGE</div>
+                <textarea class="form-textarea" name="message" id="message" maxlength="1000" placeholder="Describe what happened. Include time, location details, and any identifiers."></textarea>
+                <div class="counter"><span id="charCount">0</span>/1000</div>
+              </div>
+
+              <div class="btn-row" style="display: flex; flex-direction: column; gap: 13px;">
+                <button type="submit" class="btn-primary">SUBMIT REPORT</button>
+                <div class="btn-pair">
+                <button type="button" class="btn-secondary" id="clearBtn">CLEAR FORM</button>
+                <button type="button" class="btn-accent" id="saveDraftBtn">SAVE DRAFT</button>
+              </div>
+              </div>
+            </form>
+
+            <div class="support">
+              Need help? Contact support at &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+              <a href="mailto:labangon@gmail.com">labangon@company.com</a>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+               or call &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+               <a href="tel:+15551234567">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                (090) 123-4567</a>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script>
+      (function(){
+        var message = document.getElementById('message');
+        var counter = document.getElementById('charCount');
+        var clearBtn = document.getElementById('clearBtn');
+        var saveBtn = document.getElementById('saveDraftBtn');
+
+        function updateCount(){ counter.textContent = message.value.length; }
+        if(message){ message.addEventListener('input', updateCount); updateCount(); }
+
+        if(clearBtn){
+          clearBtn.addEventListener('click', function(){
+            document.getElementById('reportType').selectedIndex = 0;
+            document.getElementById('place').value = '';
+            message.value = '';
+            updateCount();
+          });
+        }
+
+        if(saveBtn){
+          saveBtn.addEventListener('click', function(){
+            // Placeholder for draft saving; can be wired to backend later
+            alert('Draft saved locally.');
+          });
+        }
+      })();
+    </script>
+  </body>
+  </html>
+
+

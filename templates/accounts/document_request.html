@@ -377,9 +377,10 @@
             <img src="{% static 'icons/incident-report.png' %}" alt="" />
             <span>Report Records</span>
           </li>
-          <li class="menu-item">
-            <img src="{% static 'icons/file-report.png' %}" alt="" />
-            <span>File Report</span>
+          <li class="menu-item" onclick="window.location.href='{% url 'accounts:file_report' %}'">
+              <img src="{% static 'icons/file-report.png' %}" alt="" />
+              <span>File Report</span>
+            </a>
           </li>
         </ul>
       </aside>

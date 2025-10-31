@@ -851,3 +851,18 @@ def report_records(request):
         'records': filtered,
     }
     return render(request, 'accounts/Report_records.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def file_report(request):
+    user = request.user
+    profile_pic_base64 = get_base64_image(user.profile_photo) if hasattr(user, 'profile_photo') else None
+    resident_id_base64 = get_base64_image(user.resident_id_photo) if hasattr(user, 'resident_id_photo') else None
+
+    # For now, just render the page/template. Hook up model save later.
+    context = {
+        'user': user,
+        'profile_pic_base64': profile_pic_base64,
+    }
+    return render(request, 'accounts/file_report.html', context)
