@@ -223,13 +223,13 @@
               </a>
           </li>
           <li class="menu-item" onclick="window.location.href='{% url 'accounts:report_records' %}'">
-            <a href="#">
+            <a href="{% url 'accounts:report_records' %}">
               <img src="{% static 'icons/incident-report.png' %}" alt="" />
               <span>Report Records</span>
             </a>
           </li>
-          <li class="menu-item">
-            <a href="#">
+          <li class="menu-item" onclick="window.location.href='{% url 'accounts:file_report' %}'">
+            <a href="{% url 'accounts:file_report' %}">
               <img src="{% static 'icons/file-report.png' %}" alt="" />
               <span>File Report</span>
             </a>

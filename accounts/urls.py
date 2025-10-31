@@ -18,6 +18,7 @@ urlpatterns = [
     path('certificate_requests/', views.certificate_requests, name='certificate_requests'),
     path('request-detail/<str:request_id>/', views.request_detail, name='request_detail'),
     path('report_records/', views.report_records, name='report_records'),
+    path('file_report/', views.file_report, name='file_report'),
 
     # Request pages
     path('barangay-clearance-request/', views.barangay_clearance_request, name='barangay_clearance_request'),
