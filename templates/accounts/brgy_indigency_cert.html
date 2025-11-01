@@ -156,6 +156,37 @@
             resize: vertical;
         }
 
+        .form-group input[type="file"] {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .form-group input[type="file"]::file-selector-button {
+            padding: 8px 16px;
+            margin-right: 12px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 6px;
+            color: #10b981;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input[type="file"]::file-selector-button:hover {
+            background: rgba(16, 185, 129, 0.3);
+        }
+
+        .file-upload-hint {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 6px;
+        }
+
+        .light .file-upload-hint {
+            color: #64748b;
+        }
+
         .info-box {
             background: rgba(59, 130, 246, 0.1);
             border: 1px solid rgba(59, 130, 246, 0.3);
@@ -353,7 +384,7 @@
                 </div>
 
                 <!-- Request Form -->
-                <form method="POST" action="{% url 'accounts:brgy_indigency_cert' %}">
+                <form method="POST" action="{% url 'accounts:brgy_indigency_cert' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     <div class="form-card">
@@ -374,6 +405,17 @@
                             <div class="form-group">
                                 <label>Contact Number</label>
                                 <input type="text" name="contact_number" value="{{ user.contact_number }}" readonly class="readonly-field">
+                            </div>
+                        </div>
+
+                        <!-- Financial Proof Requirement Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">Financial Proof Requirement</h3>
+                            
+                            <div class="form-group">
+                                <label>Financial Proof Image <span style="color: #ef4444;">*</span></label>
+                                <input type="file" name="financial_proof" accept="image/*" required>
+                                <div class="file-upload-hint">Please attach a picture proof about your financial status (e.g., pay slip, income statement, etc.)</div>
                             </div>
                         </div>
 
@@ -401,8 +443,8 @@
                     </div>
                 </form>
             </div>
-        </main>
     </div>
     <script src="{% static 'js/dashboard.js' %}"></script>
 </body>
 </html>
+

@@ -20,6 +20,7 @@ urlpatterns = [
     path('report_records/', views.report_records, name='report_records'),
     path('file_report/', views.file_report, name='file_report'),
 
+
     # Request pages
     path('barangay-clearance-request/', views.barangay_clearance_request, name='barangay_clearance_request'),
     path('brgy_residency_cert/', views.brgy_residency_cert, name='brgy_residency_cert'),
