@@ -534,10 +534,56 @@ def brgy_business_cert(request):
     
     if request.method == 'POST':
         purpose = request.POST.get('purpose')
+        business_name = request.POST.get('business_name', '').strip()
+        business_type = request.POST.get('business_type', '').strip()
+        business_nature = request.POST.get('business_nature', '').strip()
+        business_address = request.POST.get('business_address', '').strip()
+        number_of_employees = request.POST.get('number_of_employees', '').strip()
         
         # Validate purpose
         if not purpose or len(purpose.strip()) < 10:
             messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/brgy_business_cert.html', context)
+        
+        # Validate business information
+        if not business_name:
+            messages.error(request, "Please enter your business name.")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/brgy_business_cert.html', context)
+        
+        if not business_type:
+            messages.error(request, "Please select your business type.")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/brgy_business_cert.html', context)
+        
+        if not business_nature:
+            messages.error(request, "Please enter your business nature.")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/brgy_business_cert.html', context)
+        
+        if not business_address:
+            messages.error(request, "Please enter your business address.")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/brgy_business_cert.html', context)
+        
+        if not number_of_employees or int(number_of_employees) < 0:
+            messages.error(request, "Please enter a valid number of employees.")
             context = {
                 'user': user,
                 'profile_pic_base64': profile_pic_base64,
@@ -551,6 +597,17 @@ def brgy_business_cert(request):
             purpose=purpose,
             payment_amount=100.00,  # Barangay Business Clearance fee
         )
+        
+        # Save business information if CertificateRequest model has these fields
+        # Note: You may need to add these fields to CertificateRequest model:
+        # business_name, business_type, business_nature, business_address, number_of_employees
+        if hasattr(cert_request, 'business_name'):
+            cert_request.business_name = business_name
+            cert_request.business_type = business_type
+            cert_request.business_nature = business_nature
+            cert_request.business_address = business_address
+            cert_request.number_of_employees = int(number_of_employees)
+            cert_request.save(update_fields=['business_name', 'business_type', 'business_nature', 'business_address', 'number_of_employees'])
         
         messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
         
