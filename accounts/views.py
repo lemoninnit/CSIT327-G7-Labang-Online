@@ -412,7 +412,6 @@ def request_detail(request, request_id):
     proof_photo_base64 = None
     if cert_request.proof_photo:
         proof_photo_base64 = get_base64_image(cert_request.proof_photo)
-        cert_request.proof_photo = proof_photo_base64
 
     # Determine recommended action for convenience
     next_action = None
@@ -437,6 +436,7 @@ def request_detail(request, request_id):
         'user': user,
         'profile_pic_base64': profile_pic_base64,
         'cert_request': cert_request,
+        'proof_photo_base64': proof_photo_base64,
         'next_action': next_action,
     }
     return render(request, 'accounts/request_detail.html', context)

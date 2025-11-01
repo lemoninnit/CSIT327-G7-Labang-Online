@@ -155,11 +155,11 @@
                         </div>
                     </div>
                     
-                    {% if cert_request.certificate_type == 'certificate of indigency' and cert_request.proof_photo %}
+                    {% if cert_request.certificate_type == 'indigency' and proof_photo_base64 %}
                     <div class="details-card">
                         <h2>Financial Proof</h2>
                         <div style="text-align: center; margin: 20px 0;">
-                            <img src="data:image/jpeg;base64,{{ cert_request.proof_photo|default:'' }}" alt="Financial Proof" style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid var(--border);">
+                            <img src="data:image/jpeg;base64,{{ proof_photo_base64 }}" alt="Financial Proof" style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid var(--border);">
                         </div>
                         <div style="color: #9ca3af; font-size: 14px; text-align: center;">
                             <p>This financial proof image was submitted as part of your indigency certificate request.</p>
@@ -167,14 +167,14 @@
                     </div>
                     {% endif %}
                     
-                    {% if cert_request.certificate_type == 'barangay_business_clearance' %}
+                    {% if cert_request.certificate_type == 'business_clearance' %}
                     <div class="details-card">
                         <h2>Business Information</h2>
-                        <div class="details-row"><div class="label">Business Name</div><div class="value">{{ cert_request.business_name }}</div></div>
-                        <div class="details-row"><div class="label">Business Type</div><div class="value">{{ cert_request.business_type }}</div></div>
-                        <div class="details-row"><div class="label">Business Nature</div><div class="value">{{ cert_request.business_nature }}</div></div>
-                        <div class="details-row"><div class="label">Business Address</div><div class="value">{{ cert_request.business_address }}</div></div>
-                        <div class="details-row"><div class="label">Number of Employees</div><div class="value">{{ cert_request.employees_count }}</div></div>
+                        <div class="details-row"><div class="label">Business Name</div><div class="value">{{ cert_request.business_name|default:"Not provided" }}</div></div>
+                        <div class="details-row"><div class="label">Business Type</div><div class="value">{{ cert_request.business_type|default:"Not provided" }}</div></div>
+                        <div class="details-row"><div class="label">Business Nature</div><div class="value">{{ cert_request.business_nature|default:"Not provided" }}</div></div>
+                        <div class="details-row"><div class="label">Business Address</div><div class="value">{{ cert_request.business_address|default:"Not provided" }}</div></div>
+                        <div class="details-row"><div class="label">Number of Employees</div><div class="value">{{ cert_request.employees_count|default:"Not provided" }}</div></div>
                     </div>
                     {% endif %}
                 </div>
