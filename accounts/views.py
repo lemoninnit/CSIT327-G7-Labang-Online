@@ -497,7 +497,7 @@ def brgy_indigency_cert(request):
         
         # Save financial proof if CertificateRequest model has the field
         # Note: You may need to add financial_proof field to CertificateRequest model
-        # For now, we'll store it if the field exists
+        # For now, we'll store it if the field exists   
         if hasattr(cert_request, 'financial_proof'):
             cert_request.financial_proof = financial_proof
             cert_request.save(update_fields=['financial_proof'])
