@@ -33,5 +33,7 @@ urlpatterns = [
     path('gcash-payment/<str:request_id>/', views.gcash_payment, name='gcash_payment'),
     path('counter_payment/<str:request_id>/', views.counter_payment, name='counter_payment'),
     
+    # Request Management
+    path('certificate_requests/cancel_request/<str:request_id>/', views.cancel_request, name='cancel_request'),
     
 ]
