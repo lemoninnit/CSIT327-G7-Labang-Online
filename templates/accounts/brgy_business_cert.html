@@ -156,6 +156,16 @@
             resize: vertical;
         }
 
+        .form-group input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .form-group input[type="number"]::-webkit-outer-spin-button,
+        .form-group input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
         .info-box {
             background: rgba(59, 130, 246, 0.1);
             border: 1px solid rgba(59, 130, 246, 0.3);
@@ -377,6 +387,42 @@
                             </div>
                         </div>
 
+                        <!-- Business Information Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">Business Information</h3>
+                            
+                            <div class="form-group">
+                                <label>Business Name <span style="color: #ef4444;">*</span></label>
+                                <input type="text" name="business_name" required placeholder="Enter your business name">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Business Type <span style="color: #ef4444;">*</span></label>
+                                <select name="business_type" required>
+                                    <option value="">Select Business Type</option>
+                                    <option value="Sole Proprietorship">Sole Proprietorship</option>
+                                    <option value="Partnership">Partnership</option>
+                                    <option value="Corporation">Corporation</option>
+                                    <option value="Cooperative">Cooperative</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Business Nature <span style="color: #ef4444;">*</span></label>
+                                <input type="text" name="business_nature" required placeholder="e.g., Sari-sari store, Internet café, Food stall, etc.">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Business Address <span style="color: #ef4444;">*</span></label>
+                                <textarea name="business_address" required placeholder="Enter the complete address of your business"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Number of Employees <span style="color: #ef4444;">*</span></label>
+                                <input type="number" name="number_of_employees" required min="0" placeholder="Enter number of employees">
+                            </div>
+                        </div>
+
                         <!-- Request Details Section -->
                         <div class="form-section">
                             <h3 class="section-title">Request Details</h3>
@@ -406,3 +452,4 @@
     <script src="{% static 'js/dashboard.js' %}"></script>
 </body>
 </html>
+
