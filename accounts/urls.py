@@ -17,6 +17,7 @@ urlpatterns = [
     path('document_request/', views.document_request, name='document_request'),
     path('certificate_requests/', views.certificate_requests, name='certificate_requests'),
 
+
     # Request pages
     path('barangay-clearance-request/', views.barangay_clearance_request, name='barangay_clearance_request'),
     path('brgy_residency_cert/', views.brgy_residency_cert, name='brgy_residency_cert'),
