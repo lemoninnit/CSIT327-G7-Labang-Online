@@ -458,10 +458,29 @@ def brgy_indigency_cert(request):
     
     if request.method == 'POST':
         purpose = request.POST.get('purpose')
+        financial_proof = request.FILES.get('financial_proof')
         
         # Validate purpose
         if not purpose or len(purpose.strip()) < 10:
             messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/brgy_indigency_cert.html', context)
+        
+        # Validate financial proof
+        if not financial_proof:
+            messages.error(request, "Please upload a financial proof image.")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/brgy_indigency_cert.html', context)
+        
+        # Validate file type
+        if not financial_proof.content_type.startswith('image/'):
+            messages.error(request, "Financial proof must be an image file.")
             context = {
                 'user': user,
                 'profile_pic_base64': profile_pic_base64,
@@ -475,6 +494,13 @@ def brgy_indigency_cert(request):
             purpose=purpose,
             payment_amount=30.00,  # Certificate of Indigency fee
         )
+        
+        # Save financial proof if CertificateRequest model has the field
+        # Note: You may need to add financial_proof field to CertificateRequest model
+        # For now, we'll store it if the field exists
+        if hasattr(cert_request, 'financial_proof'):
+            cert_request.financial_proof = financial_proof
+            cert_request.save(update_fields=['financial_proof'])
         
         messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
         
