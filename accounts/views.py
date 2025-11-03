@@ -407,6 +407,11 @@ def request_detail(request, request_id):
     profile_pic_base64 = get_base64_image(user.profile_photo)
 
     cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
+    
+    # Convert proof photo to base64 if it exists
+    proof_photo_base64 = None
+    if cert_request.proof_photo:
+        proof_photo_base64 = get_base64_image(cert_request.proof_photo)
 
     # Determine recommended action for convenience
     next_action = None
@@ -431,6 +436,7 @@ def request_detail(request, request_id):
         'user': user,
         'profile_pic_base64': profile_pic_base64,
         'cert_request': cert_request,
+        'proof_photo_base64': proof_photo_base64,
         'next_action': next_action,
     }
     return render(request, 'accounts/request_detail.html', context)
@@ -498,7 +504,7 @@ def brgy_residency_cert(request):
         # Create the certificate request
         cert_request = CertificateRequest.objects.create(
             user=user,
-            certificate_type='certificate of residency',
+            certificate_type='residency',
             purpose=purpose,
             payment_amount=30.00,  # Certificate of Residency fee
         )
@@ -523,9 +529,10 @@ def brgy_indigency_cert(request):
     
     if request.method == 'POST':
         purpose = request.POST.get('purpose')
+        proof_photo = request.FILES.get('proof_photo')
         financial_proof = request.FILES.get('financial_proof')
         
-        # Validate purpose
+        # Validate purpose and proof photo
         if not purpose or len(purpose.strip()) < 10:
             messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
             context = {
@@ -534,18 +541,8 @@ def brgy_indigency_cert(request):
             }
             return render(request, 'accounts/brgy_indigency_cert.html', context)
         
-        # Validate financial proof
-        if not financial_proof:
+        if not proof_photo:
             messages.error(request, "Please upload a financial proof image.")
-            context = {
-                'user': user,
-                'profile_pic_base64': profile_pic_base64,
-            }
-            return render(request, 'accounts/brgy_indigency_cert.html', context)
-        
-        # Validate file type
-        if not financial_proof.content_type.startswith('image/'):
-            messages.error(request, "Financial proof must be an image file.")
             context = {
                 'user': user,
                 'profile_pic_base64': profile_pic_base64,
@@ -555,8 +552,9 @@ def brgy_indigency_cert(request):
         # Create the certificate request
         cert_request = CertificateRequest.objects.create(
             user=user,
-            certificate_type='certificate of indigency',
+            certificate_type='indigency',
             purpose=purpose,
+            proof_photo=proof_photo.read() if proof_photo else None,
             payment_amount=30.00,  # Certificate of Indigency fee
         )
         
@@ -600,7 +598,7 @@ def brgy_goodmoral_character(request):
         # Create the certificate request
         cert_request = CertificateRequest.objects.create(
             user=user,
-            certificate_type='Good Moral Character',
+            certificate_type='good_moral',
             purpose=purpose,
             payment_amount=40.00,  # Good Moral Character fee
         )
@@ -625,10 +623,35 @@ def brgy_business_cert(request):
     
     if request.method == 'POST':
         purpose = request.POST.get('purpose')
+        business_name = request.POST.get('business_name')
+        business_type = request.POST.get('business_type')
+        business_nature = request.POST.get('business_nature')
+        business_address = request.POST.get('business_address')
+        employees_count = request.POST.get('employees_count')
         
-        # Validate purpose
+        # Validate all required fields
         if not purpose or len(purpose.strip()) < 10:
             messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/brgy_business_cert.html', context)
+        
+        if not business_name or not business_type or not business_nature or not business_address or not employees_count:
+            messages.error(request, "Please fill in all required business information fields.")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/brgy_business_cert.html', context)
+        
+        try:
+            employees_count = int(employees_count)
+            if employees_count < 0:
+                raise ValueError("Number of employees cannot be negative")
+        except ValueError:
+            messages.error(request, "Please enter a valid number of employees.")
             context = {
                 'user': user,
                 'profile_pic_base64': profile_pic_base64,
@@ -638,8 +661,13 @@ def brgy_business_cert(request):
         # Create the certificate request
         cert_request = CertificateRequest.objects.create(
             user=user,
-            certificate_type='barangay_business_clearance',
+            certificate_type='business_clearance',
             purpose=purpose,
+            business_name=business_name,
+            business_type=business_type,
+            business_nature=business_nature,
+            business_address=business_address,
+            employees_count=employees_count,
             payment_amount=100.00,  # Barangay Business Clearance fee
         )
         
@@ -855,6 +883,34 @@ def counter_payment(request, request_id):
         'cert_request': cert_request,
     }
     return render(request, 'accounts/counter_payment.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def cancel_request(request, request_id):
+    """
+    View to handle cancellation of certificate requests.
+    Only unpaid requests can be cancelled.
+    """
+    user = request.user
+    cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
+    
+    # Check if the request is eligible for cancellation (only unpaid requests)
+    if cert_request.payment_status != 'unpaid':
+        messages.error(request, "Only unpaid requests can be cancelled. Paid requests cannot be cancelled as we do not offer refunds.")
+        return redirect('accounts:certificate_requests')
+    
+    # Store request ID for success message
+    request_id_display = cert_request.request_id
+    
+    # Delete the request
+    cert_request.delete()
+    
+    # Show success message
+    messages.success(request, f"Certificate request {request_id_display} has been successfully cancelled.")
+    
+    # Redirect back to certificate requests page
+    return redirect('accounts:certificate_requests')
 
 
 @login_required(login_url='accounts:login')

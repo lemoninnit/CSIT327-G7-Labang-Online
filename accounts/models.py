@@ -105,6 +105,16 @@ class CertificateRequest(models.Model):
     # Request Details
     purpose = models.TextField()
     
+    # Indigency Proof
+    proof_photo = models.BinaryField(blank=True, null=True)
+    
+    # Business Details
+    business_name = models.CharField(max_length=255, blank=True, null=True)
+    business_type = models.CharField(max_length=50, blank=True, null=True)
+    business_nature = models.CharField(max_length=255, blank=True, null=True)
+    business_address = models.TextField(blank=True, null=True)
+    employees_count = models.PositiveIntegerField(blank=True, null=True)
+    
     # Payment Info
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='unpaid')
     payment_mode = models.CharField(max_length=20, choices=PAYMENT_MODE, blank=True, null=True)
@@ -127,11 +137,42 @@ class CertificateRequest(models.Model):
         if not self.request_id:
             # Generate unique request ID (e.g., REQ-2025-0001)
             from django.utils import timezone
+            import random
             year = timezone.now().year
-            count = CertificateRequest.objects.filter(
-                created_at__year=year
-            ).count() + 1
-            self.request_id = f"REQ-{year}-{count:04d}"
+            
+            # Try to generate a unique request ID with retry logic
+            max_attempts = 100
+            for attempt in range(max_attempts):
+                # Get the highest existing number for this year
+                existing_requests = CertificateRequest.objects.filter(
+                    request_id__startswith=f"REQ-{year}-"
+                ).order_by('-request_id').first()
+                
+                if existing_requests:
+                    # Extract the number from the last request ID
+                    try:
+                        last_number = int(existing_requests.request_id.split('-')[-1])
+                        next_number = last_number + 1
+                    except (ValueError, IndexError):
+                        next_number = 1
+                else:
+                    next_number = 1
+                
+                # Add some randomness to avoid collisions in concurrent requests
+                if attempt > 0:
+                    next_number += random.randint(1, 10)
+                
+                self.request_id = f"REQ-{year}-{next_number:04d}"
+                
+                # Check if this ID already exists
+                if not CertificateRequest.objects.filter(request_id=self.request_id).exists():
+                    break
+            else:
+                # If we couldn't generate a unique ID after max_attempts, use timestamp
+                import time
+                timestamp = int(time.time() * 1000) % 10000
+                self.request_id = f"REQ-{year}-{timestamp:04d}"
+        
         super().save(*args, **kwargs)
     
     def __str__(self):
