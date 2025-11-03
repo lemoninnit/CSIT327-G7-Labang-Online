@@ -850,4 +850,4 @@ def report_records(request):
         'profile_pic_base64': profile_pic_base64,
         'records': filtered,
     }
-    return render(request, 'accounts/Report_records.html', context)
+    return render(request, 'accounts/report_records.html', context)
