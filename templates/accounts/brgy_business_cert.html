@@ -363,7 +363,7 @@
                 </div>
 
                 <!-- Request Form -->
-                <form method="POST" action="{% url 'accounts:brgy_business_cert' %}">
+                <form method="POST" action="{% url 'accounts:brgy_business_cert' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     <div class="form-card">
@@ -419,7 +419,14 @@
 
                             <div class="form-group">
                                 <label>Number of Employees <span style="color: #ef4444;">*</span></label>
-                                <input type="number" name="number_of_employees" required min="0" placeholder="Enter number of employees">
+                                <input type="number" name="employees_count" required min="0" placeholder="Enter number of employees">
+                            </div>
+                            
+                            <div class="form-group">
+                                <p style="color: #9ca3af; font-size: 14px; margin-top: 8px;">
+                                    <strong>Note:</strong> All business information will be stored securely and will be visible in your request details for reference.
+                                    This information will be used for verification and processing of your business clearance.
+                                </p>
                             </div>
                         </div>
 

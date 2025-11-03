@@ -271,6 +271,12 @@
         .light .records-table td {
             color: #475569;
         }
+        
+        /* Center the Actions column */
+        .records-table th:last-child,
+        .records-table td:last-child {
+            text-align: center;
+        }
 
         .records-table tbody tr {
             transition: all 0.2s ease;
@@ -384,21 +390,28 @@
         .action-buttons {
             display: flex;
             gap: 8px;
-            justify-content: flex-end;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: nowrap;
+            min-height: 40px;
         }
 
         .btn-action {
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             border: none;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 5px;
+            white-space: nowrap;
+            min-width: 70px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .btn-view {
@@ -409,6 +422,8 @@
 
         .btn-view:hover {
             background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
         }
 
         .btn-pay {
@@ -419,6 +434,147 @@
 
         .btn-pay:hover {
             background: rgba(16, 185, 129, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.2);
+        }
+        
+        .btn-cancel {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-cancel:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.2);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-container {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        .light .modal-container {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .modal-overlay.active .modal-container {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .modal-header svg {
+            color: #ef4444;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .modal-header h3 {
+            color: #e5e7eb;
+            font-size: 20px;
+            margin: 0;
+        }
+        
+        .light .modal-header h3 {
+            color: #111827;
+        }
+        
+        .modal-content {
+            margin-bottom: 24px;
+        }
+        
+        .modal-content p {
+            color: #cbd5e1;
+            font-size: 15px;
+            line-height: 1.5;
+            margin: 0 0 8px 0;
+        }
+        
+        .light .modal-content p {
+            color: #475569;
+        }
+        
+        .modal-content .warning {
+            color: #ef4444;
+            font-weight: 500;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .modal-btn-cancel {
+            background: rgba(148, 163, 184, 0.1);
+            color: #cbd5e1;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .light .modal-btn-cancel {
+            background: white;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+        
+        .modal-btn-cancel:hover {
+            background: rgba(148, 163, 184, 0.2);
+        }
+        
+        .modal-btn-confirm {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .modal-btn-confirm:hover {
+            background: rgba(239, 68, 68, 0.2);
         }
 
         .btn-clear-filters,
@@ -465,6 +621,22 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
         }
+        
+        .btn-apply-filters:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .btn-apply-filters.filters-changed {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3), 0 2px 8px rgba(16, 185, 129, 0.3); }
+            100% { box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
+        }
 
         /* Responsive */
         @media (max-width: 1024px) {
@@ -486,6 +658,17 @@
 
             .filters-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            
+            .btn-action {
+                padding: 6px 10px;
+                font-size: 11px;
+                min-width: 60px;
             }
         }
     </style>
@@ -705,6 +888,12 @@
                                             </svg>
                                             Pay Now
                                         </a>
+                                        <button type="button" class="btn-action btn-cancel" onclick="showCancelConfirmation('{{ req.request_id }}')">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                            Cancel
+                                        </button>
                                         {% endif %}
                                     </div>
                                 </td>
@@ -732,8 +921,51 @@
         </main>
     </div>
 
+    <!-- Cancel Confirmation Modal -->
+    <div id="cancelModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <h3>Cancel Certificate Request</h3>
+            </div>
+            <div class="modal-content">
+                <p>Are you sure you want to cancel this certificate request?</p>
+                <p class="warning">This action cannot be undone.</p>
+                <p>Your request will be permanently deleted from the system.</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn modal-btn-cancel" onclick="hideCancelConfirmation()">No, Keep Request</button>
+                <button type="button" class="modal-btn modal-btn-confirm" id="confirmCancelBtn">Yes, Cancel Request</button>
+            </div>
+        </div>
+    </div>
+
     <script src="{% static 'js/dashboard.js' %}"></script>
     <script>
+        // Cancel Request Modal Functions
+        let currentRequestId = null;
+        
+        function showCancelConfirmation(requestId) {
+            currentRequestId = requestId;
+            document.getElementById('cancelModal').classList.add('active');
+            document.getElementById('confirmCancelBtn').onclick = function() {
+                window.location.href = "{% url 'accounts:certificate_requests' %}cancel_request/" + requestId + "/";
+            };
+        }
+        
+        function hideCancelConfirmation() {
+            document.getElementById('cancelModal').classList.remove('active');
+            currentRequestId = null;
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('cancelModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideCancelConfirmation();
+            }
+        });
 
         function clearFilters() {
             // Clear all filter selections
@@ -746,17 +978,45 @@
             window.location.href = "{% url 'accounts:certificate_requests' %}";
         }
 
-        // Prevent accidental filter changes
+        // Add loading state functionality
+        function showLoadingState() {
+            const applyBtn = document.querySelector('.btn-apply-filters');
+            const originalText = applyBtn.innerHTML;
+            applyBtn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 6px; animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>Applying...';
+            applyBtn.disabled = true;
+            
+            // Add CSS for spin animation if not exists
+            if (!document.getElementById('spinAnimation')) {
+                const style = document.createElement('style');
+                style.id = 'spinAnimation';
+                style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+                document.head.appendChild(style);
+            }
+            
+            return originalText;
+        }
+
+        // Enhanced filter change handling with visual feedback
         document.querySelectorAll('.filter-group select').forEach(select => {
             select.addEventListener('change', function(e) {
-                // Don't auto-submit anymore - user must click Apply Filters
+                // Add visual feedback that filters have changed
+                const applyBtn = document.querySelector('.btn-apply-filters');
+                if (!applyBtn.classList.contains('filters-changed')) {
+                    applyBtn.classList.add('filters-changed');
+                    applyBtn.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.3)';
+                    applyBtn.style.transform = 'scale(1.02)';
+                }
+                
                 console.log('Filter changed:', this.name, this.value);
             });
         });
 
-        // Handle form submission
+        // Enhanced form submission with loading state
         document.getElementById('filterForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Show loading state
+            const originalText = showLoadingState();
             
             // Build query string from selected filters
             const formData = new FormData(this);
@@ -768,11 +1028,13 @@
                 }
             }
             
-            // Redirect with filters
-            const queryString = params.toString();
-            window.location.href = queryString ? 
-                "{% url 'accounts:certificate_requests' %}?" + queryString : 
-                "{% url 'accounts:certificate_requests' %}";
+            // Small delay to show loading state, then redirect
+            setTimeout(() => {
+                const queryString = params.toString();
+                window.location.href = queryString ? 
+                    "{% url 'accounts:certificate_requests' %}?" + queryString : 
+                    "{% url 'accounts:certificate_requests' %}";
+            }, 300);
         });
     </script>
 </body>
