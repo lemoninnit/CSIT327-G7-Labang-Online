@@ -842,7 +842,7 @@ def report_records(request):
     query = request.GET.get('q', '').lower()
     status = request.GET.get('status', '')
 
-    # No hardcoded filtering needed
+    # No hardcoded filter needed
     filtered = records
 
     context = {
@@ -850,4 +850,5 @@ def report_records(request):
         'profile_pic_base64': profile_pic_base64,
         'records': filtered,
     }
+    
     return render(request, 'accounts/report_records.html', context)
