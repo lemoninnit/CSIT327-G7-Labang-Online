@@ -55,13 +55,57 @@
       }
 
       .report-header {
-        text-align: center;
-        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-align: initial;        /* override previous center */
+        margin-bottom: 10px;        /* keep your spacing */
+        position: relative;
+        min-height: 40px;
+      }
+
+      .report-header .btn-accept {
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+        color: #ffffff;
+        border: none;
+        padding: 15px 25px !important;   /* smaller */
+        font-size: 13px;
+        line-height: 1;
+        border-radius: 8px;
+        width: auto !important;         /* override the global width:100% */
+        min-width: 0;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      /* Icon size inside the small button */
+      .report-header .btn-accept img {
+        height: 20px;                   /* fix invalid value */
+        filter: brightness(0) invert(1);
+        margin: 0;
+      }
+
+
+      .btn-compact {
+        padding: 6px 10px;  /* small size */
+        font-size: 12px;
+        line-height: 1;
+        min-width: auto;    /* keep width small */
+        width: auto;
+        border-radius: 8px;
       }
 
       .report-header h2 {
-        font-size: 32px;
-        margin: 0 0 4px 0;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+        text-align: center;
+        width: max-content;
       }
 
       .report-subtitle {
@@ -432,12 +476,7 @@
               <span>Resident Records</span>
               </a>
           </li>
-          <li class="menu-item" onclick="window.location.href='{% url 'accounts:report_records' %}'">
-            <a href="{% url 'accounts:report_records' %}">
-              <img src="{% static 'icons/incident-report.png' %}" alt="" />
-              <span>Report Records</span>
-            </a>
-          </li>
+          
           <li class="menu-item active">
             <a href="{% url 'accounts:file_report' %}">
               <img src="{% static 'icons/file-report.png' %}" alt="" />
@@ -482,6 +521,11 @@
           <div class="content-right">
             <div class="report-header">
               <h2>Submit New Report</h2>
+
+              <a href="{% url 'accounts:report_records' %}" class="btn-accept" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;background:linear-gradient(135deg,#34d399 0%,#10b981 100%);color:#ffffff;border:none;padding:12px 18px;border-radius:10px;font-weight:700;">
+    <img src="{% static 'icons/incident-report.png' %}" alt="" style="height:18px;filter:brightness(0) invert(1);" />
+    View Report Records
+  </a>
             </div>
             <p class="report-subtitle">Please provide the report details and select the appropriate category.</p>
 
