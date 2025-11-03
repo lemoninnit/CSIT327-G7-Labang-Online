@@ -33,7 +33,15 @@ SECRET_KEY = 'django-insecure-lb0y6aytz)rnjzkh+%p8_%-q&h6@w&i%tp6-g545@a9!g9^fd4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "labang-online.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "https://labang-online.onrender.com"
+]
+
 
 
 # Application definition
