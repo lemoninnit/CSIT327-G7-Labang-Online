@@ -34,9 +34,10 @@ SECRET_KEY = 'django-insecure-lb0y6aytz)rnjzkh+%p8_%-q&h6@w&i%tp6-g545@a9!g9^fd4
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "labang-online.onrender.com",
-    "localhost",
-    "127.0.0.1",
+    'labang-online.onrender.com',
+    'csit327-g7-labang-online.onrender.com',
+    'localhost',
+    '127.0.0.1'
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://labang-online.onrender.com"
