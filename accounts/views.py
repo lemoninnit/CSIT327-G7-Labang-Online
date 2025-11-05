@@ -17,8 +17,8 @@ import base64
 from django.shortcuts import render
 from .models import User, PasswordResetCode
 from .forms import RegistrationForm
-from .models import User, PasswordResetCode, CertificateRequest
-
+from .models import User, PasswordResetCode, CertificateRequest, IncidentReport
+from django.db import models  # Add this for Q queries
 # -------------------- HELPER FUNCTION --------------------
 def get_base64_image(data):
     """Convert binary image data to base64 string WITHOUT data URI prefix"""
@@ -911,20 +911,30 @@ def report_records(request):
     user = request.user
     profile_pic_base64 = get_base64_image(user.profile_photo) if hasattr(user, 'profile_photo') else None
 
-    records = []
+    # Get all incident reports for the current user
+    records = IncidentReport.objects.filter(user=user).order_by('-created_at')
 
-    query = request.GET.get('q', '').lower()
-    status = request.GET.get('status', '')
+    # Get filter parameters
+    query = request.GET.get('q', '').strip()
+    status = request.GET.get('status', '').strip()
 
-    # No hardcoded filtering needed
-    filtered = records
+    # Apply filters
+    if query:
+        records = records.filter(
+            models.Q(report_id__icontains=query) |
+            models.Q(incident_type__icontains=query) |
+            models.Q(place__icontains=query) |
+            models.Q(message__icontains=query)
+        )
+    
+    if status:
+        records = records.filter(status=status)
 
     context = {
         'user': user,
         'profile_pic_base64': profile_pic_base64,
-        'records': filtered,
+        'records': records,
     }
-    # Fixed: Changed 'Report_records.html' to 'report_records.html'
     return render(request, 'accounts/report_records.html', context)
 
 
@@ -934,9 +944,74 @@ def report_records(request):
 def file_report(request):
     user = request.user
     profile_pic_base64 = get_base64_image(user.profile_photo) if hasattr(user, 'profile_photo') else None
-    resident_id_base64 = get_base64_image(user.resident_id_photo) if hasattr(user, 'resident_id_photo') else None
 
-    # For now, just render the page/template. Hook up model save later.
+    if request.method == 'POST':
+        report_type = request.POST.get('report_type')
+        place = request.POST.get('place')
+        message = request.POST.get('message')
+        
+        # Validation
+        if not report_type or not place or not message:
+            messages.error(request, "All fields are required. Please fill in all the information.")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/file_report.html', context)
+        
+        # Validate report type
+        valid_report_types = ['Theft', 'Assault', 'Vandalism', 'Disturbance', 'Other']
+        if report_type not in valid_report_types:
+            messages.error(request, "Invalid report type selected.")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/file_report.html', context)
+        
+        # Validate place (minimum length)
+        if len(place.strip()) < 5:
+            messages.error(request, "Please provide a more detailed location (at least 5 characters).")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/file_report.html', context)
+        
+        # Validate message (minimum length)
+        if len(message.strip()) < 20:
+            messages.error(request, "Please provide a detailed description (at least 20 characters).")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/file_report.html', context)
+        
+        # Create the incident report
+        try:
+            incident = IncidentReport.objects.create(
+                user=user,
+                incident_type=report_type,
+                place=place.strip(),
+                message=message.strip(),
+                status='Pending'
+            )
+            
+            messages.success(
+                request, 
+                f"Report submitted successfully! Your report ID is {incident.report_id}. "
+                "Our team will review it within 24 hours."
+            )
+            return redirect('accounts:report_records')
+            
+        except Exception as e:
+            messages.error(request, f"An error occurred while submitting your report: {str(e)}")
+            context = {
+                'user': user,
+                'profile_pic_base64': profile_pic_base64,
+            }
+            return render(request, 'accounts/file_report.html', context)
+
     context = {
         'user': user,
         'profile_pic_base64': profile_pic_base64,

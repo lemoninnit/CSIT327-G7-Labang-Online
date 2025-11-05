@@ -4,6 +4,8 @@ from django.utils import timezone
 from django.conf import settings
 import secrets
 import string
+import uuid
+
 
 class User(AbstractUser):
     full_name = models.CharField(max_length=255)
@@ -200,9 +202,12 @@ class IncidentReport(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='incident_reports')
     incident_type = models.CharField(max_length=50, choices=REPORT_TYPES)
     place = models.CharField(max_length=255)
-    message = models.Textarea = models.TextField()
+    message = models.TextField()  # FIXED: Was models.Textarea (incorrect)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
     def save(self, *args, **kwargs):
         if not self.report_id:
