@@ -92,7 +92,8 @@ WSGI_APPLICATION = 'labang_online.wsgi.application'
 # Database
 # Use Supabase when DATABASE_URL is present; otherwise fall back to SQLite
 load_dotenv()
-
+SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY', '')
 
 
 db_url = os.environ.get('DATABASE_URL')

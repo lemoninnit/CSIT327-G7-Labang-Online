@@ -297,19 +297,46 @@ def edit_profile(request):
         if civil_status:
             user.civil_status = civil_status
 
-        # TODO: Handle file uploads to Supabase Storage
-        # You'll need to implement Supabase upload logic here
+        # Handle file uploads to Supabase Storage
+        from .storage_utils import upload_to_supabase, delete_from_supabase
+        
         profile_photo = request.FILES.get('profile_photo')
         if profile_photo:
-            # Upload to Supabase and get URL
-            # user.profile_photo_url = upload_to_supabase(profile_photo)
-            pass
+            # Delete old photo if it exists
+            if user.profile_photo_url:
+                delete_from_supabase(user.profile_photo_url, bucket_name='user-uploads')
+            
+            # Upload new photo
+            new_url = upload_to_supabase(
+                profile_photo, 
+                bucket_name='user-uploads',
+                folder='profile-photos'
+            )
+            
+            if new_url:
+                user.profile_photo_url = new_url
+            else:
+                messages.error(request, "Failed to upload profile photo. Please try again.")
+                save_ok = False
 
         resident_id_photo = request.FILES.get('resident_id_photo')
         if resident_id_photo:
-            # Upload to Supabase and get URL
-            # user.resident_id_photo_url = upload_to_supabase(resident_id_photo)
-            pass
+            # Delete old ID photo if it exists
+            if user.resident_id_photo_url:
+                delete_from_supabase(user.resident_id_photo_url, bucket_name='user-uploads')
+            
+            # Upload new ID photo
+            new_url = upload_to_supabase(
+                resident_id_photo, 
+                bucket_name='user-uploads',
+                folder='resident-ids'
+            )
+            
+            if new_url:
+                user.resident_id_photo_url = new_url
+            else:
+                messages.error(request, "Failed to upload resident ID photo. Please try again.")
+                save_ok = False
 
         if save_ok:
             user.save()
@@ -534,15 +561,27 @@ def brgy_indigency_cert(request):
             }
             return render(request, 'accounts/brgy_indigency_cert.html', context)
         
-        # TODO: Upload proof_photo to Supabase and get URL
-        # proof_photo_url = upload_to_supabase(proof_photo)
+        # Upload proof photo to Supabase
+        from .storage_utils import upload_to_supabase
+        proof_photo_url = upload_to_supabase(
+            proof_photo, 
+            bucket_name='user-uploads',
+            folder='indigency-proofs'
+        )
+        
+        if not proof_photo_url:
+            messages.error(request, "Failed to upload proof photo. Please try again.")
+            context = {
+                'user': user,
+            }
+            return render(request, 'accounts/brgy_indigency_cert.html', context)
         
         # Create the certificate request
         cert_request = CertificateRequest.objects.create(
             user=user,
             certificate_type='indigency',
             purpose=purpose,
-            # proof_photo_url=proof_photo_url,  # Use this when Supabase upload is implemented
+            proof_photo_url=proof_photo_url,
             payment_amount=30.00,  # Certificate of Indigency fee
         )
         

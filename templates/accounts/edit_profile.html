@@ -22,6 +22,24 @@
       .btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;cursor:pointer;text-decoration:none;} 
       .btn-secondary:hover{background:var(--panel-hover);border-color:var(--border-hover);} 
       .content-right .action-btn{display:none;} /* hide dashboard's right buttons on edit page */
+      
+      /* Image preview styling */
+      .image-preview {
+        margin-top: 8px;
+        max-width: 200px;
+      }
+      .image-preview img {
+        width: 100%;
+        border-radius: 8px;
+        border: 2px solid var(--border);
+      }
+      
+      /* File input styling */
+      input[type="file"] {
+        padding: 8px !important;
+        cursor: pointer;
+      }
+      
       /* Responsive helpers */
       @media (max-width: 768px){
         .two-col{grid-template-columns:1fr;}
@@ -48,24 +66,34 @@
 
         <ul class="menu">
           <li class="menu-item active">
-            <img src="{% static 'icons/user-info.png' %}" alt="" />
-            <span>Personal Info</span>
+            <a href="{% url 'accounts:personal_info' %}">
+              <img src="{% static 'icons/user-info.png' %}" alt="" />
+              <span>Personal Info</span>
+            </a>
           </li>
           <li class="menu-item">
-            <img src="{% static 'icons/request-records.png' %}" alt="" />
-            <span>Request Records</span>
+            <a href="{% url 'accounts:document_request' %}">
+              <img src="{% static 'icons/request-records.png' %}" alt="" />
+              <span>Document Request</span>
+            </a>
           </li>
           <li class="menu-item">
-            <img src="{% static 'icons/resident-record.png' %}" alt="" />
-            <span>Resident Records</span>
+            <a href="#">
+              <img src="{% static 'icons/resident-record.png' %}" alt="" />
+              <span>Resident Records</span>
+            </a>
           </li>
           <li class="menu-item">
-            <img src="{% static 'icons/incident-report.png' %}" alt="" />
-            <span>Report Records</span>
+            <a href="{% url 'accounts:report_records' %}">
+              <img src="{% static 'icons/incident-report.png' %}" alt="" />
+              <span>Report Records</span>
+            </a>
           </li>
           <li class="menu-item">
-            <img src="{% static 'icons/file-report.png' %}" alt="" />
-            <span>File Report</span>
+            <a href="{% url 'accounts:file_report' %}">
+              <img src="{% static 'icons/file-report.png' %}" alt="" />
+              <span>File Report</span>
+            </a>
           </li>
         </ul>
       </aside>
@@ -77,36 +105,46 @@
           <span></span>
           <button id="mode-toggle" class="btn">Toggle</button>
           <div class="user-profile">
-            {% if profile_pic_base64 %}
-              <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
+            {% if user.profile_photo_url %}
+              <img src="{{ user.profile_photo_url }}" alt="User Profile" />
             {% else %}
               <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
             {% endif %}
-            <span>{{ request.user.full_name }}</span>
+            <span>{{ user.full_name }}</span>
+            <form method="get" action="{% url 'accounts:logout_confirm' %}">
+              <button type="submit" class="btn-logout">LOGOUT</button>
+            </form>
           </div>
         </header>
 
         <div class="content-wrapper">
           <div class="content-left">
             <div class="user-header">
-              {% if profile_pic_base64 %}
-                <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
+              {% if user.profile_photo_url %}
+                <img src="{{ user.profile_photo_url }}" alt="User Profile" />
               {% else %}
                 <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
               {% endif %}
               <div class="user-name">
-                <h2>{{ request.user.full_name|default:"User" }}</h2>
-                <span class="role">{% if request.user.resident_confirmation %}Resident{% else %}Pending Verification{% endif %}</span>
+                <h2>{{ user.full_name|default:"User" }}</h2>
+                <span class="role {% if not user.resident_confirmation %}pending{% endif %}">
+                  {% if user.resident_confirmation %}Resident{% else %}Pending Verification{% endif %}
+                </span>
               </div>
             </div>
 
             <!-- Flash Messages -->
             {% if messages %}
-              {% for message in messages %}
-                <div class="flash-message {% if message.tags %}{{ message.tags }}{% endif %}">
-                  {{ message }}
-                </div>
-              {% endfor %}
+              <div class="messages" style="margin-bottom: 20px;">
+                {% for message in messages %}
+                  <div class="msg {% if message.tags %}{{ message.tags }}{% endif %}" 
+                       style="padding: 12px 16px; border-radius: 8px; margin-bottom: 10px;
+                              {% if message.tags == 'error' %}background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);{% endif %}
+                              {% if message.tags == 'success' %}background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);{% endif %}">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              </div>
             {% endif %}
 
             <!-- Edit Form -->
@@ -118,33 +156,49 @@
                 <table class="user-info-table">
                   <tr>
                     <td>Profile Picture:</td>
-                    <td><input type="file" name="profile_photo" accept="image/*" /></td>
+                    <td>
+                      <input type="file" name="profile_photo" accept="image/*" id="profile-photo-input" />
+                      {% if user.profile_photo_url %}
+                        <div class="image-preview">
+                          <p style="font-size: 12px; color: var(--muted); margin: 8px 0 4px 0;">Current Photo:</p>
+                          <img src="{{ user.profile_photo_url }}" alt="Current Profile Photo" />
+                        </div>
+                      {% endif %}
+                    </td>
                   </tr>
                   <tr>
                     <td>Resident ID:</td>
-                    <td><input type="file" name="resident_id_photo" accept="image/*" /></td>
+                    <td>
+                      <input type="file" name="resident_id_photo" accept="image/*" id="resident-id-input" />
+                      {% if user.resident_id_photo_url %}
+                        <div class="image-preview">
+                          <p style="font-size: 12px; color: var(--muted); margin: 8px 0 4px 0;">Current ID:</p>
+                          <img src="{{ user.resident_id_photo_url }}" alt="Current Resident ID" />
+                        </div>
+                      {% endif %}
+                    </td>
                   </tr>
                   <tr>
                     <td>Full Name:</td>
-                    <td><input type="text" name="full_name" value="{{ request.user.full_name }}" required /></td>
+                    <td><input type="text" name="full_name" value="{{ user.full_name }}" required /></td>
                   </tr>
                   <tr>
                     <td>Username:</td>
-                    <td><input type="text" name="username" value="{{ request.user.username }}" required /></td>
+                    <td><input type="text" name="username" value="{{ user.username }}" required /></td>
                   </tr>
                   <tr>
                     <td>Date of Birth:</td>
-                    <td><input type="date" name="date_of_birth" value="{{ request.user.date_of_birth|date:'Y-m-d' }}" /></td>
+                    <td><input type="date" name="date_of_birth" value="{{ user.date_of_birth|date:'Y-m-d' }}" /></td>
                   </tr>
                   <tr>
                     <td>Civil Status:</td>
                     <td>
                       <select name="civil_status">
                         <option value="">Select status</option>
-                        <option value="Single" {% if request.user.civil_status == "Single" %}selected{% endif %}>Single</option>
-                        <option value="Married" {% if request.user.civil_status == "Married" %}selected{% endif %}>Married</option>
-                        <option value="Widowed" {% if request.user.civil_status == "Widowed" %}selected{% endif %}>Widowed</option>
-                        <option value="Separated" {% if request.user.civil_status == "Separated" %}selected{% endif %}>Separated</option>
+                        <option value="Single" {% if user.civil_status == "Single" %}selected{% endif %}>Single</option>
+                        <option value="Married" {% if user.civil_status == "Married" %}selected{% endif %}>Married</option>
+                        <option value="Widowed" {% if user.civil_status == "Widowed" %}selected{% endif %}>Widowed</option>
+                        <option value="Separated" {% if user.civil_status == "Separated" %}selected{% endif %}>Separated</option>
                       </select>
                     </td>
                   </tr>
@@ -152,22 +206,28 @@
                     <td>Address:</td>
                     <td>
                       <div class="two-col" style="margin-bottom:12px;">
-                        <input type="text" name="address_line" placeholder="Street Address" value="{{ request.user.address_line }}" required />
-                        <input type="tel" name="contact_number" placeholder="Contact Number" value="{{ request.user.contact_number }}" required />
+                        <input type="text" name="address_line" placeholder="Street Address" value="{{ user.address_line }}" required />
+                        <input type="tel" name="contact_number" placeholder="Contact Number" value="{{ user.contact_number }}" required />
                       </div>
                       <div class="two-col">
-                        <input type="text" name="barangay" placeholder="Barangay" value="{{ request.user.barangay|default:'Labangon' }}" disabled />
-                        <input type="text" name="city" placeholder="City" value="{{ request.user.city|default:'Cebu City' }}" disabled />
+                        <input type="text" name="barangay" placeholder="Barangay" value="{{ user.barangay|default:'Labangon' }}" disabled />
+                        <input type="text" name="city" placeholder="City" value="{{ user.city|default:'Cebu City' }}" disabled />
                       </div>
                       <div class="two-col" style="margin-top:12px;">
-                        <input type="text" name="province" placeholder="Province" value="{{ request.user.province|default:'Cebu' }}" disabled />
-                        <input type="text" name="postal_code" placeholder="Postal Code" value="{{ request.user.postal_code|default:'6000' }}" disabled />
+                        <input type="text" name="province" placeholder="Province" value="{{ user.province|default:'Cebu' }}" disabled />
+                        <input type="text" name="postal_code" placeholder="Postal Code" value="{{ user.postal_code|default:'6000' }}" disabled />
                       </div>
                     </td>
                   </tr>
                   <tr>
                     <td>Resident Confirmed:</td>
-                    <td>{% if request.user.resident_confirmation %}Yes{% else %}No{% endif %}</td>
+                    <td>
+                      {% if user.resident_confirmation %}
+                        <span style="color: #10b981; font-weight: 600;">✓ Yes</span>
+                      {% else %}
+                        <span style="color: #f59e0b; font-weight: 600;">⏳ No</span>
+                      {% endif %}
+                    </td>
                   </tr>
                 </table>
 
@@ -178,17 +238,17 @@
               </div>
             </form>
 
-            <!-- Contact Information -->
+            <!-- Contact Information (Read-only) -->
             <div class="info-section">
               <h3>CONTACT INFORMATION</h3>
               <table class="user-info-table">
                 <tr>
                   <td>Mobile:</td>
-                  <td>{{ request.user.contact_number }}</td>
+                  <td>{{ user.contact_number }}</td>
                 </tr>
                 <tr>
                   <td>Email:</td>
-                  <td>{{ request.user.email }}</td>
+                  <td>{{ user.email }}</td>
                 </tr>
               </table>
             </div>
@@ -198,5 +258,26 @@
     </div>
 
     <script src="{% static 'js/dashboard.js' %}"></script>
+    <script>
+      // Optional: Preview selected images before upload
+      document.getElementById('profile-photo-input')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            // You could add a preview here if desired
+            console.log('Profile photo selected:', file.name);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      document.getElementById('resident-id-input')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          console.log('Resident ID selected:', file.name);
+        }
+      });
+    </script>
   </body>
 </html>
