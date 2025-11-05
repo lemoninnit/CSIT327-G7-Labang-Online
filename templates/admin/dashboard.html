@@ -1,0 +1,481 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Labang Online</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.9rem;
+            color: #bdc3c7;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            padding-left: 25px;
+        }
+
+        .sidebar-menu a.active {
+            background: #3498db;
+            border-left: 4px solid #2980b9;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 30px;
+            width: calc(100% - 260px);
+        }
+
+        .dashboard-header {
+            margin-bottom: 30px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-header p {
+            color: #7f8c8d;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .summary-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .summary-card-title {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .icon-blue { background: #e3f2fd; color: #2196f3; }
+        .icon-green { background: #e8f5e9; color: #4caf50; }
+        .icon-orange { background: #fff3e0; color: #ff9800; }
+        .icon-red { background: #ffebee; color: #f44336; }
+        .icon-purple { background: #f3e5f5; color: #9c27b0; }
+
+        .summary-card-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        /* Activity Section */
+        .activity-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .activity-header h2 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+        }
+
+        .view-all-link {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .view-all-link:hover {
+            color: #2980b9;
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .activity-item:hover {
+            background: #f8f9fa;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-info h4 {
+            font-size: 1rem;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .activity-info p {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .activity-time {
+            font-size: 0.85rem;
+            color: #95a5a6;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-paid { background: #d4edda; color: #155724; }
+        .status-unpaid { background: #f8d7da; color: #721c24; }
+        .status-investigation { background: #cce5ff; color: #004085; }
+        .status-resolved { background: #d1ecf1; color: #0c5460; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+                width: calc(100% - 200px);
+                padding: 20px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Panel</h2>
+                <p>{{ user.full_name }}</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{% url 'accounts:admin_dashboard' %}" class="active"><i>📊</i> Dashboard</a></li>
+                <li><a href="{% url 'accounts:admin_users' %}"><i>👥</i> Users</a></li>
+                <li><a href="{% url 'accounts:admin_certificates' %}"><i>📄</i> Certificates</a></li>
+                <li><a href="{% url 'accounts:admin_reports' %}"><i>📋</i> Reports</a></li>
+                <li><a href="{% url 'accounts:personal_info' %}"><i>🏠</i> User View</a></li>
+                <li><a href="{% url 'accounts:logout_confirm' %}"><i>🚪</i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <h1>Dashboard Overview</h1>
+                <p>Welcome back, {{ user.full_name }}. Here's what's happening with your barangay.</p>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-grid">
+                <!-- User Statistics -->
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-card-title">Total Users</span>
+                        <div class="summary-card-icon icon-blue">👥</div>
+                    </div>
+                    <div class="summary-card-value">{{ total_users }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-card-title">Verified Users</span>
+                        <div class="summary-card-icon icon-green">✓</div>
+                    </div>
+                    <div class="summary-card-value">{{ verified_users }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-card-title">Pending Verification</span>
+                        <div class="summary-card-icon icon-orange">⏳</div>
+                    </div>
+                    <div class="summary-card-value">{{ pending_verification }}</div>
+                </div>
+
+                <!-- Certificate Statistics -->
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-card-title">Total Certificates</span>
+                        <div class="summary-card-icon icon-purple">📄</div>
+                    </div>
+                    <div class="summary-card-value">{{ total_certificates }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-card-title">Pending Payments</span>
+                        <div class="summary-card-icon icon-orange">💳</div>
+                    </div>
+                    <div class="summary-card-value">{{ pending_payments }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-card-title">Paid Certificates</span>
+                        <div class="summary-card-icon icon-green">💰</div>
+                    </div>
+                    <div class="summary-card-value">{{ paid_certificates }}</div>
+                </div>
+
+                <!-- Report Statistics -->
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-card-title">Total Reports</span>
+                        <div class="summary-card-icon icon-blue">📋</div>
+                    </div>
+                    <div class="summary-card-value">{{ total_reports }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-card-title">Pending Reports</span>
+                        <div class="summary-card-icon icon-red">⚠️</div>
+                    </div>
+                    <div class="summary-card-value">{{ pending_reports }}</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-card-header">
+                        <span class="summary-card-title">Resolved Reports</span>
+                        <div class="summary-card-icon icon-green">✅</div>
+                    </div>
+                    <div class="summary-card-value">{{ resolved_reports }}</div>
+                </div>
+            </div>
+
+            <!-- Recent Certificates -->
+            <div class="activity-section">
+                <div class="activity-header">
+                    <h2>Recent Certificate Requests</h2>
+                    <a href="{% url 'accounts:admin_certificates' %}" class="view-all-link">View All →</a>
+                </div>
+                {% if recent_certificates %}
+                <ul class="activity-list">
+                    {% for cert in recent_certificates %}
+                    <li class="activity-item">
+                        <div class="activity-info">
+                            <h4>{{ cert.request_id }} - {{ cert.get_certificate_type_display }}</h4>
+                            <p>{{ cert.user.full_name }} • {{ cert.created_at|date:"M d, Y" }}</p>
+                        </div>
+                        <span class="status-badge status-{{ cert.payment_status }}">{{ cert.get_payment_status_display }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <i>📄</i>
+                    <p>No certificate requests yet</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Recent Reports -->
+            <div class="activity-section">
+                <div class="activity-header">
+                    <h2>Recent Incident Reports</h2>
+                    <a href="{% url 'accounts:admin_reports' %}" class="view-all-link">View All →</a>
+                </div>
+                {% if recent_reports %}
+                <ul class="activity-list">
+                    {% for report in recent_reports %}
+                    <li class="activity-item">
+                        <div class="activity-info">
+                            <h4>{{ report.report_id }} - {{ report.incident_type }}</h4>
+                            <p>{{ report.user.full_name }} • {{ report.place }}</p>
+                        </div>
+                        <span class="status-badge status-{{ report.status|lower|cut:' ' }}">{{ report.status }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <i>📋</i>
+                    <p>No incident reports yet</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Recent Users -->
+            <div class="activity-section">
+                <div class="activity-header">
+                    <h2>Recent User Registrations</h2>
+                    <a href="{% url 'accounts:admin_users' %}" class="view-all-link">View All →</a>
+                </div>
+                {% if recent_users %}
+                <ul class="activity-list">
+                    {% for usr in recent_users %}
+                    <li class="activity-item">
+                        <div class="activity-info">
+                            <h4>{{ usr.full_name }}</h4>
+                            <p>{{ usr.email }} • Joined {{ usr.date_joined|date:"M d, Y" }}</p>
+                        </div>
+                        {% if usr.resident_confirmation %}
+                        <span class="status-badge status-paid">Verified</span>
+                        {% else %}
+                        <span class="status-badge status-pending">Pending</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <i>👥</i>
+                    <p>No user registrations yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,589 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Admin</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.9rem;
+            color: #bdc3c7;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            padding-left: 25px;
+        }
+
+        .sidebar-menu a.active {
+            background: #3498db;
+            border-left: 4px solid #2980b9;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 30px;
+            width: calc(100% - 260px);
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: #7f8c8d;
+        }
+
+        /* Filters */
+        .filters-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .filters-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.3s;
+        }
+
+        .filter-btn:hover {
+            background: #2980b9;
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #34495e;
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #ecf0f1;
+            transition: background 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-verified { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-active { background: #d1ecf1; color: #0c5460; }
+        .status-inactive { background: #f8d7da; color: #721c24; }
+
+        .action-btn {
+            padding: 6px 12px;
+            margin: 0 3px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .btn-verify {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-verify:hover {
+            background: #218838;
+        }
+
+        .btn-deactivate {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-deactivate:hover {
+            background: #c82333;
+        }
+
+        .btn-activate {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-activate:hover {
+            background: #138496;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #2c3e50;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .modal-btn-primary {
+            background: #28a745;
+            color: white;
+        }
+
+        .modal-btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .modal-btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .modal-btn-cancel {
+            background: #95a5a6;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+                width: calc(100% - 200px);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .filters-form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Panel</h2>
+                <p>{{ user.full_name }}</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{% url 'accounts:admin_dashboard' %}"><i>📊</i> Dashboard</a></li>
+                <li><a href="{% url 'accounts:admin_users' %}" class="active"><i>👥</i> Users</a></li>
+                <li><a href="{% url 'accounts:admin_certificates' %}"><i>📄</i> Certificates</a></li>
+                <li><a href="{% url 'accounts:admin_reports' %}"><i>📋</i> Reports</a></li>
+                <li><a href="{% url 'accounts:personal_info' %}"><i>🏠</i> User View</a></li>
+                <li><a href="{% url 'accounts:logout_confirm' %}"><i>🚪</i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1>User Management</h1>
+                <p>Manage resident accounts and verification status</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-section">
+                <form method="GET" class="filters-form">
+                    <div class="form-group">
+                        <label for="q">Search</label>
+                        <input type="text" id="q" name="q" placeholder="Username, Email, Name..." value="{{ request.GET.q }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="verification_status">Verification Status</label>
+                        <select id="verification_status" name="verification_status">
+                            <option value="">All Status</option>
+                            <option value="verified" {% if request.GET.verification_status == 'verified' %}selected{% endif %}>Verified</option>
+                            <option value="pending" {% if request.GET.verification_status == 'pending' %}selected{% endif %}>Pending</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="filter-btn">Apply Filters</button>
+                </form>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                <div class="table-responsive">
+                    {% if users %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Contact</th>
+                                <th>Verification</th>
+                                <th>Account Status</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for usr in users %}
+                            <tr>
+                                <td><strong>{{ usr.username }}</strong></td>
+                                <td>{{ usr.full_name }}</td>
+                                <td>{{ usr.email }}</td>
+                                <td>{{ usr.contact_number }}</td>
+                                <td>
+                                    {% if usr.resident_confirmation %}
+                                    <span class="status-badge status-verified">✓ Verified</span>
+                                    {% else %}
+                                    <span class="status-badge status-pending">⏳ Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if usr.is_active %}
+                                    <span class="status-badge status-active">Active</span>
+                                    {% else %}
+                                    <span class="status-badge status-inactive">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ usr.date_joined|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if not usr.resident_confirmation %}
+                                    <button onclick="confirmVerify({{ usr.id }}, '{{ usr.username }}')" class="action-btn btn-verify">✓ Verify</button>
+                                    {% endif %}
+                                    
+                                    {% if usr.is_active %}
+                                    <button onclick="confirmDeactivate({{ usr.id }}, '{{ usr.username }}')" class="action-btn btn-deactivate">🔒 Deactivate</button>
+                                    {% else %}
+                                    <button onclick="confirmActivate({{ usr.id }}, '{{ usr.username }}')" class="action-btn btn-activate">🔓 Activate</button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">
+                        <i>👥</i>
+                        <h3>No Users Found</h3>
+                        <p>There are no users matching your filters.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Verify User Modal -->
+    <div id="verifyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Verify User Account</h2>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to verify the account for <strong id="verifyUsername"></strong>?</p>
+                <p style="margin-top: 10px; color: #7f8c8d; font-size: 0.9rem;">This will allow the user to access all system features.</p>
+            </div>
+            <form method="POST" id="verifyForm">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <button type="button" onclick="closeVerifyModal()" class="modal-btn modal-btn-cancel">Cancel</button>
+                    <button type="submit" class="modal-btn modal-btn-primary">Verify Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Deactivate User Modal -->
+    <div id="deactivateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Deactivate User Account</h2>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to deactivate the account for <strong id="deactivateUsername"></strong>?</p>
+                <p style="margin-top: 10px; color: #721c24; font-size: 0.9rem;">⚠️ This will prevent the user from logging in.</p>
+            </div>
+            <form method="POST" id="deactivateForm">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <button type="button" onclick="closeDeactivateModal()" class="modal-btn modal-btn-cancel">Cancel</button>
+                    <button type="submit" class="modal-btn modal-btn-danger">Deactivate Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Activate User Modal -->
+    <div id="activateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Activate User Account</h2>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to activate the account for <strong id="activateUsername"></strong>?</p>
+                <p style="margin-top: 10px; color: #0c5460; font-size: 0.9rem;">This will allow the user to log in again.</p>
+            </div>
+            <form method="POST" id="activateForm">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <button type="button" onclick="closeActivateModal()" class="modal-btn modal-btn-cancel">Cancel</button>
+                    <button type="submit" class="modal-btn modal-btn-info">Activate Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function confirmVerify(userId, username) {
+            const modal = document.getElementById('verifyModal');
+            const form = document.getElementById('verifyForm');
+            const usernameEl = document.getElementById('verifyUsername');
+            
+            form.action = `/accounts/admin/users/${userId}/verify/`;
+            usernameEl.textContent = username;
+            modal.classList.add('active');
+        }
+
+        function closeVerifyModal() {
+            document.getElementById('verifyModal').classList.remove('active');
+        }
+
+        function confirmDeactivate(userId, username) {
+            const modal = document.getElementById('deactivateModal');
+            const form = document.getElementById('deactivateForm');
+            const usernameEl = document.getElementById('deactivateUsername');
+            
+            form.action = `/accounts/admin/users/${userId}/deactivate/`;
+            usernameEl.textContent = username;
+            modal.classList.add('active');
+        }
+
+        function closeDeactivateModal() {
+            document.getElementById('deactivateModal').classList.remove('active');
+        }
+
+        function confirmActivate(userId, username) {
+            const modal = document.getElementById('activateModal');
+            const form = document.getElementById('activateForm');
+            const usernameEl = document.getElementById('activateUsername');
+            
+            form.action = `/accounts/admin/users/${userId}/activate/`;
+            usernameEl.textContent = username;
+            modal.classList.add('active');
+        }
+
+        function closeActivateModal() {
+            document.getElementById('activateModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const verifyModal = document.getElementById('verifyModal');
+            const deactivateModal = document.getElementById('deactivateModal');
+            const activateModal = document.getElementById('activateModal');
+            
+            if (event.target == verifyModal) {
+                closeVerifyModal();
+            }
+            if (event.target == deactivateModal) {
+                closeDeactivateModal();
+            }
+            if (event.target == activateModal) {
+                closeActivateModal();
+            }
+        }
+    </script>
+</body>
+</html>
