@@ -93,5 +93,76 @@ py manage.py runserver
 - Backend Developer
 - moniquonicole.mosende@cit.edu
 
+5. Admin Dashboard Instructions
 
-Labangonline  database password: TcsezrZHJyLg3q4o
+The Admin Dashboard allows authorized staff to manage users, certificate requests, and incident reports.
+
+Access Requirements
+
+User must have is_staff=True or is_superuser=True.
+
+Only staff users can access admin URLs.
+
+Creating an Admin User
+
+Create a superuser (if none exists):
+
+py manage.py createsuperuser
+
+
+Or promote an existing user to staff:
+
+py manage.py shell
+>>> from accounts.models import User
+>>> user = User.objects.get(username='your_username')
+>>> user.is_staff = True
+>>> user.save()
+
+URLs
+Feature	URL
+Admin Dashboard	/accounts/admin/dashboard/
+User Management	/accounts/admin/users/
+Certificate Management	/accounts/admin/certificates/
+Report Management	/accounts/admin/reports/
+
+All admin views require login. Unauthorized users are redirected to /accounts/personal_info/.
+
+Key Features
+
+Dashboard Statistics: Users, certificates, and reports overview
+
+User Management: Verify, activate/deactivate users, view details
+
+Certificate Management: Approve/reject payments, update claim status
+
+Report Management: Update status, delete reports
+
+Activity Tracking: Automatic logging via Django
+
+Security
+
+Authentication required
+
+CSRF protection on all forms
+
+SQL injection prevention through Django ORM
+
+Only staff can perform admin actions
+
+Testing Checklist
+
+ Admin dashboard loads correctly
+
+ All summary cards display statistics
+
+ Recent activities are visible
+
+ Sidebar highlights the active section
+
+ Verify/deactivate users works
+
+ Certificate payment approval/rejection works
+
+ Report status updates and deletion works
+
+ Success/error messages display correctly
