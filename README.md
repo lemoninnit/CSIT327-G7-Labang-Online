@@ -92,3 +92,6 @@ py manage.py runserver
 - Moniquo Nicole C. Mosende
 - Backend Developer
 - moniquonicole.mosende@cit.edu
+
+
+Labangonline  database password: TcsezrZHJyLg3q4o
