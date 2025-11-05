@@ -1,84 +1,220 @@
-{% extends 'base.html' %}
-{% load static %}
-{% block title %}LabangOnline • Barangay Labangon Digital Services{% endblock %}
-{% block head %}
-  <style>
-    .hero { padding: 60px 0; text-align: center; }
-    .hero h1 { font-size: 40px; margin: 0 0 12px; }
-    .hero p { font-size: 18px; color: var(--text-secondary); margin: 0 0 20px; }
-    .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+{% extends 'base.html' %} {% load static %} {% block title %}LabangOnline •
+Barangay Labangon Digital Services{% endblock %} {% block head %}
+<style>
+  .hero {
+    padding: 60px 0;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: 40px;
+    margin: 0 0 12px;
+  }
+  .hero p {
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin: 0 0 20px;
+  }
+  .cta {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 
-    .section { padding: 40px 0; }
-    .section h2 { margin: 0 0 14px; font-size: 26px; }
-    .muted { color: var(--muted); }
+  .section {
+    padding: 40px 0;
+  }
+  .section h2 {
+    margin: 0 0 14px;
+    font-size: 26px;
+  }
+  .muted {
+    color: var(--muted);
+  }
 
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    @media (max-width: 900px) { .grid-3, .grid-2 { grid-template-columns: 1fr; } }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 900px) {
+    .grid-3,
+    .grid-2 {
+      grid-template-columns: 1fr;
+    }
+  }
 
-    .card { background: linear-gradient(180deg, var(--panel) 0%, var(--panel-hover) 100%);
-            border: 1px solid var(--border); border-radius: 12px; padding: 18px; box-shadow: 0 10px 30px var(--shadow); }
-    .icon { width: 28px; height: 28px; margin-right: 8px; }
-    .step { display: flex; gap: 12px; align-items: flex-start; }
+  .card {
+    background: linear-gradient(
+      180deg,
+      var(--panel) 0%,
+      var(--panel-hover) 100%
+    );
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 10px 30px var(--shadow);
+  }
+  .icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 8px;
+  }
+  .step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
 
-    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 24px; }
-    .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
-    .stat .value { font-size: 24px; font-weight: 700; }
-    .stat .label { font-size: 12px; color: var(--muted); }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat .value {
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .stat .label {
+    font-size: 12px;
+    color: var(--muted);
+  }
 
-    .contact { text-align: center; padding: 40px 0; }
-    .contact .btn { margin-top: 12px; }
-  </style>
-{% endblock %}
-
-{% block content %}
-  <!-- Hero -->
-  <section class="hero">
-    <h1>LabangOnline – Fast, Simple Barangay Services</h1>
-    <p>Request certificates, track status, and manage records without long queues.</p>
-    <div class="cta">
-      <a href="/accounts/register/" class="btn btn-primary">Create Account</a>
-      <a href="/accounts/login/" class="btn">Sign In</a>
+  .contact {
+    text-align: center;
+    padding: 40px 0;
+  }
+  .contact .btn {
+    margin-top: 12px;
+  }
+</style>
+{% endblock %} {% block content %}
+<!-- Hero -->
+<section class="hero">
+  <h1>LabangOnline – Fast, Simple Barangay Services</h1>
+  <p>
+    Request certificates, track status, and manage records without long queues.
+  </p>
+  <div class="cta">
+    <a href="/accounts/register/" class="btn btn-primary">Create Account</a>
+    <a href="/accounts/login/" class="btn">Sign In</a>
+  </div>
+  <div class="stats">
+    <div class="stat">
+      <div class="value">5–10 mins</div>
+      <div class="label">Average online request time</div>
     </div>
-    <div class="stats">
-      <div class="stat"><div class="value">5–10 mins</div><div class="label">Average online request time</div></div>
-      <div class="stat"><div class="value">24/7</div><div class="label">Available anytime</div></div>
-      <div class="stat"><div class="value">Secure</div><div class="label">Verified payments</div></div>
-      <div class="stat"><div class="value">Local</div><div class="label">Barangay Labangon</div></div>
+    <div class="stat">
+      <div class="value">24/7</div>
+      <div class="label">Available anytime</div>
     </div>
-  </section>
-
-  <!-- About -->
-  <section id="about" class="section">
-    <h2>About LabangOnline</h2>
-    <p class="muted">LabangOnline is the official digitized service portal of Barangay Labangon, Cebu City. It streamlines certificate requests, payment verification, and record management, reducing in-person queues and speeding up processing.</p>
-    <div class="grid-3" style="margin-top:16px">
-      <div class="card"><h3>Modern & Simple</h3><p>Clean, mobile-friendly design so you can request documents with ease.</p></div>
-      <div class="card"><h3>Transparent Status</h3><p>Track payment verification and claim status in real time.</p></div>
-      <div class="card"><h3>Secure</h3><p>Your information is protected, and payments are verified by staff.</p></div>
+    <div class="stat">
+      <div class="value">Secure</div>
+      <div class="label">Verified payments</div>
     </div>
-  </section>
-
-  <!-- Services / Features -->
-  <section class="section" id="services">
-    <h2>What you can do</h2>
-    <div class="grid-3" style="margin-top:12px">
-      <div class="card"><h3>Certificate Requests</h3><p>Barangay Clearance, Residency, Indigency, Good Moral, and Business Clearance.</p></div>
-      <div class="card"><h3>Notifications</h3><p>Get updates for payment verification, processing, and claim readiness.</p></div>
-      <div class="card"><h3>Resident Profile</h3><p>Maintain your information to speed up requests and verification.</p></div>
+    <div class="stat">
+      <div class="value">Local</div>
+      <div class="label">Barangay Labangon</div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- How it works -->
-  <section class="section" id="how">
-    <h2>How it works</h2>
-    <div class="grid-2" style="margin-top:12px">
-      <div class="card step"><div class="value">1</div><div><h3>Create an account</h3><p>Register and verify your profile.</p></div></div>
-      <div class="card step"><div class="value">2</div><div><h3>Submit a request</h3><p>Choose certificate type and provide purpose.</p></div></div>
-      <div class="card step"><div class="value">3</div><div><h3>Pay securely</h3><p>Select GCash or counter; staff verifies payment.</p></div></div>
-      <div class="card step"><div class="value">4</div><div><h3>Claim your document</h3><p>Track claim status and pick up when ready.</p></div></div>
+<!-- About -->
+<section id="about" class="section">
+  <h2>About LabangOnline</h2>
+  <p class="muted">
+    LabangOnline is the official digitized service portal of Barangay Labangon,
+    Cebu City. It streamlines certificate requests, payment verification, and
+    record management, reducing in-person queues and speeding up processing.
+  </p>
+  <div class="grid-3" style="margin-top: 16px">
+    <div class="card">
+      <h3>Modern & Simple</h3>
+      <p>
+        Clean, mobile-friendly design so you can request documents with ease.
+      </p>
     </div>
-  </section>
+    <div class="card">
+      <h3>Transparent Status</h3>
+      <p>Track payment verification and claim status in real time.</p>
+    </div>
+    <div class="card">
+      <h3>Secure</h3>
+      <p>Your information is protected, and payments are verified by staff.</p>
+    </div>
+  </div>
+</section>
 
- 
+<!-- Services / Features -->
+<section class="section" id="services">
+  <h2>What you can do</h2>
+  <div class="grid-3" style="margin-top: 12px">
+    <div class="card">
+      <h3>Certificate Requests</h3>
+      <p>
+        Barangay Clearance, Residency, Indigency, Good Moral, and Business
+        Clearance.
+      </p>
+    </div>
+    <div class="card">
+      <h3>Notifications</h3>
+      <p>
+        Get updates for payment verification, processing, and claim readiness.
+      </p>
+    </div>
+    <div class="card">
+      <h3>Resident Profile</h3>
+      <p>Maintain your information to speed up requests and verification.</p>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="section" id="how">
+  <h2>How it works</h2>
+  <div class="grid-2" style="margin-top: 12px">
+    <div class="card step">
+      <div class="value">1</div>
+      <div>
+        <h3>Create an account</h3>
+        <p>Register and verify your profile.</p>
+      </div>
+    </div>
+    <div class="card step">
+      <div class="value">2</div>
+      <div>
+        <h3>Submit a request</h3>
+        <p>Choose certificate type and provide purpose.</p>
+      </div>
+    </div>
+    <div class="card step">
+      <div class="value">3</div>
+      <div>
+        <h3>Pay securely</h3>
+        <p>Select GCash or counter; staff verifies payment.</p>
+      </div>
+    </div>
+    <div class="card step">
+      <div class="value">4</div>
+      <div>
+        <h3>Claim your document</h3>
+        <p>Track claim status and pick up when ready.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 {% endblock %}

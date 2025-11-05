@@ -359,6 +359,60 @@
         color: #991b1b;
         border: 1px solid #ef4444;
       }
+
+      /* Match Barangay Clearance button styles */
+.btn-submit {
+  flex: 1;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  width: 100%;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Light mode compatibility */
+.light .btn-submit {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.light .btn-cancel {
+  background: white;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.light .btn-cancel:hover {
+  background: #f1f5f9;
+}
+
+/* Button container for layout */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-submit,
+.btn-secondary {
+  flex: 0 1 auto;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
     </style>
   </head>
   <body>
@@ -472,14 +526,12 @@
                 <div class="counter"><span id="charCount">0</span>/1000</div>
               </div>
 
-              <div class="btn-row" style="display: flex; flex-direction: column; gap: 13px;">
-                <button type="submit" class="btn-primary">SUBMIT REPORT</button>
-                <div class="btn-pair">
-                  <button type="button" class="btn-secondary" id="clearBtn">CLEAR FORM</button>
-                  <button type="button" class="btn-accent" id="saveDraftBtn">SAVE DRAFT</button>
+                    <div class="form-actions">
+
+                  <button type="button" class="btn-secondary" id="clearBtn">Clear Form</button>
+                  <button type="submit" class="btn-submit">Submit Report</button>
                 </div>
-              </div>
-            </form>
+
 
             <div class="support">
               Need help? Contact support at 
