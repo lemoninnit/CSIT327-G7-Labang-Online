@@ -1,303 +1,650 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Records - LabangOnline</title>
-    <link rel="stylesheet" href="{% static 'css/app.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <link rel="icon" href="{% static 'logo.png' %}" type="image/png" />
     <style>
-      .content-main {
-        flex: 3;
-        background: var(--panel);
-        border-radius: 12px;
-        padding: 32px 24px;
-        overflow-y: auto;
-        margin-left: 20px;
-        min-width: 0;
-      }
-      .report-table {
-        width: 100%;
-        border-collapse: collapse;
-        background: #fff;
-        color: #222940;
-        border-radius: 10px;
-        overflow: hidden;
-        font-size: 15px;
-      }
-      .report-table th, .report-table td {
-        padding: 13px 8px;
-        border: 1px solid #737f9c;
-        text-align: left;
-      }
-      .report-table th {
-        background: #eaf1fb;
-        color: #10b981;
-      }
-      
-      .status-under-investigation { color: #f59e0b; font-weight: 600; }
-      .status-pending { color: #ef4444; font-weight: 600;}
-      .status-resolved { color: #10b981; font-weight: 600;}
-      .status-mediation { color: #3b82f6; font-weight: 600;}
+        html, body {
+            overflow: hidden;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
 
-      .search-bar-mt {
-        margin-bottom: 20px;
-        display: flex;
-        grid-template-columns: 1fr auto;
-        gap: 15px;
-        align-items: center;
-      }
-      .search-bar-mt input, .search-bar-mt select {
-        padding: 10px 14px;
-        border-radius: 4px;
-        background: #2d3748;    
-        color: #e5e7eb;
-        border: 1px solid #a2aabb;
-        font-size: 0.95em;
-      }
-      
-      .search-bar-mt button { padding: 7px 20px; border-radius: 2px; border: none; background: #10b981; color: #fff; cursor: pointer;}
+        .dashboard-wrapper {
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
 
-      .search-bar-mt input::placeholder {
-        color: #9ca3af;
-      }
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-      .light .search-bar-mt input {
-        background: #ffffff;
-        color: #111;
-        border: 1px solid #d1d5db;
-      }
+        .records-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            padding-bottom: 60px;
+        }
 
-      .light .search-bar-mt input::placeholder {
-        color: #6b7280;
-      }
+        .page-header {
+            margin-bottom: 32px;
+        }
 
-      .search-bar-mt select {
-        padding: 10px 14px;
-        border-radius: 4px;
-        border: 1px solid #4a5568;
-        background: #2d3748;
-        color: #e5e7eb;
-        font-size: 0.95em;
-        min-width: 200px;
-      }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
 
-      .light .search-bar-mt select {
-        background: #f0f4f8;
-        color: #111;
-        border: 1px solid #d1d5db;
-      }
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #e5e7eb;
+            margin: 0;
+        }
 
-      .search-bar-mt button {
-        padding: 10px 24px;
-        border-radius: 4px;
-        border: none;
-        background: #3b82f6;
-        color: #fff;
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 0.9em;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        transition: background 0.2s;
-      }
+        .light .page-header h1 {
+            color: #111827;
+        }
 
-      .search-bar-mt button:hover {
-        background: #2563eb;
-      }
+        .new-request-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+        }
 
-      .search-bar-mt a button {
-        background: #6b7280;
-      }
+        .new-request-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
 
-      .search-bar-mt a button:hover {
-        background: #4b5563;
-      }
+        .page-header p {
+            color: #9ca3af;
+            font-size: 15px;
+            margin: 0;
+        }
 
+        .light .page-header p {
+            color: #374151;
+        }
 
-      body {
-        background: #19243a;
-        color: #e5e7eb;
-      }
-      .report-table {
-        background: #647083;
-          color: #fff;
-          border-radius: 5px;
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 15px;
-      }
-      .report-table th {
-        background: #384566;
-        color: #10b981;
-      }
-      .report-table td {
-        border: 1px solid #384566;
-      }
-
-      .report-records-title {
-        color: #fff;  /* Very light color for dark background */
-        font-weight: 800;
-        margin-bottom: 18px;
-      }
-
-      .light .report-records-title {
-        color: #384566; /* Very dark blue for good contrast on white */
-        font-weight: 800;
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
         
-      }
+        @media (max-width: 1024px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
 
-      .light {   
-        background: #f3f6fb;
-        color: #111;
-      }
-          /* NO RECORDS FOUND */
-      .light .report-table {
-        background: #c4c9d3;
-        color: #ff0000;
-      }
-      .light .report-table th {
-        background: #eaf1fb;
-        color: #384566;
-      }
-      .light .report-table td {
-        border: 1px solid #ffffff;
-      }
+        .summary-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
 
-      .role {
-        display: inline-block;
-        padding: 6px 16px;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-      }
+        .light .summary-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
 
-      .role.pending {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-      }
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        }
+
+        .summary-label {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .light .summary-label {
+            color: #64748b;
+        }
+
+        .summary-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #e5e7eb;
+        }
+
+        .light .summary-value {
+            color: #111827;
+        }
+
+        .summary-card.pending::before {
+            background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .summary-card.resolved::before {
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        }
+
+        .summary-card.investigation::before {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        /* Filters */
+        .filters-section {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .light .filters-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            align-items: end;
+        }
+        
+        .filter-group.search-group {
+            grid-column: span 2;
+        }
+        
+        @media (max-width: 768px) {
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-group.search-group {
+                grid-column: span 1;
+            }
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 13px;
+            color: #9ca3af;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .light .filter-group label {
+            color: #64748b;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            color: #e5e7eb;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .light .filter-group input,
+        .light .filter-group select {
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #1e293b;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .filter-group input::placeholder {
+            color: #6b7280;
+        }
+
+        /* Records Table */
+        .records-table-wrapper {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .light .records-table-wrapper {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .table-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e5e7eb;
+            margin: 0;
+        }
+
+        .light .table-header h2 {
+            color: #111827;
+        }
+
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .records-table thead {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .records-table th {
+            padding: 16px 20px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #10b981;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .records-table td {
+            padding: 20px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        .light .records-table td {
+            color: #475569;
+        }
+
+        .records-table tbody tr {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .records-table tbody tr:hover {
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .records-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.pending {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-badge.under-investigation {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-badge.resolved {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-badge.mediation-scheduled {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        /* Report ID */
+        .report-id {
+            font-family: monospace;
+            font-weight: 600;
+            color: #10b981;
+            font-size: 13px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: #e5e7eb;
+            margin-bottom: 12px;
+        }
+
+        .light .empty-state h3 {
+            color: #111827;
+        }
+
+        .empty-state p {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .light .empty-state p {
+            color: #64748b;
+        }
+
+        .btn-clear-filters,
+        .btn-apply-filters {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-clear-filters {
+            background: rgba(148, 163, 184, 0.1);
+            color: #cbd5e1;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .light .btn-clear-filters {
+            background: white;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+
+        .btn-clear-filters:hover {
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .light .btn-clear-filters:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-apply-filters {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-apply-filters:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .records-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div class="dashboard-wrapper">
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <div class="logo">
-          <img src="{% static 'logo.png' %}" alt="Labang Logo" />
-          <span>LabangOnline</span>
-        </div>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="{% static 'logo.png' %}" alt="Labang Logo">
+                <span>LabangOnline</span>
+            </div>
 
-        <div class="notification-item">
-          <div class="notification-icon-wrapper">
-            <img src="{% static 'icons/notification.png' %}" alt="Notification" />
-            <span class="notification-badge">5</span>
-          </div>
-          <span>Notification</span>
-        </div>
+            <div class="notification-item">
+                <div class="notification-icon-wrapper">
+                    <img src="{% static 'icons/notification.png' %}" alt="Notification">
+                    <span class="notification-badge">5</span>
+                </div>
+                <span>Notification</span>
+            </div>
 
-        <ul class="menu">
-          <li class="menu-item" onclick="window.location.href='{% url 'accounts:personal_info' %}'">
-            <img src="{% static 'icons/user-info.png' %}" alt="" />
-            <span>Personal Info</span>
-          </li>
-         <li class="menu-item" onclick="window.location.href='{% url 'accounts:document_request' %}'">
-            <img src="{% static 'icons/request-records.png' %}" alt="" />
-            <span>Document Request</span>
-          </li>
-          <li class="menu-item">
-            <img src="{% static 'icons/resident-record.png' %}" alt="" />
-            <span>Resident Records</span>
-          </li>
-          <li class="menu-item active" >
-            <img src="{% static 'icons/incident-report.png' %}" alt="" />
-            <span>Report Records</span>
-          </li>
-          <li class="menu-item" onclick="window.location.href='{% url 'accounts:file_report' %}'">
-            <img src="{% static 'icons/file-report.png' %}" alt="" />
-            <span>File Report</span>
-          </li>
-        </ul>
-      </aside>
+            <ul class="menu">
+                <li class="menu-item" onclick="window.location.href='{% url 'accounts:personal_info' %}'">
+                    <img src="{% static 'icons/user-info.png' %}" alt="">
+                    <span>Personal Info</span>
+                </li>
+                <li class="menu-item" onclick="window.location.href='{% url 'accounts:document_request' %}'">
+                    <img src="{% static 'icons/request-records.png' %}" alt="">
+                    <span>Document Request</span>
+                </li>
+                <li class="menu-item active" onclick="window.location.href='{% url 'accounts:file_report' %}'">
+                    <img src="{% static 'icons/file-report.png' %}" alt="">
+                    <span>File Report</span>
+                </li>
+            </ul>
+        </aside>
 
-      <!-- Main Content -->
-      <main class="main-content">
-        <header class="topbar">
-          <span></span>
-          <button id="mode-toggle" class="btn">Toggle</button>
-          <div class="user-profile">
-            {% if profile_pic_base64 %}
-              <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
-            {% else %}
-              <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
-            {% endif %}
-            <span>{{ request.user.full_name }}</span>
-            <form method="get" action="{% url 'accounts:logout_confirm' %}">
-              <button type="submit" class="btn-logout">LOGOUT</button>
-            </form>
-          </div>
-        </header>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top bar -->
+            <header class="topbar">
+                <span></span>
+                <button id="mode-toggle" class="btn">Toggle</button>
+                <div class="user-profile">
+                    {% if user.profile_photo_url %}
+                        <img src="{{ user.profile_photo_url }}" alt="User Profile" />
+                    {% else %}
+                        <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
+                    {% endif %}
+                    <span>{{ request.user.full_name }}</span>
+                    <form method="get" action="{% url 'accounts:logout_confirm' %}">
+                        <button type="submit" class="btn-logout">LOGOUT</button>
+                    </form>
+                </div>
+            </header>
 
-        <div class="content-wrapper">
-          <!-- This is the ONLY part that changes for Report Records! -->
-          <div class="content-main">
-            <h1 class="report-records-title" style="margin: 5; flex-shrink: 0;">Report Records</h1>
-            <form method="get" class="search-bar-mt">
-              <input type="text" name="q" placeholder="Search complaint report records..." value="{{ request.GET.q }}">
-              <select name="status" onchange="this.form.submit()">
-                <option value="">All Status</option>
-                <option value="Under Investigation" {% if request.GET.status == 'Under Investigation' %}selected{% endif %}>Under Investigation</option>
-                <option value="Resolved" {% if request.GET.status == 'Resolved' %}selected{% endif %}>Resolved</option>
-                <option value="Pending" {% if request.GET.status == 'Pending' %}selected{% endif %}>Pending</option>
-                <option value="Mediation Scheduled" {% if request.GET.status == 'Mediation Scheduled' %}selected{% endif %}>Mediation Scheduled</option>
-              </select>
-              <button type="submit">SEARCH</button>
-              <a href="{% url 'accounts:report_records' %}" style="margin-left:0;"><button type="button">CLEAR</button></a>
-            </form>
-            <table class="report-table">
-              <tr>
-                <th>Report ID</th>
-                <th>Type of Incident</th>
-                <th>Blotter Status</th>
-                <th>Date and Time Reported</th>
-                <th>Place of Incident</th>
-              </tr>
-              {% for r in records %}
-              <tr>
-                <td>{{ r.report_id }}</td>
-                <td>{{ r.incident_type }}</td>
-                <td>
-                  {% if r.status == "Under Investigation" %}
-                    <span class="status-under-investigation">{{ r.status }}</span>
-                  {% elif r.status == "Pending" %}
-                    <span class="status-pending">{{ r.status }}</span>
-                  {% elif r.status == "Resolved" %}
-                    <span class="status-resolved">{{ r.status }}</span>
-                  {% elif r.status == "Mediation Scheduled" %}
-                    <span class="status-mediation">{{ r.status }}</span>
-                  {% else %}
-                    {{ r.status }}
-                  {% endif %}
-                </td>
-                <td>{{ r.date }}</td>
-                <td>{{ r.place }}</td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="5" style="text-align:center;" >No records found.</td>
-              </tr>
-              {% endfor %}
-            </table>
-          </div>
-          <!-- END MAIN CONTENT -->
-        </div>
-      </main>
+            <div class="records-container">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="header-top">
+                        <h1>Incident Report Records</h1>
+                        <a href="{% url 'accounts:file_report' %}" class="new-request-btn">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            File New Report
+                        </a>
+                    </div>
+                    <p>Track and manage all your incident reports in one place</p>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-label">Total Reports</div>
+                        <div class="summary-value">{{ total_reports }}</div>
+                    </div>
+                    <div class="summary-card pending">
+                        <div class="summary-label">Pending</div>
+                        <div class="summary-value">{{ pending_count }}</div>
+                    </div>
+                    <div class="summary-card investigation">
+                        <div class="summary-label">Under Investigation</div>
+                        <div class="summary-value">{{ investigation_count }}</div>
+                    </div>
+                    <div class="summary-card resolved">
+                        <div class="summary-label">Resolved</div>
+                        <div class="summary-value">{{ resolved_count }}</div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters-section">
+                    <form method="GET" id="filterForm">
+                        <div class="filters-grid">
+                            <div class="filter-group search-group">
+                                <label>Search Reports</label>
+                                <input type="text" name="q" placeholder="Search by report ID, incident type, place, or message..." value="{{ request.GET.q }}">
+                            </div>
+                            <div class="filter-group">
+                                <label>Status</label>
+                                <select name="status">
+                                    <option value="">All Status</option>
+                                    <option value="Pending" {% if request.GET.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                    <option value="Under Investigation" {% if request.GET.status == 'Under Investigation' %}selected{% endif %}>Under Investigation</option>
+                                    <option value="Mediation Scheduled" {% if request.GET.status == 'Mediation Scheduled' %}selected{% endif %}>Mediation Scheduled</option>
+                                    <option value="Resolved" {% if request.GET.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 12px; align-items: flex-end;">
+                                <button type="button" class="btn-clear-filters" onclick="clearFilters()">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    Clear Filters
+                                </button>
+                                <button type="submit" class="btn-apply-filters">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                                    </svg>
+                                    Apply Filters
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Records Table -->
+                <div class="records-table-wrapper">
+                    <div class="table-header">
+                        <h2>Report History</h2>
+                    </div>
+
+                    {% if records %}
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th>Report ID</th>
+                                <th>Type of Incident</th>
+                                <th>Place of Incident</th>
+                                <th>Status</th>
+                                <th>Date Reported</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in records %}
+                            <tr>
+                                <td><span class="report-id">{{ r.report_id }}</span></td>
+                                <td>{{ r.incident_type }}</td>
+                                <td>{{ r.place }}</td>
+                                <td>
+                                    {% if r.status == "Under Investigation" %}
+                                        <span class="status-badge under-investigation">{{ r.status }}</span>
+                                    {% elif r.status == "Pending" %}
+                                        <span class="status-badge pending">{{ r.status }}</span>
+                                    {% elif r.status == "Resolved" %}
+                                        <span class="status-badge resolved">{{ r.status }}</span>
+                                    {% elif r.status == "Mediation Scheduled" %}
+                                        <span class="status-badge mediation-scheduled">{{ r.status }}</span>
+                                    {% else %}
+                                        <span class="status-badge">{{ r.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ r.created_at|date:"M d, Y - h:i A" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">
+                        <svg class="empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <h3>No Incident Reports Yet</h3>
+                        <p>You haven't filed any incident reports. Start by filing a report.</p>
+                        <a href="{% url 'accounts:file_report' %}" class="new-request-btn">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            File Report
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
     </div>
+
     <script src="{% static 'js/dashboard.js' %}"></script>
-  </body>
+    <script>
+        function clearFilters() {
+            window.location.href = "{% url 'accounts:report_records' %}";
+        }
+    </script>
+</body>
 </html>

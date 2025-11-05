@@ -859,7 +859,8 @@ def report_records(request):
     user = request.user
 
     # Get all incident reports for the current user
-    records = IncidentReport.objects.filter(user=user).order_by('-created_at')
+    all_records = IncidentReport.objects.filter(user=user)
+    records = all_records.order_by('-created_at')
 
     # Get filter parameters
     query = request.GET.get('q', '').strip()
@@ -877,9 +878,19 @@ def report_records(request):
     if status:
         records = records.filter(status=status)
 
+    # Calculate summary statistics (always from all user reports, not filtered)
+    total_reports = all_records.count()
+    pending_count = all_records.filter(status='Pending').count()
+    investigation_count = all_records.filter(status='Under Investigation').count()
+    resolved_count = all_records.filter(status='Resolved').count()
+
     context = {
         'user': user,
         'records': records,
+        'total_reports': total_reports,
+        'pending_count': pending_count,
+        'investigation_count': investigation_count,
+        'resolved_count': resolved_count,
     }
     return render(request, 'accounts/report_records.html', context)
 

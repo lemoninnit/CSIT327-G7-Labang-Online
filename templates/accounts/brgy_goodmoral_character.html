@@ -301,14 +301,7 @@
                     <img src="{% static 'icons/request-records.png' %}" alt="">
                     <span>Document Request</span>
                 </li>
-                <li class="menu-item">
-                    <img src="{% static 'icons/resident-record.png' %}" alt="">
-                    <span>Resident Records</span>
-                </li>
-                <li class="menu-item">
-                    <img src="{% static 'icons/incident-report.png' %}" alt="">
-                    <span>Report Records</span>
-                </li>
+                
                 <li class="menu-item">
                     <img src="{% static 'icons/file-report.png' %}" alt="">
                     <span>File Report</span>
@@ -322,12 +315,12 @@
             <header class="topbar">
                 <span></span>
                 <button id="mode-toggle" class="btn">Toggle</button>
-                <div class="user-profile">
-                    {% if profile_pic_base64 %}
-                        <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile">
-                    {% else %}
-                        <img src="{% static 'icons/default_user.png' %}" alt="User Profile">
-                    {% endif %}
+               <div class="user-profile">
+            {% if user.profile_photo_url %}
+              <img src="{{ user.profile_photo_url }}" alt="User Profile" />
+            {% else %}
+              <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
+            {% endif %}
                     <span>{{ request.user.full_name }}</span>
                     <form method="get" action="{% url 'accounts:logout_confirm' %}">
                         <button type="submit" class="btn-logout">LOGOUT</button>
