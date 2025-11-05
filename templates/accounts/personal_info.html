@@ -244,12 +244,12 @@
           <span></span>
           <button id="mode-toggle" class="btn">Toggle</button>
           <div class="user-profile">
-            {% if profile_pic_base64 %}
-              <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
+            {% if user.profile_photo_url %}
+              <img src="{{ user.profile_photo_url }}" alt="User Profile" />
             {% else %}
               <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
             {% endif %}
-            <span>{{ request.user.full_name }}</span>
+            <span>{{ user.full_name }}</span>
             <!-- Updated Logout Button -->
             <form method="get" action="{% url 'accounts:logout_confirm' %}">
                 <button type="submit" class="btn-logout">LOGOUT</button>
@@ -271,15 +271,15 @@
           <!-- Left: User Information -->
           <div class="content-left">
             <div class="user-header">
-              {% if profile_pic_base64 %}
-                <img src="data:image/jpeg;base64,{{ profile_pic_base64 }}" alt="User Profile" />
+              {% if user.profile_photo_url %}
+                <img src="{{ user.profile_photo_url }}" alt="User Profile" />
               {% else %}
                 <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
               {% endif %}
               <div class="user-name">
-                <h2>{{ request.user.full_name }}</h2>
-                <span class="role {% if not request.user.resident_confirmation %}pending{% endif %}">
-                  {% if request.user.resident_confirmation %}Resident{% else %}Pending Verification{% endif %}
+                <h2>{{ user.full_name }}</h2>
+                <span class="role {% if not user.resident_confirmation %}pending{% endif %}">
+                  {% if user.resident_confirmation %}Resident{% else %}Pending Verification{% endif %}
                 </span>
               </div>
             </div>
@@ -289,34 +289,34 @@
               <table class="user-info-table">
                 <tr>
                   <td>Full Name:</td>
-                  <td>{{ request.user.full_name }}</td>
+                  <td>{{ user.full_name }}</td>
                 </tr>
                 <tr>
                   <td>Username:</td>
-                  <td>{{ request.user.username }}</td>
+                  <td>{{ user.username }}</td>
                 </tr>
                 <tr>
                   <td>Email:</td>
-                  <td>{{ request.user.email }}</td>
+                  <td>{{ user.email }}</td>
                 </tr>
                 <tr>
                   <td>Date of Birth:</td>
-                  <td>{{ request.user.date_of_birth }}</td>
+                  <td>{{ user.date_of_birth }}</td>
                 </tr>
                 <tr>
                   <td>Civil Status:</td>
-                  <td>{{ request.user.civil_status|default:"Not specified" }}</td>
+                  <td>{{ user.civil_status|default:"Not specified" }}</td>
                 </tr>
                 <tr>
                   <td>Address:</td>
                   <td>
-                    {{ request.user.address_line }}, {{ request.user.barangay }}, {{ request.user.city }}, {{ request.user.province }} {{ request.user.postal_code }}
+                    {{ user.address_line }}, {{ user.barangay }}, {{ user.city }}, {{ user.province }} {{ user.postal_code }}
                   </td>
                 </tr>
                 <tr>
                   <td>Resident Confirmed:</td>
                   <td>
-                    {% if request.user.resident_confirmation %}
+                    {% if user.resident_confirmation %}
                       <span style="color: #10b981; font-weight: 600;">✓ Yes</span>
                     {% else %}
                       <span style="color: #f59e0b; font-weight: 600;">⏳ No</span>
@@ -331,11 +331,11 @@
               <table class="user-info-table">
                 <tr>
                   <td>Mobile:</td>
-                  <td>{{ request.user.contact_number }}</td>
+                  <td>{{ user.contact_number }}</td>
                 </tr>
                 <tr>
                   <td>Email:</td>
-                  <td>{{ request.user.email }}</td>
+                  <td>{{ user.email }}</td>
                 </tr>
               </table>
             </div>
@@ -343,8 +343,8 @@
             <div class="info-section">
               <h3>RESIDENT ID</h3>
               <div class="resident-id-container">
-                {% if resident_id_base64 %}
-                  <img src="data:image/jpeg;base64,{{ resident_id_base64 }}" 
+                {% if user.resident_id_photo_url %}
+                  <img src="{{ user.resident_id_photo_url }}" 
                        alt="Resident ID"/>
                 {% else %}
                   <div class="id-placeholder">

@@ -18,9 +18,10 @@ class User(AbstractUser):
     province = models.CharField(max_length=100, default="Cebu")
     postal_code = models.CharField(max_length=10, default="6000")
 
-    nso_document = models.BinaryField(blank=True, null=True)
-    profile_photo = models.BinaryField(blank=True, null=True)
-    resident_id_photo = models.BinaryField(blank=True, null=True)
+    # UPDATED: Changed from BinaryField to URLField for Supabase Storage
+
+    profile_photo_url = models.URLField(blank=True, null=True)
+    resident_id_photo_url = models.URLField(blank=True, null=True)
 
     resident_confirmation = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
@@ -68,9 +69,6 @@ class PasswordResetCode(models.Model):
     def __str__(self):
         return f"Reset code for {self.user.email}: {self.code}"
 
-# Add this to your models.py file
-
-# Update the PAYMENT_STATUS in your CertificateRequest model
 
 class CertificateRequest(models.Model):
     CERTIFICATE_TYPES = [
@@ -83,7 +81,7 @@ class CertificateRequest(models.Model):
     
     PAYMENT_STATUS = [
         ('unpaid', 'Unpaid'),
-        ('pending', 'Pending Verification'),  # Added for GCash verification
+        ('pending', 'Pending Verification'),
         ('paid', 'Paid'),
         ('failed', 'Failed Payment Verification'),
     ]
@@ -107,8 +105,8 @@ class CertificateRequest(models.Model):
     # Request Details
     purpose = models.TextField()
     
-    # Indigency Proof
-    proof_photo = models.BinaryField(blank=True, null=True)
+    # UPDATED: Changed from BinaryField to URLField for Supabase Storage
+    proof_photo_url = models.URLField(blank=True, null=True)
     
     # Business Details
     business_name = models.CharField(max_length=255, blank=True, null=True)
@@ -134,6 +132,11 @@ class CertificateRequest(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['payment_status']),
+            models.Index(fields=['certificate_type']),
+        ]
     
     def save(self, *args, **kwargs):
         if not self.request_id:
@@ -179,7 +182,6 @@ class CertificateRequest(models.Model):
     
     def __str__(self):
         return f"{self.request_id} - {self.get_certificate_type_display()}"
-    
 
 
 class IncidentReport(models.Model):
@@ -202,12 +204,16 @@ class IncidentReport(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='incident_reports')
     incident_type = models.CharField(max_length=50, choices=REPORT_TYPES)
     place = models.CharField(max_length=255)
-    message = models.TextField()  # FIXED: Was models.Textarea (incorrect)
+    message = models.TextField()
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['status']),
+        ]
 
     def save(self, *args, **kwargs):
         if not self.report_id:

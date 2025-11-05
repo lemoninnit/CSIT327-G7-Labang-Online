@@ -22,7 +22,7 @@
       {% endfor %}
     </div>
 
-    <form method="post" novalidate>
+    <form method="post" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
       <div class="grid grid-2">
         <!-- User information fields -->

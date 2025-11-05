@@ -12,19 +12,15 @@ from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
-import base64
 
 from django.shortcuts import render
 from .models import User, PasswordResetCode
 from .forms import RegistrationForm
 from .models import User, PasswordResetCode, CertificateRequest, IncidentReport
 from django.db import models  # Add this for Q queries
+
 # -------------------- HELPER FUNCTION --------------------
-def get_base64_image(data):
-    """Convert binary image data to base64 string WITHOUT data URI prefix"""
-    if data:
-        return base64.b64encode(data).decode('utf-8')
-    return None
+# REMOVED: get_base64_image function - no longer needed with URL fields
 
 
 # -------------------- LOGIN --------------------
@@ -64,7 +60,7 @@ def register(request):
         postal_code = request.POST.get("postal_code", "6000")
         password = request.POST.get("password")
         resident_confirmation = request.POST.get("resident_confirmation") == "on"
-        nso_document = request.FILES.get("nso_document")
+      
 
         # Check if email or username already exists
         if User.objects.filter(email=email).exists():
@@ -88,7 +84,7 @@ def register(request):
             province=province,
             postal_code=postal_code,
             resident_confirmation=resident_confirmation,
-            nso_document=nso_document.read() if nso_document else None,
+            
         )
 
         messages.success(request, "Account created successfully! Please proceed to Barangay Hall of Labangon for verification.")
@@ -257,21 +253,14 @@ def logout_confirm(request):
 # -------------------- PERSONAL INFO --------------------
 @login_required(login_url='accounts:login')
 @never_cache
-
 def personal_info(request):
     storage = messages.get_messages(request)
     storage.used = True
 
     user = request.user
 
-    # Convert to base64 (without data URI prefix - template adds it)
-    profile_pic_base64 = get_base64_image(user.profile_photo)
-    resident_id_base64 = get_base64_image(user.resident_id_photo)
-
     context = {
         'user': user,
-        'profile_pic_base64': profile_pic_base64,
-        'resident_id_base64': resident_id_base64,
     }   
     return render(request, 'accounts/personal_info.html', context)
 
@@ -308,42 +297,32 @@ def edit_profile(request):
         if civil_status:
             user.civil_status = civil_status
 
-        # Handle file uploads
+        # TODO: Handle file uploads to Supabase Storage
+        # You'll need to implement Supabase upload logic here
         profile_photo = request.FILES.get('profile_photo')
         if profile_photo:
-            user.profile_photo = profile_photo.read()
+            # Upload to Supabase and get URL
+            # user.profile_photo_url = upload_to_supabase(profile_photo)
+            pass
 
         resident_id_photo = request.FILES.get('resident_id_photo')
         if resident_id_photo:
-            user.resident_id_photo = resident_id_photo.read()
-
-        nso_document = request.FILES.get('nso_document')
-        if nso_document:
-            user.nso_document = nso_document.read()
+            # Upload to Supabase and get URL
+            # user.resident_id_photo_url = upload_to_supabase(resident_id_photo)
+            pass
 
         if save_ok:
             user.save()
             messages.success(request, "Profile updated successfully!")
-            return redirect('accounts:personal_info')  # Redirect to personal_info after save
+            return redirect('accounts:personal_info')
         else:
-            # Re-render edit page to show error messages without saving
-            profile_pic_base64 = get_base64_image(user.profile_photo)
-            resident_id_base64 = get_base64_image(user.resident_id_photo)
             context = {
                 'user': user,
-                'profile_pic_base64': profile_pic_base64,
-                'resident_id_base64': resident_id_base64,
             }
             return render(request, 'accounts/edit_profile.html', context)
 
-    # Convert images to base64 for display
-    profile_pic_base64 = get_base64_image(user.profile_photo)
-    resident_id_base64 = get_base64_image(user.resident_id_photo)
-
     context = {
         'user': user,
-        'profile_pic_base64': profile_pic_base64,
-        'resident_id_base64': resident_id_base64,
     }
     return render(request, 'accounts/edit_profile.html', context)
 
@@ -354,17 +333,11 @@ def edit_profile(request):
 def complete_profile(request):
     user = request.user
     
-    # Convert images to base64
-    profile_pic_base64 = get_base64_image(user.profile_photo)
-    resident_id_base64 = get_base64_image(user.resident_id_photo)
-    
     # If you have a Dependent model, fetch dependents here
     dependents = []
     
     context = {
         'user': user,
-        'profile_pic_base64': profile_pic_base64,
-        'resident_id_base64': resident_id_base64,
         'dependents': dependents,
     }
     return render(request, 'accounts/complete_profile.html', context)
@@ -374,11 +347,9 @@ def complete_profile(request):
 @never_cache
 def document_request(request):
     user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo)
     
     context = {
         'user': user,
-        'profile_pic_base64': profile_pic_base64,
     }
     return render(request, 'accounts/document_request.html', context)
 
@@ -387,413 +358,6 @@ def document_request(request):
 @never_cache
 def certificate_requests(request):
     user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo)
-    
-    # Fetch user's certificate requests here
-    # requests = CertificateRequest.objects.filter(user=user).order_by('-created_at')
-    
-    context = {
-        'user': user,
-        'profile_pic_base64': profile_pic_base64,
-        # 'requests': requests,
-    }
-    return render(request, 'accounts/certificate_requests.html', context)
-
-
-@login_required(login_url='accounts:login')
-@never_cache
-def request_detail(request, request_id):
-    user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo)
-
-    cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
-    
-    # Convert proof photo to base64 if it exists
-    proof_photo_base64 = None
-    if cert_request.proof_photo:
-        proof_photo_base64 = get_base64_image(cert_request.proof_photo)
-
-    # Determine recommended action for convenience
-    next_action = None
-    if cert_request.payment_status == 'unpaid':
-        if not cert_request.payment_mode:
-            next_action = {
-                'label': 'Select Payment Mode',
-                'url_name': 'accounts:payment_mode_selection',
-            }
-        elif cert_request.payment_mode == 'gcash':
-            next_action = {
-                'label': 'Proceed to GCash Payment',
-                'url_name': 'accounts:gcash_payment',
-            }
-        elif cert_request.payment_mode == 'counter':
-            next_action = {
-                'label': 'Proceed to Counter Payment',
-                'url_name': 'accounts:counter_payment',
-            }
-
-    context = {
-        'user': user,
-        'profile_pic_base64': profile_pic_base64,
-        'cert_request': cert_request,
-        'proof_photo_base64': proof_photo_base64,
-        'next_action': next_action,
-    }
-    return render(request, 'accounts/request_detail.html', context)
-
-
-# Add this view to your views.py file
-
-@login_required(login_url='accounts:login')
-@never_cache
-def barangay_clearance_request(request):
-    user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo)
-    
-    if request.method == 'POST':
-        purpose = request.POST.get('purpose')
-        
-        # Validate purpose
-        if not purpose or len(purpose.strip()) < 10:
-            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
-            context = {
-                'user': user,
-                'profile_pic_base64': profile_pic_base64,
-            }
-            return render(request, 'accounts/barangay_clearance_request.html', context)
-        
-        # Create the certificate request
-        cert_request = CertificateRequest.objects.create(
-            user=user,
-            certificate_type='barangay_clearance',
-            purpose=purpose,
-            payment_amount=50.00,  # Barangay Clearance fee
-        )
-        
-        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
-        
-        # Redirect to payment mode selection
-        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
-    
-    context = {
-        'user': user,
-        'profile_pic_base64': profile_pic_base64,
-    }
-    return render(request, 'accounts/barangay_clearance_request.html', context)
-
-
-
-@login_required(login_url='accounts:login')
-@never_cache
-def brgy_residency_cert(request):
-    user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo)
-    
-    if request.method == 'POST':
-        purpose = request.POST.get('purpose')
-        
-        # Validate purpose
-        if not purpose or len(purpose.strip()) < 10:
-            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
-            context = {
-                'user': user,
-                'profile_pic_base64': profile_pic_base64,
-            }
-            return render(request, 'accounts/brgy_residency_cert.html', context)
-        
-        # Create the certificate request
-        cert_request = CertificateRequest.objects.create(
-            user=user,
-            certificate_type='residency',
-            purpose=purpose,
-            payment_amount=30.00,  # Certificate of Residency fee
-        )
-        
-        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
-        
-        # Redirect to payment mode selection
-        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
-    
-    context = {
-        'user': user,
-        'profile_pic_base64': profile_pic_base64,
-    }
-    return render(request, 'accounts/brgy_residency_cert.html', context)
-
-
-@login_required(login_url='accounts:login')
-@never_cache
-def brgy_indigency_cert(request):
-    user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo)
-    
-    if request.method == 'POST':
-        purpose = request.POST.get('purpose')
-        proof_photo = request.FILES.get('proof_photo')
-        
-        # Validate purpose and proof photo
-        if not purpose or len(purpose.strip()) < 10:
-            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
-            context = {
-                'user': user,
-                'profile_pic_base64': profile_pic_base64,
-            }
-            return render(request, 'accounts/brgy_indigency_cert.html', context)
-        
-        if not proof_photo:
-            messages.error(request, "Please upload a proof photo for your indigency certificate request.")
-            context = {
-                'user': user,
-                'profile_pic_base64': profile_pic_base64,
-            }
-            return render(request, 'accounts/brgy_indigency_cert.html', context)
-        
-        # Create the certificate request
-        cert_request = CertificateRequest.objects.create(
-            user=user,
-            certificate_type='indigency',
-            purpose=purpose,
-            proof_photo=proof_photo.read() if proof_photo else None,
-            payment_amount=30.00,  # Certificate of Indigency fee
-        )
-        
-        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
-        
-        # Redirect to payment mode selection
-        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
-    
-    context = {
-        'user': user,
-        'profile_pic_base64': profile_pic_base64,
-    }
-    return render(request, 'accounts/brgy_indigency_cert.html', context)
-
-
-@login_required(login_url='accounts:login')
-@never_cache
-def brgy_goodmoral_character(request):
-    user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo)
-    
-    if request.method == 'POST':
-        purpose = request.POST.get('purpose')
-        
-        # Validate purpose
-        if not purpose or len(purpose.strip()) < 10:
-            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
-            context = {
-                'user': user,
-                'profile_pic_base64': profile_pic_base64,
-            }
-            return render(request, 'accounts/brgy_goodmoral_character.html', context)
-        
-        # Create the certificate request
-        cert_request = CertificateRequest.objects.create(
-            user=user,
-            certificate_type='good_moral',
-            purpose=purpose,
-            payment_amount=40.00,  # Good Moral Character fee
-        )
-        
-        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
-        
-        # Redirect to payment mode selection
-        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
-    
-    context = {
-        'user': user,
-        'profile_pic_base64': profile_pic_base64,
-    }
-    return render(request, 'accounts/brgy_goodmoral_character.html', context)
-
-
-@login_required(login_url='accounts:login')
-@never_cache
-def brgy_business_cert(request):
-    user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo)
-    
-    if request.method == 'POST':
-        purpose = request.POST.get('purpose')
-        business_name = request.POST.get('business_name')
-        business_type = request.POST.get('business_type')
-        business_nature = request.POST.get('business_nature')
-        business_address = request.POST.get('business_address')
-        employees_count = request.POST.get('employees_count')
-        
-        # Validate all required fields
-        if not purpose or len(purpose.strip()) < 10:
-            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
-            context = {
-                'user': user,
-                'profile_pic_base64': profile_pic_base64,
-            }
-            return render(request, 'accounts/brgy_business_cert.html', context)
-        
-        if not business_name or not business_type or not business_nature or not business_address or not employees_count:
-            messages.error(request, "Please fill in all required business information fields.")
-            context = {
-                'user': user,
-                'profile_pic_base64': profile_pic_base64,
-            }
-            return render(request, 'accounts/brgy_business_cert.html', context)
-        
-        try:
-            employees_count = int(employees_count)
-            if employees_count < 0:
-                raise ValueError("Number of employees cannot be negative")
-        except ValueError:
-            messages.error(request, "Please enter a valid number of employees.")
-            context = {
-                'user': user,
-                'profile_pic_base64': profile_pic_base64,
-            }
-            return render(request, 'accounts/brgy_business_cert.html', context)
-        
-        # Create the certificate request
-        cert_request = CertificateRequest.objects.create(
-            user=user,
-            certificate_type='business_clearance',
-            purpose=purpose,
-            business_name=business_name,
-            business_type=business_type,
-            business_nature=business_nature,
-            business_address=business_address,
-            employees_count=employees_count,
-            payment_amount=100.00,  # Barangay Business Clearance fee
-        )
-        
-        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
-        
-        # Redirect to payment mode selection
-        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
-    
-    context = {
-        'user': user,
-        'profile_pic_base64': profile_pic_base64,
-    }
-    return render(request, 'accounts/brgy_business_cert.html', context)
-
-
-# Add this view to your views.py file
-
-@login_required(login_url='accounts:login')
-@never_cache
-def payment_mode_selection(request, request_id):
-    user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo)
-    
-    # Get the certificate request
-    cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
-    
-    # Check if already paid
-    if cert_request.payment_status == 'paid':
-        messages.info(request, "This request has already been paid.")
-        return redirect('accounts:certificate_requests')
-    
-    if request.method == 'POST':
-        payment_mode = request.POST.get('payment_mode')
-        
-        # Validate payment mode
-        if payment_mode not in ['gcash', 'counter']:
-            messages.error(request, "Invalid payment mode selected.")
-            context = {
-                'user': user,
-                'profile_pic_base64': profile_pic_base64,
-                'cert_request': cert_request,
-            }
-            return render(request, 'accounts/payment_mode_selection.html', context)
-        
-        # Update certificate request with payment mode
-        cert_request.payment_mode = payment_mode
-        cert_request.save()
-        
-        # Redirect based on payment mode
-        if payment_mode == 'gcash':
-            return redirect('accounts:gcash_payment', request_id=cert_request.request_id)
-        else:  # counter
-            return redirect('accounts:counter_payment', request_id=cert_request.request_id)
-    
-    context = {
-        'user': user,
-        'profile_pic_base64': profile_pic_base64,
-        'cert_request': cert_request,
-    }
-    return render(request, 'accounts/payment_mode_selection.html', context)
-
-
-
-
-
-# Add this view to your views.py file
-
-@login_required(login_url='accounts:login')
-@never_cache
-def gcash_payment(request, request_id):
-    user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo)
-    
-    # Get the certificate request
-    cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
-    
-    # Check if already paid
-    if cert_request.payment_status == 'paid':
-        messages.info(request, "This request has already been paid.")
-        return redirect('accounts:certificate_requests')
-    
-    # Verify payment mode is GCash
-    if cert_request.payment_mode != 'gcash':
-        messages.error(request, "Invalid payment mode for this request.")
-        return redirect('accounts:payment_mode_selection', request_id=request_id)
-    
-    if request.method == 'POST':
-        reference_number = request.POST.get('reference_number', '').strip()
-        
-        # Validate reference number
-        if not reference_number:
-            messages.error(request, "Please enter your GCash reference number.")
-            context = {
-                'user': user,
-                'profile_pic_base64': profile_pic_base64,
-                'cert_request': cert_request,
-            }
-            return render(request, 'accounts/gcash_payment.html', context)
-        
-        if len(reference_number) < 10:
-            messages.error(request, "Invalid reference number. Please check and try again.")
-            context = {
-                'user': user,
-                'profile_pic_base64': profile_pic_base64,
-                'cert_request': cert_request,
-            }
-            return render(request, 'accounts/gcash_payment.html', context)
-        
-        # Save reference number and update status to pending verification
-        cert_request.payment_reference = reference_number
-        cert_request.payment_status = 'pending'  # Wait for admin verification
-        cert_request.save()
-        
-        messages.success(request, 
-            f"Payment reference submitted successfully! Your reference number {reference_number} "
-            "is now pending verification by our staff. You will be notified once verified."
-        )
-        
-        # Redirect to certificate requests page
-        return redirect('accounts:certificate_requests')
-    
-    context = {
-        'user': user,
-        'profile_pic_base64': profile_pic_base64,
-        'cert_request': cert_request,
-    }
-    return render(request, 'accounts/gcash_payment.html', context)
-
-
-@login_required(login_url='accounts:login')
-@never_cache
-def certificate_requests(request):
-    user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo)
     
     # Get filter parameters - use .get() with empty string default
     certificate_type = request.GET.get('certificate_type', '').strip()
@@ -833,7 +397,6 @@ def certificate_requests(request):
     
     context = {
         'user': user,
-        'profile_pic_base64': profile_pic_base64,
         'requests': requests,
         'total_requests': total_requests,
         'pending_count': pending_count,
@@ -843,12 +406,359 @@ def certificate_requests(request):
     return render(request, 'accounts/certificate_requests.html', context)
 
 
+@login_required(login_url='accounts:login')
+@never_cache
+def request_detail(request, request_id):
+    user = request.user
+
+    cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
+    
+    # Determine recommended action for convenience
+    next_action = None
+    if cert_request.payment_status == 'unpaid':
+        if not cert_request.payment_mode:
+            next_action = {
+                'label': 'Select Payment Mode',
+                'url_name': 'accounts:payment_mode_selection',
+            }
+        elif cert_request.payment_mode == 'gcash':
+            next_action = {
+                'label': 'Proceed to GCash Payment',
+                'url_name': 'accounts:gcash_payment',
+            }
+        elif cert_request.payment_mode == 'counter':
+            next_action = {
+                'label': 'Proceed to Counter Payment',
+                'url_name': 'accounts:counter_payment',
+            }
+
+    context = {
+        'user': user,
+        'cert_request': cert_request,
+        'next_action': next_action,
+    }
+    return render(request, 'accounts/request_detail.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def barangay_clearance_request(request):
+    user = request.user
+    
+    if request.method == 'POST':
+        purpose = request.POST.get('purpose')
+        
+        # Validate purpose
+        if not purpose or len(purpose.strip()) < 10:
+            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
+            context = {
+                'user': user,
+            }
+            return render(request, 'accounts/barangay_clearance_request.html', context)
+        
+        # Create the certificate request
+        cert_request = CertificateRequest.objects.create(
+            user=user,
+            certificate_type='barangay_clearance',
+            purpose=purpose,
+            payment_amount=50.00,  # Barangay Clearance fee
+        )
+        
+        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
+        
+        # Redirect to payment mode selection
+        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
+    
+    context = {
+        'user': user,
+    }
+    return render(request, 'accounts/barangay_clearance_request.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def brgy_residency_cert(request):
+    user = request.user
+    
+    if request.method == 'POST':
+        purpose = request.POST.get('purpose')
+        
+        # Validate purpose
+        if not purpose or len(purpose.strip()) < 10:
+            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
+            context = {
+                'user': user,
+            }
+            return render(request, 'accounts/brgy_residency_cert.html', context)
+        
+        # Create the certificate request
+        cert_request = CertificateRequest.objects.create(
+            user=user,
+            certificate_type='residency',
+            purpose=purpose,
+            payment_amount=30.00,  # Certificate of Residency fee
+        )
+        
+        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
+        
+        # Redirect to payment mode selection
+        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
+    
+    context = {
+        'user': user,
+    }
+    return render(request, 'accounts/brgy_residency_cert.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def brgy_indigency_cert(request):
+    user = request.user
+    
+    if request.method == 'POST':
+        purpose = request.POST.get('purpose')
+        proof_photo = request.FILES.get('proof_photo')
+        
+        # Validate purpose and proof photo
+        if not purpose or len(purpose.strip()) < 10:
+            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
+            context = {
+                'user': user,
+            }
+            return render(request, 'accounts/brgy_indigency_cert.html', context)
+        
+        if not proof_photo:
+            messages.error(request, "Please upload a proof photo for your indigency certificate request.")
+            context = {
+                'user': user,
+            }
+            return render(request, 'accounts/brgy_indigency_cert.html', context)
+        
+        # TODO: Upload proof_photo to Supabase and get URL
+        # proof_photo_url = upload_to_supabase(proof_photo)
+        
+        # Create the certificate request
+        cert_request = CertificateRequest.objects.create(
+            user=user,
+            certificate_type='indigency',
+            purpose=purpose,
+            # proof_photo_url=proof_photo_url,  # Use this when Supabase upload is implemented
+            payment_amount=30.00,  # Certificate of Indigency fee
+        )
+        
+        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
+        
+        # Redirect to payment mode selection
+        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
+    
+    context = {
+        'user': user,
+    }
+    return render(request, 'accounts/brgy_indigency_cert.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def brgy_goodmoral_character(request):
+    user = request.user
+    
+    if request.method == 'POST':
+        purpose = request.POST.get('purpose')
+        
+        # Validate purpose
+        if not purpose or len(purpose.strip()) < 10:
+            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
+            context = {
+                'user': user,
+            }
+            return render(request, 'accounts/brgy_goodmoral_character.html', context)
+        
+        # Create the certificate request
+        cert_request = CertificateRequest.objects.create(
+            user=user,
+            certificate_type='good_moral',
+            purpose=purpose,
+            payment_amount=40.00,  # Good Moral Character fee
+        )
+        
+        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
+        
+        # Redirect to payment mode selection
+        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
+    
+    context = {
+        'user': user,
+    }
+    return render(request, 'accounts/brgy_goodmoral_character.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def brgy_business_cert(request):
+    user = request.user
+    
+    if request.method == 'POST':
+        purpose = request.POST.get('purpose')
+        business_name = request.POST.get('business_name')
+        business_type = request.POST.get('business_type')
+        business_nature = request.POST.get('business_nature')
+        business_address = request.POST.get('business_address')
+        employees_count = request.POST.get('employees_count')
+        
+        # Validate all required fields
+        if not purpose or len(purpose.strip()) < 10:
+            messages.error(request, "Please provide a detailed purpose for your request (at least 10 characters).")
+            context = {
+                'user': user,
+            }
+            return render(request, 'accounts/brgy_business_cert.html', context)
+        
+        if not business_name or not business_type or not business_nature or not business_address or not employees_count:
+            messages.error(request, "Please fill in all required business information fields.")
+            context = {
+                'user': user,
+            }
+            return render(request, 'accounts/brgy_business_cert.html', context)
+        
+        try:
+            employees_count = int(employees_count)
+            if employees_count < 0:
+                raise ValueError("Number of employees cannot be negative")
+        except ValueError:
+            messages.error(request, "Please enter a valid number of employees.")
+            context = {
+                'user': user,
+            }
+            return render(request, 'accounts/brgy_business_cert.html', context)
+        
+        # Create the certificate request
+        cert_request = CertificateRequest.objects.create(
+            user=user,
+            certificate_type='business_clearance',
+            purpose=purpose,
+            business_name=business_name,
+            business_type=business_type,
+            business_nature=business_nature,
+            business_address=business_address,
+            employees_count=employees_count,
+            payment_amount=100.00,  # Barangay Business Clearance fee
+        )
+        
+        messages.success(request, f"Request submitted successfully! Your request ID is {cert_request.request_id}. Please proceed to payment.")
+        
+        # Redirect to payment mode selection
+        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
+    
+    context = {
+        'user': user,
+    }
+    return render(request, 'accounts/brgy_business_cert.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def payment_mode_selection(request, request_id):
+    user = request.user
+    
+    # Get the certificate request
+    cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
+    
+    # Check if already paid
+    if cert_request.payment_status == 'paid':
+        messages.info(request, "This request has already been paid.")
+        return redirect('accounts:certificate_requests')
+    
+    if request.method == 'POST':
+        payment_mode = request.POST.get('payment_mode')
+        
+        # Validate payment mode
+        if payment_mode not in ['gcash', 'counter']:
+            messages.error(request, "Invalid payment mode selected.")
+            context = {
+                'user': user,
+                'cert_request': cert_request,
+            }
+            return render(request, 'accounts/payment_mode_selection.html', context)
+        
+        # Update certificate request with payment mode
+        cert_request.payment_mode = payment_mode
+        cert_request.save()
+        
+        # Redirect based on payment mode
+        if payment_mode == 'gcash':
+            return redirect('accounts:gcash_payment', request_id=cert_request.request_id)
+        else:  # counter
+            return redirect('accounts:counter_payment', request_id=cert_request.request_id)
+    
+    context = {
+        'user': user,
+        'cert_request': cert_request,
+    }
+    return render(request, 'accounts/payment_mode_selection.html', context)
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def gcash_payment(request, request_id):
+    user = request.user
+    
+    # Get the certificate request
+    cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
+    
+    # Check if already paid
+    if cert_request.payment_status == 'paid':
+        messages.info(request, "This request has already been paid.")
+        return redirect('accounts:certificate_requests')
+    
+    # Verify payment mode is GCash
+    if cert_request.payment_mode != 'gcash':
+        messages.error(request, "Invalid payment mode for this request.")
+        return redirect('accounts:payment_mode_selection', request_id=request_id)
+    
+    if request.method == 'POST':
+        reference_number = request.POST.get('reference_number', '').strip()
+        
+        # Validate reference number
+        if not reference_number:
+            messages.error(request, "Please enter your GCash reference number.")
+            context = {
+                'user': user,
+                'cert_request': cert_request,
+            }
+            return render(request, 'accounts/gcash_payment.html', context)
+        
+        if len(reference_number) < 10:
+            messages.error(request, "Invalid reference number. Please check and try again.")
+            context = {
+                'user': user,
+                'cert_request': cert_request,
+            }
+            return render(request, 'accounts/gcash_payment.html', context)
+        
+        # Save reference number and update status to pending verification
+        cert_request.payment_reference = reference_number
+        cert_request.payment_status = 'pending'  # Wait for admin verification
+        cert_request.save()
+        
+        messages.success(request, 
+            f"Payment reference submitted successfully! Your reference number {reference_number} "
+            "is now pending verification by our staff. You will be notified once verified."
+        )
+        
+        # Redirect to certificate requests page
+        return redirect('accounts:certificate_requests')
+    
+    context = {
+        'user': user,
+        'cert_request': cert_request,
+    }
+    return render(request, 'accounts/gcash_payment.html', context)
+
 
 @login_required(login_url='accounts:login')
 @never_cache
 def counter_payment(request, request_id):
     user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo)
 
     cert_request = get_object_or_404(CertificateRequest, request_id=request_id, user=user)
 
@@ -871,7 +781,6 @@ def counter_payment(request, request_id):
 
     context = {
         'user': user,
-        'profile_pic_base64': profile_pic_base64,
         'cert_request': cert_request,
     }
     return render(request, 'accounts/counter_payment.html', context)
@@ -909,7 +818,6 @@ def cancel_request(request, request_id):
 @never_cache
 def report_records(request):
     user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo) if hasattr(user, 'profile_photo') else None
 
     # Get all incident reports for the current user
     records = IncidentReport.objects.filter(user=user).order_by('-created_at')
@@ -932,18 +840,15 @@ def report_records(request):
 
     context = {
         'user': user,
-        'profile_pic_base64': profile_pic_base64,
         'records': records,
     }
     return render(request, 'accounts/report_records.html', context)
-
 
 
 @login_required(login_url='accounts:login')
 @never_cache
 def file_report(request):
     user = request.user
-    profile_pic_base64 = get_base64_image(user.profile_photo) if hasattr(user, 'profile_photo') else None
 
     if request.method == 'POST':
         report_type = request.POST.get('report_type')
@@ -955,7 +860,6 @@ def file_report(request):
             messages.error(request, "All fields are required. Please fill in all the information.")
             context = {
                 'user': user,
-                'profile_pic_base64': profile_pic_base64,
             }
             return render(request, 'accounts/file_report.html', context)
         
@@ -965,7 +869,6 @@ def file_report(request):
             messages.error(request, "Invalid report type selected.")
             context = {
                 'user': user,
-                'profile_pic_base64': profile_pic_base64,
             }
             return render(request, 'accounts/file_report.html', context)
         
@@ -974,7 +877,6 @@ def file_report(request):
             messages.error(request, "Please provide a more detailed location (at least 5 characters).")
             context = {
                 'user': user,
-                'profile_pic_base64': profile_pic_base64,
             }
             return render(request, 'accounts/file_report.html', context)
         
@@ -983,7 +885,6 @@ def file_report(request):
             messages.error(request, "Please provide a detailed description (at least 20 characters).")
             context = {
                 'user': user,
-                'profile_pic_base64': profile_pic_base64,
             }
             return render(request, 'accounts/file_report.html', context)
         
@@ -1008,12 +909,10 @@ def file_report(request):
             messages.error(request, f"An error occurred while submitting your report: {str(e)}")
             context = {
                 'user': user,
-                'profile_pic_base64': profile_pic_base64,
             }
             return render(request, 'accounts/file_report.html', context)
 
     context = {
         'user': user,
-        'profile_pic_base64': profile_pic_base64,
     }
     return render(request, 'accounts/file_report.html', context)
