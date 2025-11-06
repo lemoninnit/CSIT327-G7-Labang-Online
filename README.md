@@ -80,19 +80,6 @@ py manage.py migrate
 py manage.py runserver
 ```
 
-## Team members
-- Lenon Lee O. Natividad 
-- Lead Developer
-- lenonlee.natividad@cit.edu
-
-- Bryne Kendrick P. Nuñez
-- Frontend Developer
-- brynekendrick.nunez@cit.edu
-
-- Moniquo Nicole C. Mosende
-- Backend Developer
-- moniquonicole.mosende@cit.edu
-
 5. Admin Dashboard Instructions
 
 The Admin Dashboard allows authorized staff to manage users, certificate requests, and incident reports.
@@ -166,3 +153,17 @@ Testing Checklist
  Report status updates and deletion works
 
  Success/error messages display correctly
+
+## Team members
+- Lenon Lee O. Natividad 
+- Lead Developer
+- lenonlee.natividad@cit.edu
+
+- Bryne Kendrick P. Nuñez
+- Frontend Developer
+- brynekendrick.nunez@cit.edu
+
+- Moniquo Nicole C. Mosende
+- Backend Developer
+- moniquonicole.mosende@cit.edu
+
