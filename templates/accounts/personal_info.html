@@ -11,7 +11,8 @@
     <link rel="icon" href="{% static 'logo.png' %}" type="image/png" />
     <style>
       /* Fix scrolling issues */
-      html, body {
+      html,
+      body {
         overflow: hidden;
         height: 100%;
         margin: 0;
@@ -82,7 +83,11 @@
         align-items: center;
         gap: 24px;
         padding: 24px;
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+        background: linear-gradient(
+          135deg,
+          rgba(16, 185, 129, 0.1) 0%,
+          rgba(16, 185, 129, 0.05) 100%
+        );
         border-radius: 16px;
         margin-bottom: 24px;
         border: 1px solid rgba(16, 185, 129, 0.2);
@@ -180,6 +185,18 @@
         gap: 12px;
         width: 100%;
       }
+
+      /* Optional: Add distinct styling for admin button */
+      .action-btn.admin-btn {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        margin-top: 15px;
+      }
+
+      .action-btn.admin-btn:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      }
     </style>
   </head>
   <body>
@@ -210,14 +227,20 @@
               <span>Personal Info</span>
             </a>
           </li>
-          <li class="menu-item" onclick="window.location.href='{% url 'accounts:document_request' %}'">
+          <li
+            class="menu-item"
+            onclick="window.location.href='{% url 'accounts:document_request' %}'"
+          >
             <a href="{% url 'accounts:document_request' %}">
               <img src="{% static 'icons/request-records.png' %}" alt="" />
               <span>Document Request</span>
             </a>
           </li>
-          
-          <li class="menu-item" onclick="window.location.href='{% url 'accounts:file_report' %}'">
+
+          <li
+            class="menu-item"
+            onclick="window.location.href='{% url 'accounts:file_report' %}'"
+          >
             <a href="{% url 'accounts:file_report' %}">
               <img src="{% static 'icons/file-report.png' %}" alt="" />
               <span>File Report</span>
@@ -234,44 +257,52 @@
           <button id="mode-toggle" class="btn">Toggle</button>
           <div class="user-profile">
             {% if user.profile_photo_url %}
-              <img src="{{ user.profile_photo_url }}" alt="User Profile" />
+            <img src="{{ user.profile_photo_url }}" alt="User Profile" />
             {% else %}
-              <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
+            <img
+              src="{% static 'icons/default_user.png' %}"
+              alt="User Profile"
+            />
             {% endif %}
             <span>{{ user.full_name }}</span>
             <!-- Updated Logout Button -->
             <form method="get" action="{% url 'accounts:logout_confirm' %}">
-                <button type="submit" class="btn-logout">LOGOUT</button>
-              </form>
+              <button type="submit" class="btn-logout">LOGOUT</button>
+            </form>
           </div>
         </header>
-        
+
         {% if messages %}
         <div class="messages">
-            {% for message in messages %}
-            {% if message.tags == 'success' %}
-            <div class="msg success">{{ message }}</div>
-          {% endif %}
-          {% endfor %}
+          {% for message in messages %} {% if message.tags == 'success' %}
+          <div class="msg success">{{ message }}</div>
+          {% endif %} {% endfor %}
         </div>
         {% endif %}
-        
+
         <div class="content-wrapper">
           <!-- Left: User Information -->
           <div class="content-left">
             <div class="user-header">
-              {% if user.profile_photo_url %}
-                <img src="{{ user.profile_photo_url }}" alt="User Profile" />
-              {% else %}
-                <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
-              {% endif %}
-              <div class="user-name">
-                <h2>{{ user.full_name }}</h2>
-                <span class="role {% if not user.resident_confirmation %}pending{% endif %}">
-                  {% if user.resident_confirmation %}Resident{% else %}Pending Verification{% endif %}
-                </span>
-              </div>
-            </div>
+  {% if user.profile_photo_url %}
+    <img src="{{ user.profile_photo_url }}" alt="User Profile" />
+  {% else %}
+    <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
+  {% endif %}
+  <div class="user-name">
+    <h2>{{ user.full_name }}</h2>
+    {% if user.is_superuser %}
+      <span class="role admin">Super Administrator</span>
+    {% elif user.is_staff %}
+      <span class="role admin">Administrator</span>
+    {% elif user.resident_confirmation %}
+      <span class="role">Resident</span>
+    {% else %}
+      <span class="role pending">Pending Verification</span>
+    {% endif %}
+  </div>
+</div>
+
 
             <div class="info-section">
               <h3>USER INFORMATION</h3>
@@ -299,16 +330,17 @@
                 <tr>
                   <td>Address:</td>
                   <td>
-                    {{ user.address_line }}, {{ user.barangay }}, {{ user.city }}, {{ user.province }} {{ user.postal_code }}
+                    {{ user.address_line }}, {{ user.barangay }}, {{ user.city
+                    }}, {{ user.province }} {{ user.postal_code }}
                   </td>
                 </tr>
                 <tr>
                   <td>Resident Confirmed:</td>
                   <td>
                     {% if user.resident_confirmation %}
-                      <span style="color: #10b981; font-weight: 600;">✓ Yes</span>
+                    <span style="color: #10b981; font-weight: 600">✓ Yes</span>
                     {% else %}
-                      <span style="color: #f59e0b; font-weight: 600;">⏳ No</span>
+                    <span style="color: #f59e0b; font-weight: 600">⏳ No</span>
                     {% endif %}
                   </td>
                 </tr>
@@ -333,22 +365,32 @@
               <h3>RESIDENT ID</h3>
               <div class="resident-id-container">
                 {% if user.resident_id_photo_url %}
-                  <img src="{{ user.resident_id_photo_url }}" 
-                       alt="Resident ID"/>
+                <img src="{{ user.resident_id_photo_url }}" alt="Resident ID" />
                 {% else %}
-                  <div class="id-placeholder">
-                    <img src="{% static 'icons/file-report.png' %}" alt="No ID"/>
-                    <p>No Resident ID uploaded yet</p>
-                  </div>
+                <div class="id-placeholder">
+                  <img src="{% static 'icons/file-report.png' %}" alt="No ID" />
+                  <p>No Resident ID uploaded yet</p>
+                </div>
                 {% endif %}
               </div>
             </div>
           </div>
-          
+
           <!-- Right: Action Buttons -->
           <div class="content-right">
-            <a href="{% url 'accounts:edit_profile' %}" class="action-btn">EDIT INFORMATION</a>
-            
+            <a href="{% url 'accounts:edit_profile' %}" class="action-btn"
+              >EDIT INFORMATION</a
+            >
+
+            <!-- Admin Dashboard Button - Only visible for staff/superusers -->
+            {% if user.is_staff or user.is_superuser %}
+            <a
+              href="{% url 'accounts:admin_dashboard' %}"
+              class="action-btn admin-btn"
+            >
+              ADMIN DASHBOARD
+            </a>
+            {% endif %}
           </div>
         </div>
       </main>

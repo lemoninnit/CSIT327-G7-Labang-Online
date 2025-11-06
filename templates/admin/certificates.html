@@ -435,6 +435,8 @@
                                 <th>Resident</th>
                                 <th>Certificate Type</th>
                                 <th>Payment Status</th>
+                                <th>Payment Reference</th>
+                                <th>Payment Mode</th>
                                 <th>Claim Status</th>
                                 <th>Date</th>
                                 <th>Actions</th>
@@ -447,18 +449,30 @@
                                 <td>{{ cert.user.full_name }}</td>
                                 <td>{{ cert.get_certificate_type_display }}</td>
                                 <td><span class="status-badge status-{{ cert.payment_status }}">{{ cert.get_payment_status_display }}</span></td>
+                                <td>
+                                    {% if cert.payment_reference %}
+                                        <span style="font-family: monospace; background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">
+                                            {{ cert.payment_reference }}
+                                        </span>
+                                    {% else %}
+                                        <span style="color: #95a5a6; font-style: italic;">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if cert.payment_mode == 'gcash' %}
+                                        <span style="color: #0088cc; font-weight: 500;">💳 GCash</span>
+                                    {% elif cert.payment_mode == 'counter' %}
+                                        <span style="color: #28a745; font-weight: 500;">🏪 Counter</span>
+                                    {% else %}
+                                        <span style="color: #95a5a6; font-style: italic;">Not Selected</span>
+                                    {% endif %}
+                                </td>
                                 <td><span class="status-badge claim-{{ cert.claim_status }}">{{ cert.get_claim_status_display }}</span></td>
                                 <td>{{ cert.created_at|date:"M d, Y" }}</td>
                                 <td>
                                     {% if cert.payment_status == 'pending' %}
-                                    <form method="POST" action="{% url 'accounts:admin_verify_payment' cert.request_id %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="action-btn btn-verify">✓ Verify</button>
-                                    </form>
-                                    <form method="POST" action="{% url 'accounts:admin_reject_payment' cert.request_id %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="action-btn btn-reject">✗ Reject</button>
-                                    </form>
+                                    <button onclick="confirmVerifyPayment('{{ cert.request_id }}', '{{ cert.payment_reference }}', '{{ cert.get_payment_mode_display }}')" class="action-btn btn-verify">✓ Verify</button>
+                                    <button onclick="confirmRejectPayment('{{ cert.request_id }}', '{{ cert.payment_reference }}')" class="action-btn btn-reject">✗ Reject</button>
                                     {% endif %}
                                     
                                     {% if cert.payment_status == 'paid' %}
@@ -479,6 +493,59 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Payment Verification Modal -->
+    <div id="verifyPaymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Verify Payment</h2>
+            </div>
+            <div class="modal-body">
+                <p><strong>Request ID:</strong> <span id="verifyRequestId"></span></p>
+                <p><strong>Payment Mode:</strong> <span id="verifyPaymentMode"></span></p>
+                <p style="margin-top: 15px;"><strong>Payment Reference:</strong></p>
+                <div style="background: #e9ecef; padding: 12px; border-radius: 8px; margin-top: 8px; font-family: monospace; font-size: 1.1rem; text-align: center; border: 2px solid #3498db;">
+                    <span id="verifyPaymentRef"></span>
+                </div>
+                <p style="margin-top: 15px; color: #7f8c8d; font-size: 0.9rem;">
+                    ℹ️ Please verify this payment reference in your payment system before confirming.
+                </p>
+            </div>
+            <form method="POST" id="verifyPaymentForm">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <button type="button" onclick="closeVerifyPaymentModal()" class="modal-btn modal-btn-cancel">Cancel</button>
+                    <button type="submit" class="modal-btn" style="background: #28a745; color: white;">✓ Confirm Verification</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Rejection Modal -->
+    <div id="rejectPaymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Reject Payment</h2>
+            </div>
+            <div class="modal-body">
+                <p><strong>Request ID:</strong> <span id="rejectRequestId"></span></p>
+                <p style="margin-top: 15px;"><strong>Payment Reference:</strong></p>
+                <div style="background: #f8d7da; padding: 12px; border-radius: 8px; margin-top: 8px; font-family: monospace; font-size: 1.1rem; text-align: center; border: 2px solid #dc3545;">
+                    <span id="rejectPaymentRef"></span>
+                </div>
+                <p style="margin-top: 15px; color: #721c24; font-size: 0.9rem;">
+                    ⚠️ Are you sure you want to reject this payment? The user will need to resubmit their payment.
+                </p>
+            </div>
+            <form method="POST" id="rejectPaymentForm">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <button type="button" onclick="closeRejectPaymentModal()" class="modal-btn modal-btn-cancel">Cancel</button>
+                    <button type="submit" class="modal-btn" style="background: #dc3545; color: white;">✗ Confirm Rejection</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Claim Status Update Modal -->
@@ -508,6 +575,37 @@
     </div>
 
     <script>
+        function confirmVerifyPayment(requestId, paymentRef, paymentMode) {
+            const modal = document.getElementById('verifyPaymentModal');
+            const form = document.getElementById('verifyPaymentForm');
+            
+            document.getElementById('verifyRequestId').textContent = requestId;
+            document.getElementById('verifyPaymentRef').textContent = paymentRef || 'N/A';
+            document.getElementById('verifyPaymentMode').textContent = paymentMode || 'N/A';
+            
+            form.action = `/accounts/admin/certificates/${requestId}/verify-payment/`;
+            modal.classList.add('active');
+        }
+
+        function closeVerifyPaymentModal() {
+            document.getElementById('verifyPaymentModal').classList.remove('active');
+        }
+
+        function confirmRejectPayment(requestId, paymentRef) {
+            const modal = document.getElementById('rejectPaymentModal');
+            const form = document.getElementById('rejectPaymentForm');
+            
+            document.getElementById('rejectRequestId').textContent = requestId;
+            document.getElementById('rejectPaymentRef').textContent = paymentRef || 'N/A';
+            
+            form.action = `/accounts/admin/certificates/${requestId}/reject-payment/`;
+            modal.classList.add('active');
+        }
+
+        function closeRejectPaymentModal() {
+            document.getElementById('rejectPaymentModal').classList.remove('active');
+        }
+
         function openClaimModal(requestId, currentStatus) {
             const modal = document.getElementById('claimModal');
             const form = document.getElementById('claimForm');
@@ -525,9 +623,18 @@
 
         // Close modal when clicking outside
         window.onclick = function(event) {
-            const modal = document.getElementById('claimModal');
-            if (event.target == modal) {
+            const claimModal = document.getElementById('claimModal');
+            const verifyModal = document.getElementById('verifyPaymentModal');
+            const rejectModal = document.getElementById('rejectPaymentModal');
+            
+            if (event.target == claimModal) {
                 closeClaimModal();
+            }
+            if (event.target == verifyModal) {
+                closeVerifyPaymentModal();
+            }
+            if (event.target == rejectModal) {
+                closeRejectPaymentModal();
             }
         }
     </script>

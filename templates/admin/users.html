@@ -487,23 +487,29 @@
 
     <!-- Deactivate User Modal -->
     <div id="deactivateModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Deactivate User Account</h2>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to deactivate the account for <strong id="deactivateUsername"></strong>?</p>
-                <p style="margin-top: 10px; color: #721c24; font-size: 0.9rem;">⚠️ This will prevent the user from logging in.</p>
-            </div>
-            <form method="POST" id="deactivateForm">
-                {% csrf_token %}
-                <div class="modal-footer">
-                    <button type="button" onclick="closeDeactivateModal()" class="modal-btn modal-btn-cancel">Cancel</button>
-                    <button type="submit" class="modal-btn modal-btn-danger">Deactivate Account</button>
-                </div>
-            </form>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Deactivate User Account</h2>
         </div>
+        <div class="modal-body">
+            <p>Are you sure you want to deactivate the account for <strong id="deactivateUsername"></strong>?</p>
+            <p id="deactivateSelfWarning" style="margin-top: 10px; color: #721c24; font-size: 0.9rem; display: none;">
+                ⚠️ <strong>WARNING: You are about to deactivate your own account!</strong><br>
+                You will be immediately logged out and will not be able to log back in until another administrator reactivates your account.
+            </p>
+            <p id="deactivateRegularWarning" style="margin-top: 10px; color: #721c24; font-size: 0.9rem;">
+                ⚠️ This will prevent the user from logging in.
+            </p>
+        </div>
+        <form method="POST" id="deactivateForm">
+            {% csrf_token %}
+            <div class="modal-footer">
+                <button type="button" onclick="closeDeactivateModal()" class="modal-btn modal-btn-cancel">Cancel</button>
+                <button type="submit" class="modal-btn modal-btn-danger" id="deactivateButton">Deactivate Account</button>
+            </div>
+        </form>
     </div>
+</div>
 
     <!-- Activate User Modal -->
     <div id="activateModal" class="modal">
@@ -526,64 +532,98 @@
     </div>
 
     <script>
-        function confirmVerify(userId, username) {
-            const modal = document.getElementById('verifyModal');
-            const form = document.getElementById('verifyForm');
-            const usernameEl = document.getElementById('verifyUsername');
+    // Store current user ID for self-check
+    const currentUserId = {{ user.id }};
+
+    function confirmVerify(userId, username) {
+        const modal = document.getElementById('verifyModal');
+        const form = document.getElementById('verifyForm');
+        const usernameEl = document.getElementById('verifyUsername');
+        
+        form.action = `/accounts/admin/users/${userId}/verify/`;
+        usernameEl.textContent = username;
+        modal.classList.add('active');
+    }
+
+    function closeVerifyModal() {
+        document.getElementById('verifyModal').classList.remove('active');
+    }
+
+    function confirmDeactivate(userId, username) {
+        const modal = document.getElementById('deactivateModal');
+        const form = document.getElementById('deactivateForm');
+        const usernameEl = document.getElementById('deactivateUsername');
+        const selfWarning = document.getElementById('deactivateSelfWarning');
+        const regularWarning = document.getElementById('deactivateRegularWarning');
+        const deactivateBtn = document.getElementById('deactivateButton');
+        
+        form.action = `/accounts/admin/users/${userId}/deactivate/`;
+        usernameEl.textContent = username;
+        
+        // Check if deactivating own account
+        if (userId === currentUserId) {
+            selfWarning.style.display = 'block';
+            regularWarning.style.display = 'none';
+            deactivateBtn.textContent = 'Yes, Deactivate My Account';
+            deactivateBtn.style.background = '#dc3545';
             
-            form.action = `/accounts/admin/users/${userId}/verify/`;
-            usernameEl.textContent = username;
-            modal.classList.add('active');
+            // Add extra confirmation click handler
+            deactivateBtn.onclick = function(e) {
+                if (!confirm('⚠️ FINAL WARNING: Are you absolutely sure you want to deactivate your own account? You will be logged out immediately!')) {
+                    e.preventDefault();
+                    return false;
+                }
+                return true;
+            };
+        } else {
+            selfWarning.style.display = 'none';
+            regularWarning.style.display = 'block';
+            deactivateBtn.textContent = 'Deactivate Account';
+            deactivateBtn.style.background = '#dc3545';
+            deactivateBtn.onclick = null; // Remove extra confirmation for other users
         }
+        
+        modal.classList.add('active');
+    }
 
-        function closeVerifyModal() {
-            document.getElementById('verifyModal').classList.remove('active');
-        }
+    function closeDeactivateModal() {
+        document.getElementById('deactivateModal').classList.remove('active');
+        // Reset button
+        const deactivateBtn = document.getElementById('deactivateButton');
+        deactivateBtn.textContent = 'Deactivate Account';
+        deactivateBtn.onclick = null;
+    }
 
-        function confirmDeactivate(userId, username) {
-            const modal = document.getElementById('deactivateModal');
-            const form = document.getElementById('deactivateForm');
-            const usernameEl = document.getElementById('deactivateUsername');
-            
-            form.action = `/accounts/admin/users/${userId}/deactivate/`;
-            usernameEl.textContent = username;
-            modal.classList.add('active');
-        }
+    function confirmActivate(userId, username) {
+        const modal = document.getElementById('activateModal');
+        const form = document.getElementById('activateForm');
+        const usernameEl = document.getElementById('activateUsername');
+        
+        form.action = `/accounts/admin/users/${userId}/activate/`;
+        usernameEl.textContent = username;
+        modal.classList.add('active');
+    }
 
-        function closeDeactivateModal() {
-            document.getElementById('deactivateModal').classList.remove('active');
-        }
+    function closeActivateModal() {
+        document.getElementById('activateModal').classList.remove('active');
+    }
 
-        function confirmActivate(userId, username) {
-            const modal = document.getElementById('activateModal');
-            const form = document.getElementById('activateForm');
-            const usernameEl = document.getElementById('activateUsername');
-            
-            form.action = `/accounts/admin/users/${userId}/activate/`;
-            usernameEl.textContent = username;
-            modal.classList.add('active');
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const verifyModal = document.getElementById('verifyModal');
+        const deactivateModal = document.getElementById('deactivateModal');
+        const activateModal = document.getElementById('activateModal');
+        
+        if (event.target == verifyModal) {
+            closeVerifyModal();
         }
-
-        function closeActivateModal() {
-            document.getElementById('activateModal').classList.remove('active');
+        if (event.target == deactivateModal) {
+            closeDeactivateModal();
         }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const verifyModal = document.getElementById('verifyModal');
-            const deactivateModal = document.getElementById('deactivateModal');
-            const activateModal = document.getElementById('activateModal');
-            
-            if (event.target == verifyModal) {
-                closeVerifyModal();
-            }
-            if (event.target == deactivateModal) {
-                closeDeactivateModal();
-            }
-            if (event.target == activateModal) {
-                closeActivateModal();
-            }
+        if (event.target == activateModal) {
+            closeActivateModal();
         }
-    </script>
+    }
+</script>
 </body>
 </html>
