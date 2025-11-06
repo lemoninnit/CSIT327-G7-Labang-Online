@@ -10,9 +10,10 @@
     <link rel="icon" href="{% static 'logo.png' %}" type="image/png">
     <style>
         .announcements-container {
-            padding: 30px;
-            max-width: 1200px;
-            margin: 0 auto;
+            padding: 30px 60px;
+            width: 100%;
+            max-width: none;
+            margin: 0;
         }
 
         .page-header {
@@ -266,23 +267,18 @@
             </div>
 
             <ul class="menu">
-                <li class="menu-item">
-                    <a href="{% url 'accounts:personal_info' %}">
-                        <img src="{% static 'icons/user-info.png' %}" alt="">
-                        <span>Personal Info</span>
-                    </a>
+                <li class="menu-item" onclick="window.location.href='{% url 'accounts:personal_info' %}'">
+                    <img src="{% static 'icons/user-info.png' %}" alt="">
+                    <span>Personal Info</span>
                 </li>
                 <li class="menu-item">
-                    <a href="{% url 'accounts:document_request' %}">
-                        <img src="{% static 'icons/request-records.png' %}" alt="">
-                        <span>Document Request</span>
-                    </a>
+                    <img src="{% static 'icons/request-records.png' %}" alt="">
+                    <span>Document Request</span>
                 </li>
+                
                 <li class="menu-item">
-                    <a href="{% url 'accounts:file_report' %}">
-                        <img src="{% static 'icons/file-report.png' %}" alt="">
-                        <span>File Report</span>
-                    </a>
+                    <img src="{% static 'icons/file-report.png' %}" alt="">
+                    <span>File Report</span>
                 </li>
             </ul>
         </aside>
