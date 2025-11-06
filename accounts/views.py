@@ -403,7 +403,7 @@ def document_request(request):
 @never_cache
 def certificate_requests(request):
     user = request.user
-    
+
     # Get filter parameters - use .get() with empty string default
     certificate_type = request.GET.get('certificate_type', '').strip()
     payment_status = request.GET.get('payment_status', '').strip()
@@ -447,6 +447,8 @@ def certificate_requests(request):
         'pending_count': pending_count,
         'paid_count': paid_count,
         'unpaid_count': unpaid_count,
+        'unread_count': unread_count,
+        
     }
     return render(request, 'accounts/certificate_requests.html', context)
 
@@ -481,6 +483,7 @@ def request_detail(request, request_id):
         'user': user,
         'cert_request': cert_request,
         'next_action': next_action,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/request_detail.html', context)
 
@@ -813,6 +816,7 @@ def gcash_payment(request, request_id):
     context = {
         'user': user,
         'cert_request': cert_request,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/gcash_payment.html', context)
 
@@ -844,6 +848,7 @@ def counter_payment(request, request_id):
     context = {
         'user': user,
         'cert_request': cert_request,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/counter_payment.html', context)
 
