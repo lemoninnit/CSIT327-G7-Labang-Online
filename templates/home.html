@@ -100,6 +100,29 @@ Barangay Labangon Digital Services{% endblock %} {% block head %}
   .contact .btn {
     margin-top: 12px;
   }
+
+  /* Nav styles for authenticated users */
+  .auth-nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .auth-nav .user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+  
+  .auth-nav .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #10b981;
+  }
 </style>
 {% endblock %} {% block content %}
 <!-- Hero -->
@@ -109,8 +132,14 @@ Barangay Labangon Digital Services{% endblock %} {% block head %}
     Request certificates, track status, and manage records without long queues.
   </p>
   <div class="cta">
-    <a href="/accounts/register/" class="btn btn-primary">Create Account</a>
-    <a href="/accounts/login/" class="btn">Sign In</a>
+    {% if user.is_authenticated %}
+      <!-- Show Dashboard button for authenticated users -->
+      <a href="{% url 'accounts:personal_info' %}" class="btn btn-primary">Go to Dashboard</a>
+    {% else %}
+      <!-- Show Login/Register for non-authenticated users -->
+      <a href="{% url 'accounts:register' %}" class="btn btn-primary">Create Account</a>
+      <a href="{% url 'accounts:login' %}" class="btn">Sign In</a>
+    {% endif %}
   </div>
   <div class="stats">
     <div class="stat">
