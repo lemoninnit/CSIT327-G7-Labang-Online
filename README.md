@@ -87,15 +87,10 @@ The Admin Dashboard allows authorized staff to manage users, certificate request
 Access Requirements
 
 User must have is_staff=True or is_superuser=True.
-
 Only staff users can access admin URLs.
-
 Creating an Admin User
-
 Create a superuser (if none exists):
-
 py manage.py createsuperuser
-
 
 Or promote an existing user to staff:
 
@@ -116,43 +111,18 @@ All admin views require login. Unauthorized users are redirected to /accounts/pe
 
 Key Features
 
-Dashboard Statistics: Users, certificates, and reports overview
+- Dashboard Statistics: Users, certificates, and reports overvie
+- User Management: Verify, activate/deactivate users, view details
+- Certificate Management: Approve/reject payments, update claim status
+- Report Management: Update status, delete reports
+- Activity Tracking: Automatic logging via Django
+- Create announcements
+- Security
+- Authentication required
+- CSRF protection on all forms
+- SQL injection prevention through Django ORM
+- Only staff can perform admin actions
 
-User Management: Verify, activate/deactivate users, view details
-
-Certificate Management: Approve/reject payments, update claim status
-
-Report Management: Update status, delete reports
-
-Activity Tracking: Automatic logging via Django
-
-Security
-
-Authentication required
-
-CSRF protection on all forms
-
-SQL injection prevention through Django ORM
-
-Only staff can perform admin actions
-
-Testing Checklist
-
- Admin dashboard loads correctly
-
- All summary cards display statistics
-
- Recent activities are visible
-
- Sidebar highlights the active section
-
- Verify/deactivate users works
-
- Certificate payment approval/rejection works
-
- Report status updates and deletion works
-
- Success/error messages display correctly
 
 ## Team members
 - Lenon Lee O. Natividad 
