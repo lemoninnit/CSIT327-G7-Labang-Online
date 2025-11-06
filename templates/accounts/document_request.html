@@ -352,12 +352,20 @@
           <span>LabangOnline</span>
         </div>
 
-        <div class="notification-item">
+        
+        <!-- Notification with badge -->
+        <div
+          class="notification-item"
+          onclick="window.location.href='{% url 'accounts:announcements' %}'"
+        >
           <div class="notification-icon-wrapper">
-            <img src="{% static 'icons/notification.png' %}" alt="Notification" />
-            <span class="notification-badge">5</span>
+            <img
+              src="{% static 'icons/notification.png' %}"
+              alt="Notification"
+            />
+            <span class="notification-badge">{{ unread_count|default:0 }}</span>
           </div>
-          <span>Notification</span>
+          <span>Announcements</span>
         </div>
 
         <ul class="menu">
@@ -365,7 +373,7 @@
             <img src="{% static 'icons/user-info.png' %}" alt="" />
             <span>Personal Info</span>
           </li>
-          <li class="menu-item active">
+          <li class="menu-item active" onclick="window.location.href='{% url 'accounts:document_request' %}'">
             <img src="{% static 'icons/request-records.png' %}" alt="" />
             <span>Document Request</span>
           </li>
@@ -375,7 +383,6 @@
               <span>File Report</span>
             </a>
           </li>
-        </ul>
       </aside>
 
       <!-- Main Content -->

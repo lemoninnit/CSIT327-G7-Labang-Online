@@ -31,6 +31,8 @@ from django.contrib.auth.decorators import user_passes_test
 
 
 # -------------------- LOGIN --------------------
+unread_count = Announcement.objects.filter(is_active=True).count()
+
 @never_cache
 def login(request):
     if request.method == 'POST':
@@ -258,6 +260,7 @@ def logout_confirm(request):
 
 
 # -------------------- PERSONAL INFO --------------------
+
 @login_required(login_url='accounts:login')
 @never_cache
 def personal_info(request):
@@ -281,6 +284,8 @@ def personal_info(request):
 @never_cache
 def edit_profile(request):
     user = request.user
+    
+    unread_count = Announcement.objects.filter(is_active=True).count()
 
     if request.method == 'POST':
         save_ok = True
@@ -361,6 +366,7 @@ def edit_profile(request):
 
     context = {
         'user': user,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/edit_profile.html', context)
 
@@ -388,6 +394,7 @@ def document_request(request):
     
     context = {
         'user': user,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/document_request.html', context)
 
@@ -509,6 +516,7 @@ def barangay_clearance_request(request):
     
     context = {
         'user': user,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/barangay_clearance_request.html', context)
 
@@ -544,6 +552,7 @@ def brgy_residency_cert(request):
     
     context = {
         'user': user,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/brgy_residency_cert.html', context)
 
@@ -603,6 +612,7 @@ def brgy_indigency_cert(request):
     
     context = {
         'user': user,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/brgy_indigency_cert.html', context)
 
@@ -638,6 +648,7 @@ def brgy_goodmoral_character(request):
     
     context = {
         'user': user,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/brgy_goodmoral_character.html', context)
 
@@ -701,6 +712,7 @@ def brgy_business_cert(request):
     
     context = {
         'user': user,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/brgy_business_cert.html', context)
 
@@ -868,10 +880,12 @@ def cancel_request(request, request_id):
 @never_cache
 def report_records(request):
     user = request.user
-
+    unread_count = Announcement.objects.filter(is_active=True).count()
+    
     # Get all incident reports for the current user
     all_records = IncidentReport.objects.filter(user=user)
     records = all_records.order_by('-created_at')
+    
 
     # Get filter parameters
     query = request.GET.get('q', '').strip()
@@ -902,6 +916,7 @@ def report_records(request):
         'pending_count': pending_count,
         'investigation_count': investigation_count,
         'resolved_count': resolved_count,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/report_records.html', context)
 
@@ -910,7 +925,8 @@ def report_records(request):
 @never_cache
 def file_report(request):
     user = request.user
-
+    unread_count = Announcement.objects.filter(is_active=True).count()
+    
     if request.method == 'POST':
         report_type = request.POST.get('report_type')
         place = request.POST.get('place')
@@ -975,6 +991,7 @@ def file_report(request):
 
     context = {
         'user': user,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/file_report.html', context)
 
@@ -1404,8 +1421,6 @@ def announcements(request):
     if announcement_type and announcement_type in ['general', 'event', 'alert', 'maintenance']:
         announcements_list = announcements_list.filter(announcement_type=announcement_type)
     
-    # Count unread (for badge) - for now, show total active announcements
-    unread_count = announcements_list.count()
     
     context = {
         'user': user,
@@ -1458,6 +1473,7 @@ def admin_announcements(request):
         'user': request.user,
         'announcements': announcements_list,
         'total_announcements': announcements_list.count(),
+        'unread_count': unread_count,
     }
     
     return render(request, 'admin/announcements.html', context)
@@ -1561,23 +1577,3 @@ def admin_toggle_announcement(request, announcement_id):
     return redirect('accounts:admin_announcements')
 
 
-# ============================================
-# 5. UPDATE personal_info view to include unread_count
-# ============================================
-
-@login_required(login_url='accounts:login')
-@never_cache
-def personal_info(request):
-    storage = messages.get_messages(request)
-    storage.used = True
-
-    user = request.user
-    
-    # Get unread announcement count
-    unread_count = Announcement.objects.filter(is_active=True).count()
-
-    context = {
-        'user': user,
-        'unread_count': unread_count,
-    }   
-    return render(request, 'accounts/personal_info.html', context)

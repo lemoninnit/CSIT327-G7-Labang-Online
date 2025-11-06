@@ -298,12 +298,12 @@
                     <img src="{% static 'icons/user-info.png' %}" alt="">
                     <span>Personal Info</span>
                 </li>
-                <li class="menu-item">
+                <li class="menu-item" onclick="window.location.href='{% url 'accounts:document_request' %}'">
                     <img src="{% static 'icons/request-records.png' %}" alt="">
                     <span>Document Request</span>
                 </li>
                 
-                <li class="menu-item">
+                <li class="menu-item" onclick="window.location.href='{% url 'accounts:file_report' %}'">
                     <img src="{% static 'icons/file-report.png' %}" alt="">
                     <span>File Report</span>
                 </li>
