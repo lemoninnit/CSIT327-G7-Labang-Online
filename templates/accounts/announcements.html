@@ -247,6 +247,32 @@
             color: var(--text-primary);
             line-height: 1.8;
         }
+
+        .notification-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s;
+            color: var(--text-primary);
+        }
+
+        .notification-item:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .notification-item.active {
+            background: #10b981;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .notification-item.active img {
+            filter: brightness(0) invert(1);
+        }
+
     </style>
 </head>
 <body>
@@ -258,7 +284,8 @@
                 <span>LabangOnline</span>
             </div>
 
-            <div class="notification-item" onclick="window.location.href='{% url 'accounts:announcements' %}'">
+            <div class="notification-item {% if request.resolver_match.url_name == 'announcements' %}active{% endif %}"
+                onclick="window.location.href='{% url 'accounts:announcements' %}'">
                 <div class="notification-icon-wrapper">
                     <img src="{% static 'icons/notification.png' %}" alt="Notification">
                     <span class="notification-badge">{{ unread_count|default:0 }}</span>
