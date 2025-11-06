@@ -197,6 +197,12 @@
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
       }
+
+      /* Admin role badge styling */
+      .role.admin {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+      }
     </style>
   </head>
   <body>
@@ -209,15 +215,18 @@
         </div>
 
         <!-- Notification with badge -->
-        <div class="notification-item">
+        <div
+          class="notification-item"
+          onclick="window.location.href='{% url 'accounts:announcements' %}'"
+        >
           <div class="notification-icon-wrapper">
             <img
               src="{% static 'icons/notification.png' %}"
               alt="Notification"
             />
-            <span class="notification-badge">5</span>
+            <span class="notification-badge">{{ unread_count|default:0 }}</span>
           </div>
-          <span>Notification</span>
+          <span>Announcements</span>
         </div>
 
         <ul class="menu">
@@ -284,25 +293,27 @@
           <!-- Left: User Information -->
           <div class="content-left">
             <div class="user-header">
-  {% if user.profile_photo_url %}
-    <img src="{{ user.profile_photo_url }}" alt="User Profile" />
-  {% else %}
-    <img src="{% static 'icons/default_user.png' %}" alt="User Profile" />
-  {% endif %}
-  <div class="user-name">
-    <h2>{{ user.full_name }}</h2>
-    {% if user.is_superuser %}
-      <span class="role admin">Super Administrator</span>
-    {% elif user.is_staff %}
-      <span class="role admin">Administrator</span>
-    {% elif user.resident_confirmation %}
-      <span class="role">Resident</span>
-    {% else %}
-      <span class="role pending">Pending Verification</span>
-    {% endif %}
-  </div>
-</div>
-
+              {% if user.profile_photo_url %}
+              <img src="{{ user.profile_photo_url }}" alt="User Profile" />
+              {% else %}
+              <img
+                src="{% static 'icons/default_user.png' %}"
+                alt="User Profile"
+              />
+              {% endif %}
+              <div class="user-name">
+                <h2>{{ user.full_name }}</h2>
+                {% if user.is_superuser %}
+                <span class="role admin">Super Administrator</span>
+                {% elif user.is_staff %}
+                <span class="role admin">Administrator</span>
+                {% elif user.resident_confirmation %}
+                <span class="role">Resident</span>
+                {% else %}
+                <span class="role pending">Pending Verification</span>
+                {% endif %}
+              </div>
+            </div>
 
             <div class="info-section">
               <h3>USER INFORMATION</h3>

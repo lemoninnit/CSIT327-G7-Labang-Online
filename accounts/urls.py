@@ -56,5 +56,15 @@ path('admin/reports/', views.admin_reports, name='admin_reports'),
 path('admin/reports/<str:report_id>/', views.admin_report_detail, name='admin_report_detail'),
 path('admin/reports/<str:report_id>/update-status/', views.admin_update_report_status, name='admin_update_report_status'),
 path('admin/reports/<str:report_id>/delete/', views.admin_delete_report, name='admin_delete_report'),
+
+# User Announcements (Notifications)
+    path('announcements/', views.announcements, name='announcements'),
+    
+    # Admin Announcement Management
+    path('admin/announcements/', views.admin_announcements, name='admin_announcements'),
+    path('admin/announcements/create/', views.admin_create_announcement, name='admin_create_announcement'),
+    path('admin/announcements/<int:announcement_id>/edit/', views.admin_edit_announcement, name='admin_edit_announcement'),
+    path('admin/announcements/<int:announcement_id>/delete/', views.admin_delete_announcement, name='admin_delete_announcement'),
+    path('admin/announcements/<int:announcement_id>/toggle/', views.admin_toggle_announcement, name='admin_toggle_announcement'),
     
 ]

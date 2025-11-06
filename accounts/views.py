@@ -16,13 +16,15 @@ from django.views.decorators.cache import never_cache
 from django.shortcuts import render
 from .models import User, PasswordResetCode
 from .forms import RegistrationForm
-from .models import User, PasswordResetCode, CertificateRequest, IncidentReport
+from .models import User, PasswordResetCode, CertificateRequest, IncidentReport, Announcement
 from django.db import models  # Add this for Q queries
 
 
 from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.contrib.auth.decorators import user_passes_test
+
+
 
 # -------------------- HELPER FUNCTION --------------------
 # REMOVED: get_base64_image function - no longer needed with URL fields
@@ -263,9 +265,13 @@ def personal_info(request):
     storage.used = True
 
     user = request.user
+    
+    # Get unread announcement count
+    unread_count = Announcement.objects.filter(is_active=True).count()
 
     context = {
         'user': user,
+        'unread_count': unread_count,
     }   
     return render(request, 'accounts/personal_info.html', context)
 
@@ -989,8 +995,11 @@ def admin_dashboard(request):
     Main admin dashboard with summary statistics and recent activities
     Implements US-33 (Admin Dashboard UI) and US-34 (Admin Dashboard Functionality)
     """
-    
-    # Summary Statistics
+    # Announcement Statistics
+    total_announcements = Announcement.objects.count()
+    active_announcements = Announcement.objects.filter(is_active=True).count()
+    recent_announcements = Announcement.objects.select_related('posted_by').order_by('-created_at')[:5]
+        # Summary Statistics 
     total_users = User.objects.filter(is_staff=False).count()
     verified_users = User.objects.filter(resident_confirmation=True, is_staff=False).count()
     pending_verification = User.objects.filter(resident_confirmation=False, is_staff=False).count()
@@ -1032,6 +1041,9 @@ def admin_dashboard(request):
         'recent_certificates': recent_certificates,
         'recent_reports': recent_reports,
         'recent_users': recent_users,
+        'total_announcements': total_announcements,
+        'active_announcements': active_announcements,
+        'recent_announcements': recent_announcements,
     }
     
     return render(request, 'admin/dashboard.html', context)
@@ -1372,3 +1384,200 @@ def admin_delete_report(request, report_id):
         return redirect('accounts:admin_reports')
     
     return redirect('accounts:admin_reports')
+
+@login_required(login_url='accounts:login')
+@never_cache
+def announcements(request):
+    """
+    User view for announcements
+    Implements US-35: User Announcement Viewing
+    """
+    user = request.user
+    
+    # Get only active announcements
+    announcements_list = Announcement.objects.filter(is_active=True).select_related('posted_by')
+    
+    # Get filter parameters
+    announcement_type = request.GET.get('type', '').strip()
+    
+    # Apply type filter if provided
+    if announcement_type and announcement_type in ['general', 'event', 'alert', 'maintenance']:
+        announcements_list = announcements_list.filter(announcement_type=announcement_type)
+    
+    # Count unread (for badge) - for now, show total active announcements
+    unread_count = announcements_list.count()
+    
+    context = {
+        'user': user,
+        'announcements': announcements_list,
+        'unread_count': unread_count,
+    }
+    
+    return render(request, 'accounts/announcements.html', context)
+
+
+# ============================================
+# ADMIN VIEWS FOR ANNOUNCEMENTS
+# ============================================
+
+@login_required(login_url='accounts:login')
+@user_passes_test(is_admin, login_url='accounts:personal_info')
+@never_cache
+def admin_announcements(request):
+    """
+    Admin view for managing announcements
+    Implements US-34 AC-40: Announcement Management
+    """
+    
+    # Get filter parameters
+    query = request.GET.get('q', '').strip()
+    announcement_type = request.GET.get('type', '').strip()
+    status = request.GET.get('status', '').strip()
+    
+    # Base queryset
+    announcements_list = Announcement.objects.select_related('posted_by').order_by('-created_at')
+    
+    # Apply search filter
+    if query:
+        announcements_list = announcements_list.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query)
+        )
+    
+    # Apply type filter
+    if announcement_type:
+        announcements_list = announcements_list.filter(announcement_type=announcement_type)
+    
+    # Apply status filter
+    if status == 'active':
+        announcements_list = announcements_list.filter(is_active=True)
+    elif status == 'inactive':
+        announcements_list = announcements_list.filter(is_active=False)
+    
+    context = {
+        'user': request.user,
+        'announcements': announcements_list,
+        'total_announcements': announcements_list.count(),
+    }
+    
+    return render(request, 'admin/announcements.html', context)
+
+
+@login_required(login_url='accounts:login')
+@user_passes_test(is_admin, login_url='accounts:personal_info')
+@never_cache
+def admin_create_announcement(request):
+    """Create new announcement"""
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        announcement_type = request.POST.get('announcement_type')
+        is_active = request.POST.get('is_active') == 'on'
+        
+        # Validation
+        if not title or not content:
+            messages.error(request, "Title and content are required.")
+            return redirect('accounts:admin_announcements')
+        
+        if announcement_type not in ['general', 'event', 'alert', 'maintenance']:
+            messages.error(request, "Invalid announcement type.")
+            return redirect('accounts:admin_announcements')
+        
+        # Create announcement
+        Announcement.objects.create(
+            title=title,
+            content=content,
+            announcement_type=announcement_type,
+            is_active=is_active,
+            posted_by=request.user
+        )
+        
+        messages.success(request, "Announcement created successfully!")
+        return redirect('accounts:admin_announcements')
+    
+    return redirect('accounts:admin_announcements')
+
+
+@login_required(login_url='accounts:login')
+@user_passes_test(is_admin, login_url='accounts:personal_info')
+@never_cache
+def admin_edit_announcement(request, announcement_id):
+    """Edit existing announcement"""
+    announcement = get_object_or_404(Announcement, id=announcement_id)
+    
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        announcement_type = request.POST.get('announcement_type')
+        is_active = request.POST.get('is_active') == 'on'
+        
+        # Validation
+        if not title or not content:
+            messages.error(request, "Title and content are required.")
+            return redirect('accounts:admin_announcements')
+        
+        # Update announcement
+        announcement.title = title
+        announcement.content = content
+        announcement.announcement_type = announcement_type
+        announcement.is_active = is_active
+        announcement.save()
+        
+        messages.success(request, "Announcement updated successfully!")
+        return redirect('accounts:admin_announcements')
+    
+    return redirect('accounts:admin_announcements')
+
+
+@login_required(login_url='accounts:login')
+@user_passes_test(is_admin, login_url='accounts:personal_info')
+@never_cache
+def admin_delete_announcement(request, announcement_id):
+    """Delete announcement"""
+    if request.method == 'POST':
+        announcement = get_object_or_404(Announcement, id=announcement_id)
+        announcement.delete()
+        
+        messages.success(request, "Announcement deleted successfully!")
+        return redirect('accounts:admin_announcements')
+    
+    return redirect('accounts:admin_announcements')
+
+
+@login_required(login_url='accounts:login')
+@user_passes_test(is_admin, login_url='accounts:personal_info')
+@never_cache
+def admin_toggle_announcement(request, announcement_id):
+    """Toggle announcement active status"""
+    if request.method == 'POST':
+        announcement = get_object_or_404(Announcement, id=announcement_id)
+        announcement.is_active = not announcement.is_active
+        announcement.save()
+        
+        status = "activated" if announcement.is_active else "deactivated"
+        messages.success(request, f"Announcement {status} successfully!")
+        return redirect('accounts:admin_announcements')
+    
+    return redirect('accounts:admin_announcements')
+
+
+# ============================================
+# 5. UPDATE personal_info view to include unread_count
+# ============================================
+
+@login_required(login_url='accounts:login')
+@never_cache
+def personal_info(request):
+    storage = messages.get_messages(request)
+    storage.used = True
+
+    user = request.user
+    
+    # Get unread announcement count
+    unread_count = Announcement.objects.filter(is_active=True).count()
+
+    context = {
+        'user': user,
+        'unread_count': unread_count,
+    }   
+    return render(request, 'accounts/personal_info.html', context)
