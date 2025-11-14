@@ -135,7 +135,7 @@ def forgot_password(request):
             
             Your verification code is: {reset_code.code}
             
-            This code will expire in 10 minutes.
+            This code will expire in 5 minutes.
             
             If you didn't request this password reset, please ignore this email.
             
@@ -190,8 +190,45 @@ def verify_code(request, user_id):
         except PasswordResetCode.DoesNotExist:
             messages.error(request, "Invalid verification code. Please try again.")
     
-    context = {'user': user}
+    context = {'user': user, 'hide_user_nav': True}
     return render(request, 'accounts/verify_code.html', context)
+
+
+# -------------------- RESEND VERIFICATION CODE --------------------
+def resend_code(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    
+    # Generate a new code and send email
+    reset_code = PasswordResetCode.generate_code(user)
+    subject = 'Password Reset Verification Code - Labang Online'
+    message = f"""
+    Hello {user.full_name},
+    
+    Here is your new verification code for resetting your password:
+    
+    Your verification code is: {reset_code.code}
+    
+    This code will expire in 5 minutes.
+    
+    If you didn't request this password reset, please ignore this email.
+    
+    Best regards,
+    Labang Online Team
+    """
+    try:
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+        messages.success(request, f"A new verification code was sent to {user.email}.")
+    except Exception as e:
+        messages.error(request, f"Failed to send email. Please try again later. Error: {str(e)}")
+    
+    # Return to verify page with minimal header
+    return redirect('accounts:verify_code', user_id=user.id)
 
 
 # -------------------- RESET PASSWORD --------------------

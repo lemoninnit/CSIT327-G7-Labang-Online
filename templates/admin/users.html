@@ -5,8 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management - Admin</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin/users.css' %}">
+    <!-- Inline styles moved to static/css/admin/users.css -->
+    <!-- <style>
         * {
             margin: 0;
             padding: 0;
@@ -14,8 +17,9 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
+            font-family: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
         }
 
@@ -27,28 +31,30 @@
         /* Sidebar */
         .sidebar {
             width: 260px;
-            background: #2c3e50;
-            color: white;
+            background: var(--panel);
+            color: var(--text);
             padding: 20px 0;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
+            border-right: 1px solid var(--border);
         }
 
         .sidebar-header {
             padding: 0 20px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid var(--border);
             margin-bottom: 20px;
         }
 
         .sidebar-header h2 {
             font-size: 1.5rem;
             margin-bottom: 5px;
+            color: var(--text);
         }
 
         .sidebar-header p {
             font-size: 0.9rem;
-            color: #bdc3c7;
+            color: var(--text-secondary);
         }
 
         .sidebar-menu {
@@ -63,19 +69,21 @@
             display: flex;
             align-items: center;
             padding: 12px 20px;
-            color: #ecf0f1;
+            color: var(--text);
             text-decoration: none;
-            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            transition: background .2s ease, padding-left .2s ease, color .2s ease;
         }
 
         .sidebar-menu a:hover {
-            background: rgba(255,255,255,0.1);
+            background: var(--panel-hover);
             padding-left: 25px;
         }
 
         .sidebar-menu a.active {
-            background: #3498db;
-            border-left: 4px solid #2980b9;
+            background: color-mix(in oklab, var(--brand) 20%, var(--panel) 80%);
+            border-left-color: var(--brand);
+            color: #fff;
         }
 
         .sidebar-menu a i {
@@ -97,20 +105,20 @@
 
         .page-header h1 {
             font-size: 2rem;
-            color: #2c3e50;
+            color: var(--text);
             margin-bottom: 10px;
         }
 
         .page-header p {
-            color: #7f8c8d;
+            color: var(--text-secondary);
         }
 
         /* Filters */
         .filters-section {
-            background: white;
+            background: var(--panel);
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            border: 1px solid var(--border);
             margin-bottom: 20px;
         }
 
@@ -128,7 +136,7 @@
 
         .form-group label {
             font-size: 0.9rem;
-            color: #2c3e50;
+            color: var(--text);
             margin-bottom: 5px;
             font-weight: 500;
         }
@@ -136,31 +144,34 @@
         .form-group input,
         .form-group select {
             padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
             font-size: 0.95rem;
+            background: var(--panel);
+            color: var(--text);
         }
 
         .filter-btn {
             padding: 10px 20px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
+            background: linear-gradient(90deg, var(--brand), var(--brand-700));
+            color: #071118;
+            border: 0;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 0.95rem;
-            transition: background 0.3s;
+            box-shadow: 0 8px 20px rgba(34,197,94,0.22);
+            transition: filter .2s ease;
         }
 
         .filter-btn:hover {
-            background: #2980b9;
+            filter: brightness(1.05);
         }
 
         /* Table */
         .table-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: var(--panel);
+            border-radius: 12px;
+            border: 1px solid var(--border);
             overflow: hidden;
         }
 
@@ -174,8 +185,8 @@
         }
 
         thead {
-            background: #34495e;
-            color: white;
+            background: var(--panel-hover);
+            color: var(--text);
         }
 
         th, td {
@@ -184,12 +195,12 @@
         }
 
         tbody tr {
-            border-bottom: 1px solid #ecf0f1;
-            transition: background 0.3s;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
         }
 
         tbody tr:hover {
-            background: #f8f9fa;
+            background: var(--panel-hover);
         }
 
         .status-badge {
@@ -198,54 +209,54 @@
             border-radius: 12px;
             font-size: 0.85rem;
             font-weight: 500;
+            border: 1px solid var(--border);
         }
-
-        .status-verified { background: #d4edda; color: #155724; }
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-active { background: #d1ecf1; color: #0c5460; }
-        .status-inactive { background: #f8d7da; color: #721c24; }
+        .status-verified { border-color: var(--success); color: var(--success); }
+        .status-pending { border-color: var(--warning); color: var(--warning); }
+        .status-active { border-color: var(--brand); color: var(--brand); }
+        .status-inactive { border-color: var(--danger); color: var(--danger); }
 
         .action-btn {
             padding: 6px 12px;
             margin: 0 3px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 0.85rem;
-            transition: all 0.3s;
+            transition: filter .2s ease;
         }
 
         .btn-verify {
-            background: #28a745;
-            color: white;
+            background: var(--success);
+            color: #071118;
         }
 
         .btn-verify:hover {
-            background: #218838;
+            filter: brightness(1.05);
         }
 
         .btn-deactivate {
-            background: #dc3545;
-            color: white;
+            background: var(--danger);
+            color: #071118;
         }
 
         .btn-deactivate:hover {
-            background: #c82333;
+            filter: brightness(1.05);
         }
 
         .btn-activate {
-            background: #17a2b8;
-            color: white;
+            background: var(--brand);
+            color: #071118;
         }
 
         .btn-activate:hover {
-            background: #138496;
+            filter: brightness(1.05);
         }
 
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #7f8c8d;
+            color: var(--text-secondary);
         }
 
         .empty-state i {
@@ -273,9 +284,10 @@
         }
 
         .modal-content {
-            background: white;
+            background: var(--panel);
             padding: 30px;
-            border-radius: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
             max-width: 500px;
             width: 90%;
         }
@@ -285,11 +297,12 @@
         }
 
         .modal-header h2 {
-            color: #2c3e50;
+            color: var(--text);
         }
 
         .modal-body {
             margin-bottom: 20px;
+            color: var(--text);
         }
 
         .modal-footer {
@@ -301,29 +314,30 @@
         .modal-btn {
             padding: 10px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 0.95rem;
+            transition: filter .2s ease;
         }
 
         .modal-btn-primary {
-            background: #28a745;
-            color: white;
+            background: var(--success);
+            color: #071118;
         }
 
         .modal-btn-danger {
-            background: #dc3545;
-            color: white;
+            background: var(--danger);
+            color: #071118;
         }
 
         .modal-btn-info {
-            background: #17a2b8;
-            color: white;
+            background: var(--brand);
+            color: #071118;
         }
 
         .modal-btn-cancel {
-            background: #95a5a6;
-            color: white;
+            background: var(--muted);
+            color: #071118;
         }
 
         @media (max-width: 768px) {
@@ -353,7 +367,7 @@
                 grid-template-columns: 1fr;
             }
         }
-    </style>
+    </style> -->
 </head>
 <body>
     <div class="admin-container">

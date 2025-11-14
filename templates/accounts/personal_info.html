@@ -9,7 +9,9 @@
     <link rel="stylesheet" href="{% static 'css/app.css' %}" />
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
     <link rel="icon" href="{% static 'logo.png' %}" type="image/png" />
-    <style>
+    <link rel="stylesheet" href="{% static 'css/pages/personal_info.css' %}" />
+    <!-- inline styles moved to static/css/pages/personal_info.css -->
+    <!--
       /* Fix scrolling issues */
       html,
       body {
@@ -43,12 +45,26 @@
         height: 100%;
       }
 
-      /* Left column - User info */
+      /* Left column - User info (transparent to show pure black bg) */
       .content-left {
         flex: 1;
-        background-color: var(--panel);
-        border-radius: 12px;
+        background: transparent;
+        border-radius: 0;
         padding: 24px;
+        overflow-y: auto;
+        max-height: 100%;
+      }
+
+      /* Right column - Action area (transparent like Document Request) */
+      .content-right {
+        width: 300px;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 24px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
         overflow-y: auto;
         max-height: 100%;
       }
@@ -109,7 +125,7 @@
       .role {
         display: inline-block;
         padding: 6px 16px;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
         color: white;
         border-radius: 20px;
         font-size: 13px;
@@ -120,7 +136,7 @@
       }
 
       .role.pending {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        background: linear-gradient(135deg, #1e293b 0%, #1e293b 100%);
       }
 
       /* Resident ID Card Styling */
@@ -160,6 +176,31 @@
         height: 80px;
         margin-bottom: 16px;
         filter: grayscale(100%);
+        max-width: 100%;
+        width: auto;
+        object-fit: contain;
+      }
+
+      /* Light mode overrides for Resident ID section */
+      .light .resident-id-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        box-shadow: 0 4px 12px rgba(17, 24, 39, 0.06);
+      }
+
+      .light .resident-id-container img {
+        box-shadow: 0 4px 12px rgba(17, 24, 39, 0.08);
+      }
+
+      .light .id-placeholder {
+        background: rgba(148, 163, 184, 0.15);
+        border: 2px dashed rgba(148, 163, 184, 0.35);
+        color: #475569;
+      }
+
+      .light .id-placeholder img {
+        opacity: 0.5;
+        filter: grayscale(0%);
       }
 
       .id-placeholder p {
@@ -188,24 +229,42 @@
 
       /* Optional: Add distinct styling for admin button */
       .action-btn.admin-btn {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
         margin-top: 15px;
       }
 
       .action-btn.admin-btn:hover {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
       }
 
       /* Admin role badge styling */
       .role.admin {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
       }
-    </style>
+
+      /* Super admin overrides: switch blue to green theme */
+      .super-admin .action-btn.admin-btn {
+        background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
+        color: #fff;
+        border: none;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+      }
+
+      .super-admin .action-btn.admin-btn:hover {
+        background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
+        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+      }
+
+      .super-admin .role.admin {
+        background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+      }
+    -->
   </head>
-  <body>
+  <body class="{% if user.is_superuser %}super-admin{% endif %}">
     <div class="dashboard-wrapper">
       <!-- Sidebar -->
       <aside class="sidebar">
@@ -350,7 +409,7 @@
                     {% if user.resident_confirmation %}
                     <span style="color: #10b981; font-weight: 600">✓ Yes</span>
                     {% else %}
-                    <span style="color: #f59e0b; font-weight: 600">⏳ No</span>
+                    <span style="color: var(--text-secondary); font-weight: 600">⏳ No</span>
                     {% endif %}
                   </td>
                 </tr>
@@ -375,7 +434,7 @@
               <h3>RESIDENT ID</h3>
               <div class="resident-id-container">
                 {% if user.resident_id_photo_url %}
-                <img src="{{ user.resident_id_photo_url }}" alt="Resident ID" />
+                <img src="{{ user.resident_id_photo_url }}" alt="Resident ID" class="real-id" />
                 {% else %}
                 <div class="id-placeholder">
                   <img src="{% static 'icons/file-report.png' %}" alt="No ID" />

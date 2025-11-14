@@ -8,7 +8,8 @@
     <link rel="icon" href="{% static 'logo.png' %}" type="image/png">
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-    <style>
+    <link rel="stylesheet" href="{% static 'css/pages/gcash_payment.css' %}">
+    <!-- <style>
         html, body {
             overflow: hidden;
             height: 100%;
@@ -63,10 +64,10 @@
             color: #374151;
         }
 
-        /* Payment Instructions */
+        /* Payment Instructions (green theme) */
         .instructions-card {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.25);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 32px;
@@ -75,7 +76,7 @@
         .instructions-title {
             font-size: 18px;
             font-weight: 600;
-            color: #3b82f6;
+            color: #10b981;
             margin-bottom: 16px;
             display: flex;
             align-items: center;
@@ -105,7 +106,7 @@
             flex-shrink: 0;
             width: 28px;
             height: 28px;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
             color: white;
             border-radius: 50%;
             display: flex;
@@ -113,6 +114,7 @@
             justify-content: center;
             font-weight: 600;
             font-size: 14px;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
         }
 
         /* QR Code Section */
@@ -123,6 +125,7 @@
             padding: 32px;
             text-align: center;
             margin-bottom: 32px;
+            position: relative; /* allow amount badge to anchor bottom-right */
         }
 
         .light .qr-section {
@@ -167,12 +170,16 @@
         }
 
         .amount-display {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.35);
             border-radius: 12px;
             padding: 16px 24px;
             display: inline-block;
-            margin-top: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            position: absolute;
+            right: 24px;
+            bottom: 24px;
+            margin-top: 0;
         }
 
         .amount-label {
@@ -189,6 +196,18 @@
             font-size: 32px;
             font-weight: 700;
             color: #10b981;
+        }
+
+        @media (max-width: 640px) {
+            .qr-code-wrapper img {
+                width: 220px;
+                height: 220px;
+            }
+            .amount-display {
+                position: static;
+                margin-top: 16px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            }
         }
 
         /* Reference Number Form */
@@ -279,8 +298,8 @@
 
         /* Warning Box */
         .warning-box {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
+            background: rgba(30, 41, 59, 0.12);
+            border: 1px solid rgba(30, 41, 59, 0.3);
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 24px;
@@ -289,7 +308,7 @@
         }
 
         .warning-icon {
-            color: #f59e0b;
+            color: var(--text-secondary);
             flex-shrink: 0;
         }
 
@@ -313,7 +332,7 @@
         .btn-submit {
             flex: 1;
             padding: 16px 32px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -400,7 +419,7 @@
         .light .info-value {
             color: #1e293b;
         }
-    </style>
+    </style> -->
 </head>
 <body>
     <div class="dashboard-wrapper">
@@ -539,7 +558,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>GCash Reference Number <span style="color: #ef4444;">*</span></label>
+                            <label>GCash Reference Number <span style="color: var(--brand)">*</span></label>
                             <input 
                                 type="text" 
                                 name="reference_number" 

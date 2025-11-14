@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <link rel="icon" href="{% static 'logo.png' %}" type="image/png" />
-    <style>
+    <link rel="stylesheet" href="{% static 'css/pages/request_detail.css' %}">
+    <!-- Inline styles moved to static/css/pages/request_detail.css -->
+    <!-- <style>
         html, body { overflow: hidden; height: 100%; margin: 0; padding: 0; }
         .dashboard-wrapper { height: 100vh; overflow: hidden; display: flex; }
         .main-content { flex: 1; overflow-y: auto; overflow-x: hidden; height: 100vh; display: flex; flex-direction: column; }
@@ -49,14 +51,14 @@
 
         /* Status badges copied to match list page */
         .status-badge { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-        .status-badge.unpaid { background: rgba(239,68,68,0.15); color: #fecaca; border: 1px solid rgba(239,68,68,0.3); }
-        .status-badge.pending { background: rgba(234,179,8,0.15); color: #fde68a; border: 1px solid rgba(234,179,8,0.4); }
-        .status-badge.paid { background: rgba(16,185,129,0.15); color: #bbf7d0; border: 1px solid rgba(16,185,129,0.35); }
-        .status-badge.failed { background: rgba(239,68,68,0.15); color: #fecaca; border: 1px solid rgba(239,68,68,0.3); }
-        .status-badge.processing { background: rgba(59,130,246,0.12); color: #bfdbfe; border: 1px solid rgba(59,130,246,0.35); }
-        .status-badge.ready { background: rgba(16,185,129,0.12); color: #bbf7d0; border: 1px solid rgba(16,185,129,0.35); }
-        .status-badge.claimed { background: rgba(99,102,241,0.12); color: #c7d2fe; border: 1px solid rgba(99,102,241,0.35); }
-    </style>
+        .status-badge.unpaid { background: rgba(30,41,59,0.18); color: var(--text-secondary); border: 1px solid rgba(30,41,59,0.35); }
+        .status-badge.pending { background: rgba(30,41,59,0.18); color: var(--text-secondary); border: 1px solid rgba(30,41,59,0.35); }
+        .status-badge.paid { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.35); }
+        .status-badge.failed { background: rgba(30,41,59,0.18); color: var(--text-secondary); border: 1px solid rgba(30,41,59,0.35); }
+        .status-badge.processing { background: rgba(30,41,59,0.18); color: var(--text-secondary); border: 1px solid rgba(30,41,59,0.35); }
+        .status-badge.ready { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.35); }
+        .status-badge.claimed { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.35); }
+    </style> -->
 </head>
 <body>
     <div class="dashboard-wrapper">

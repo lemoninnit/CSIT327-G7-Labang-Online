@@ -8,7 +8,9 @@
     <link rel="icon" href="{% static 'logo.png' %}" type="image/png">
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-    <style>
+    <link rel="stylesheet" href="{% static 'css/pages/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pages/brgy_indigency_cert.css' %}">
+    <!-- <style>
         html, body {
             overflow: hidden;
             height: 100%;
@@ -102,7 +104,7 @@
             content: '';
             width: 3px;
             height: 20px;
-            background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(180deg, #10b981 0%, #10b981 100%);
             border-radius: 2px;
         }
 
@@ -198,7 +200,7 @@
         }
 
         .info-box-icon {
-            color: #3b82f6;
+            color: var(--brand);
             flex-shrink: 0;
         }
 
@@ -235,7 +237,7 @@
         .btn-submit {
             flex: 1;
             padding: 14px 24px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -304,7 +306,7 @@
             font-weight: 700;
             color: #10b981;
         }
-    </style>
+    </style> -->
 </head>
 <body>
     <div class="dashboard-wrapper">
@@ -413,7 +415,7 @@
                             <h3 class="section-title">Financial Proof Requirement</h3>
                             
                             <div class="form-group">
-                                <label>Financial Proof Image <span style="color: #ef4444;">*</span></label>
+            <label>Financial Proof Image <span style="color: var(--brand)">*</span></label>
                                 <input type="file" name="proof_photo" accept="image/*" required>
                                 <div class="file-upload-hint">Please attach a picture proof about your financial status (e.g., pay slip, income statement, etc.)</div>
                             </div>
@@ -430,7 +432,7 @@
                             <h3 class="section-title">Request Details</h3>
                             
                             <div class="form-group">
-                                <label>Purpose of Request <span style="color: #ef4444;">*</span></label>
+            <label>Purpose of Request <span style="color: var(--brand)">*</span></label>
                                 <textarea name="purpose" required placeholder="Please specify the purpose of this certificate of indigency (e.g., Employment, Local Business, Police Clearance, etc.)"></textarea>
                             </div>
                         </div>

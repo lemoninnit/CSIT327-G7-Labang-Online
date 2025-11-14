@@ -8,6 +8,9 @@
     <link rel="icon" href="{% static 'logo.png' %}" type="image/png">
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pages/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pages/brgy_business_cert.css' %}">
+    <!--
     <style>
         html, body {
             overflow: hidden;
@@ -102,7 +105,7 @@
             content: '';
             width: 3px;
             height: 20px;
-            background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(180deg, #10b981 0%, #10b981 100%);
             border-radius: 2px;
         }
 
@@ -177,7 +180,7 @@
         }
 
         .info-box-icon {
-            color: #3b82f6;
+            color: var(--brand);
             flex-shrink: 0;
         }
 
@@ -214,7 +217,7 @@
         .btn-submit {
             flex: 1;
             padding: 14px 24px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -284,6 +287,7 @@
             color: #10b981;
         }
     </style>
+    -->
 </head>
 <body>
     <div class="dashboard-wrapper">
@@ -392,12 +396,12 @@
                             <h3 class="section-title">Business Information</h3>
                             
                             <div class="form-group">
-                                <label>Business Name <span style="color: #ef4444;">*</span></label>
+            <label>Business Name <span style="color: var(--brand)">*</span></label>
                                 <input type="text" name="business_name" required placeholder="Enter your business name">
                             </div>
 
                             <div class="form-group">
-                                <label>Business Type <span style="color: #ef4444;">*</span></label>
+            <label>Business Type <span style="color: var(--brand)">*</span></label>
                                 <select name="business_type" required>
                                     <option value="">Select Business Type</option>
                                     <option value="Sole Proprietorship">Sole Proprietorship</option>
@@ -408,17 +412,17 @@
                             </div>
 
                             <div class="form-group">
-                                <label>Business Nature <span style="color: #ef4444;">*</span></label>
+            <label>Business Nature <span style="color: var(--brand)">*</span></label>
                                 <input type="text" name="business_nature" required placeholder="e.g., Sari-sari store, Internet café, Food stall, etc.">
                             </div>
 
                             <div class="form-group">
-                                <label>Business Address <span style="color: #ef4444;">*</span></label>
+            <label>Business Address <span style="color: var(--brand)">*</span></label>
                                 <textarea name="business_address" required placeholder="Enter the complete address of your business"></textarea>
                             </div>
 
                             <div class="form-group">
-                                <label>Number of Employees <span style="color: #ef4444;">*</span></label>
+            <label>Number of Employees <span style="color: var(--brand)">*</span></label>
                                 <input type="number" name="employees_count" required min="0" placeholder="Enter number of employees">
                             </div>
                             
@@ -435,7 +439,7 @@
                             <h3 class="section-title">Request Details</h3>
                             
                             <div class="form-group">
-                                <label>Purpose of Request <span style="color: #ef4444;">*</span></label>
+            <label>Purpose of Request <span style="color: var(--brand)">*</span></label>
                                 <textarea name="purpose" required placeholder="Please specify the purpose of this good moral character (e.g., Employment, Local Business, Police Clearance, etc.)"></textarea>
                             </div>
                         </div>

@@ -3,10 +3,10 @@
 }
 :root {
     --bg: #0b1020;
-    --panel: #0f172a;
+    --panel: #1e293b;
     --text: #e2e8f0;
-    --brand: #22c55e;
-    --brand-700: #16a34a;
+    --brand: #10b981;
+    --brand-700: #10b981;
 }
 
 /* Light mode overrides */
@@ -14,8 +14,8 @@
     --bg: #f6f8fb;
     --panel: #ffffff;
     --text: #111827;
-    --brand: #22c55e;
-    --brand-700: #16a34a;
+    --brand: #10b981;
+    --brand-700: #10b981;
 }
 
 .dashboard-wrapper {
@@ -84,7 +84,7 @@
     position: absolute;
     top: -6px;
     right: -6px;
-    background-color: #ef4444;
+    background-color: var(--brand);
     color: white;
     font-size: 10px;
     font-weight: 700;
@@ -205,6 +205,13 @@
     transition: 0.2s;
     text-align: center;
     letter-spacing: 0.5px;
+    text-decoration: none;
+}
+
+.action-btn:visited,
+.action-btn:hover,
+.action-btn:focus {
+    text-decoration: none;
 }
 
 .action-btn:hover {
@@ -410,6 +417,47 @@
 
 .btn-cancel:hover {
     background-color: #475569;
+}
+
+/* Super administrator specific styling (green theme) */
+.super-admin .content-right .action-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+.super-admin .content-right .action-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+}
+
+.super-admin .content-right .action-btn.admin-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+.super-admin .content-right .action-btn.admin-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+}
+
+/* Super administrator badge green */
+.super-admin .role.admin {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Resident ID image should not stretch when missing or narrow */
+.resident-id-container img.real-id {
+    display: block;
+    max-width: 100%;
+    width: auto;
+    max-height: 280px;
+    margin: 0 auto;
+    object-fit: contain;
 }
 
 /* Responsive adjustments */

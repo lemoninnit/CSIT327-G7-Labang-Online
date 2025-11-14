@@ -59,6 +59,8 @@ path('admin/reports/<str:report_id>/delete/', views.admin_delete_report, name='a
 
 # User Announcements (Notifications)
     path('announcements/', views.announcements, name='announcements'),
+    # Verify code & resend
+    path('verify_code/<int:user_id>/resend/', views.resend_code, name='resend_code'),
     
     # Admin Announcement Management
     path('admin/announcements/', views.admin_announcements, name='admin_announcements'),

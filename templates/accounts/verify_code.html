@@ -19,8 +19,8 @@ Labang Online{% endblock %} {% block content %}
         />
 
         <p class="hint-text">
-          We've sent a 6-digit verification code to <strong>{{ user.email }}</strong><br />
-          Please enter the code below to continue.
+          We've sent a 6-digit verification code to <strong>{{ user.email }}</strong>.<br />
+          This code expires in <strong>5 minutes</strong>. Please enter the code below to continue.
         </p>
 
         {% if messages %}
@@ -49,12 +49,9 @@ Labang Online{% endblock %} {% block content %}
         </div>
 
         <div class="actions center-actions">
-          <button type="submit" class="btn btn-primary">
-            Verify Code
-          </button>
-          <a href="{% url 'accounts:forgot_password' %}" class="btn btn-secondary">
-            Back to Email
-          </a>
+          <button type="submit" class="btn btn-primary">Verify Code</button>
+          <a href="{% url 'accounts:forgot_password' %}" class="btn btn-secondary">Back to Email</a>
+          <a href="{% url 'accounts:resend_code' user.id %}" class="btn btn-secondary">Resend Code</a>
         </div>
       </form>
     </div>
@@ -81,6 +78,24 @@ document.getElementById('code').addEventListener('input', function(e) {
         }, 500);
     }
 });
+
+// Optional: display a 5-minute countdown
+(function() {
+  const container = document.querySelector('.hint-text');
+  const end = Date.now() + 5 * 60 * 1000;
+  function fmt(ms){
+    const s = Math.max(0, Math.floor(ms/1000));
+    const m = Math.floor(s/60);
+    const r = s % 60;
+    return `${m}:${r.toString().padStart(2,'0')}`;
+  }
+  function tick(){
+    const left = end - Date.now();
+    if (container) container.innerHTML = `We've sent a 6-digit verification code to <strong>{{ user.email }}</strong>.<br />This code expires in <strong>5 minutes</strong> (time left: <strong>${fmt(left)}</strong>).`;
+    if (left <= 0) return; else setTimeout(tick, 1000);
+  }
+  tick();
+})();
 
 // Focus on the input when page loads
 document.addEventListener('DOMContentLoaded', function() {

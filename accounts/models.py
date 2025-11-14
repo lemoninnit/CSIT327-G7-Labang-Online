@@ -51,9 +51,9 @@ class PasswordResetCode(models.Model):
         # Generate a 6-digit code
         code = ''.join(secrets.choice(string.digits) for _ in range(6))
         
-        # Create the reset code (expires in 10 minutes)
+        # Create the reset code (expires in 5 minutes)
         from django.utils import timezone
-        expires_at = timezone.now() + timezone.timedelta(minutes=10)
+        expires_at = timezone.now() + timezone.timedelta(minutes=5)
         
         return cls.objects.create(
             user=user,

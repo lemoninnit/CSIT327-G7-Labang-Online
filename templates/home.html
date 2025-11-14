@@ -1,144 +1,24 @@
 {% extends 'base.html' %} {% load static %} {% block title %}LabangOnline •
 Barangay Labangon Digital Services{% endblock %} {% block head %}
-<style>
-  .hero {
-    padding: 60px 0;
-    text-align: center;
-  }
-  .hero h1 {
-    font-size: 40px;
-    margin: 0 0 12px;
-  }
-  .hero p {
-    font-size: 18px;
-    color: var(--text-secondary);
-    margin: 0 0 20px;
-  }
-  .cta {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .section {
-    padding: 40px 0;
-  }
-  .section h2 {
-    margin: 0 0 14px;
-    font-size: 26px;
-  }
-  .muted {
-    color: var(--muted);
-  }
-
-  .grid-3 {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-  .grid-2 {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-  @media (max-width: 900px) {
-    .grid-3,
-    .grid-2 {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .card {
-    background: linear-gradient(
-      180deg,
-      var(--panel) 0%,
-      var(--panel-hover) 100%
-    );
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px;
-    box-shadow: 0 10px 30px var(--shadow);
-  }
-  .icon {
-    width: 28px;
-    height: 28px;
-    margin-right: 8px;
-  }
-  .step {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-  }
-
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-top: 24px;
-  }
-  .stat {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    text-align: center;
-  }
-  .stat .value {
-    font-size: 24px;
-    font-weight: 700;
-  }
-  .stat .label {
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .contact {
-    text-align: center;
-    padding: 40px 0;
-  }
-  .contact .btn {
-    margin-top: 12px;
-  }
-
-  /* Nav styles for authenticated users */
-  .auth-nav {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  
-  .auth-nav .user-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-secondary);
-    font-size: 14px;
-  }
-  
-  .auth-nav .user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #10b981;
-  }
-</style>
+<link rel="stylesheet" href="{% static 'css/pages/home.css' %}">
 {% endblock %} {% block content %}
 <!-- Hero -->
 <section class="hero">
   <h1>LabangOnline – Fast, Simple Barangay Services</h1>
   <p>
-    Request certificates, track status, and manage records without long queues.
+    Book certificates, file reports, and track progress without the lines.
   </p>
   <div class="cta">
     {% if user.is_authenticated %}
       <!-- Show Dashboard button for authenticated users -->
       <a href="{% url 'accounts:personal_info' %}" class="btn btn-primary">Go to Dashboard</a>
+      <a href="{% url 'accounts:document_request' %}" class="btn">Request Certificate</a>
+      <a href="{% url 'accounts:file_report' %}" class="btn">File Report</a>
     {% else %}
       <!-- Show Login/Register for non-authenticated users -->
       <a href="{% url 'accounts:register' %}" class="btn btn-primary">Create Account</a>
       <a href="{% url 'accounts:login' %}" class="btn">Sign In</a>
+      <a href="#services" class="btn">Browse Services</a>
     {% endif %}
   </div>
   <div class="stats">
@@ -158,6 +38,34 @@ Barangay Labangon Digital Services{% endblock %} {% block head %}
       <div class="value">Local</div>
       <div class="label">Barangay Labangon</div>
     </div>
+  </div>
+</section>
+
+<!-- Quick Actions -->
+<section class="section quick-actions">
+  <h2>Quick Actions</h2>
+  <div class="grid-3" style="margin-top:12px">
+    <a href="{% url 'accounts:document_request' %}" class="card action-card">
+      <div class="action-text">
+        <h3>Request a Certificate</h3>
+        <p>Clearance, Residency, Indigency, Good Moral, Business.</p>
+      </div>
+      <img src="{% static 'icons/request-records.png' %}" class="icon" alt="Request" />
+    </a>
+    <a href="{% url 'accounts:file_report' %}" class="card action-card">
+      <div class="action-text">
+        <h3>File a Report</h3>
+        <p>Submit incidents securely. Reviewed within 24 hours.</p>
+      </div>
+      <img src="{% static 'icons/file-report.png' %}" class="icon" alt="Report" />
+    </a>
+    <a href="{% url 'accounts:announcements' %}" class="card action-card">
+      <div class="action-text">
+        <h3>Community Announcements</h3>
+        <p>News, advisories, and barangay events.</p>
+      </div>
+      <img src="{% static 'icons/notification.png' %}" class="icon" alt="Announcements" />
+    </a>
   </div>
 </section>
 
@@ -244,6 +152,14 @@ Barangay Labangon Digital Services{% endblock %} {% block head %}
       </div>
     </div>
   </div>
+</section>
+
+<!-- Contact -->
+<section class="contact">
+  <h2>Need help?</h2>
+  <p class="muted">Email labangon@company.com or call (090) 123-4567</p>
+  <a href="{% url 'accounts:document_request' %}" class="btn btn-primary">Start a Request</a>
+  <a href="{% url 'accounts:file_report' %}" class="btn">Submit a Report</a>
 </section>
 
 {% endblock %}
