@@ -486,11 +486,9 @@
                                 <td><span class="status-badge status-{{ cert.payment_status }}">{{ cert.get_payment_status_display }}</span></td>
                                 <td>
                                     {% if cert.payment_reference %}
-                                        <span style="font-family: monospace; background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">
-                                            {{ cert.payment_reference }}
-                                        </span>
+                                        <span class="payment-ref">{{ cert.payment_reference }}</span>
                                     {% else %}
-                                        <span style="color: #95a5a6; font-style: italic;">N/A</span>
+                                        <span class="payment-ref na">N/A</span>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -539,11 +537,11 @@
             <div class="modal-body">
                 <p><strong>Request ID:</strong> <span id="verifyRequestId"></span></p>
                 <p><strong>Payment Mode:</strong> <span id="verifyPaymentMode"></span></p>
-                <p style="margin-top: 15px;"><strong>Payment Reference:</strong></p>
-                <div style="background: #e9ecef; padding: 12px; border-radius: 8px; margin-top: 8px; font-family: monospace; font-size: 1.1rem; text-align: center; border: 2px solid #3498db;">
+                <p><strong>Payment Reference:</strong></p>
+                <div class="payment-ref-box">
                     <span id="verifyPaymentRef"></span>
                 </div>
-                <p style="margin-top: 15px; color: #7f8c8d; font-size: 0.9rem;">
+                <p class="modal-note">
                     ℹ️ Please verify this payment reference in your payment system before confirming.
                 </p>
             </div>
@@ -565,11 +563,11 @@
             </div>
             <div class="modal-body">
                 <p><strong>Request ID:</strong> <span id="rejectRequestId"></span></p>
-                <p style="margin-top: 15px;"><strong>Payment Reference:</strong></p>
-                <div style="background: #f8d7da; padding: 12px; border-radius: 8px; margin-top: 8px; font-family: monospace; font-size: 1.1rem; text-align: center; border: 2px solid #dc3545;">
+                <p><strong>Payment Reference:</strong></p>
+                <div class="payment-ref-box reject">
                     <span id="rejectPaymentRef"></span>
                 </div>
-                <p style="margin-top: 15px; color: #721c24; font-size: 0.9rem;">
+                <p class="modal-note" style="color:#721c24;">
                     ⚠️ Are you sure you want to reject this payment? The user will need to resubmit their payment.
                 </p>
             </div>
