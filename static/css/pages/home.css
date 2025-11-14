@@ -1,0 +1,116 @@
+/* Home page styles extracted from home.html */
+.hero {
+  padding: 72px 0;
+  text-align: center;
+}
+.hero h1 {
+  font-size: 44px;
+  margin: 0 0 12px;
+  line-height: 1.2;
+}
+.hero p {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin: 0 0 20px;
+}
+.cta {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.section {
+  padding: 40px 0;
+}
+.section h2 {
+  margin: 0 0 14px;
+  font-size: 26px;
+}
+.muted {
+  color: var(--muted);
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.quick-actions {
+  margin-top: 28px;
+}
+.action-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.action-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px var(--shadow); }
+.action-text h3 { margin: 0 0 6px; }
+.action-text p { margin: 0; color: var(--text-secondary); font-size: 14px; }
+@media (max-width: 900px) {
+  .grid-3,
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: linear-gradient(
+    180deg,
+    var(--panel) 0%,
+    var(--panel-hover) 100%
+  );
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 10px 30px var(--shadow);
+}
+.icon {
+  width: 28px;
+  height: 28px;
+  margin-right: 8px;
+}
+.step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+.stat {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+.stat .value {
+  font-size: 24px;
+  font-weight: 700;
+}
+.stat .label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.contact {
+  text-align: center;
+  padding: 40px 0;
+}
+.contact .btn {
+  margin-top: 12px;
+}
