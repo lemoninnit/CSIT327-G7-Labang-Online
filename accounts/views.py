@@ -795,6 +795,7 @@ def payment_mode_selection(request, request_id):
     context = {
         'user': user,
         'cert_request': cert_request,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/payment_mode_selection.html', context)
 

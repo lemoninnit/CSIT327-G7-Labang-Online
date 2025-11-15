@@ -430,30 +430,37 @@
                 <span>LabangOnline</span>
             </div>
 
-            <div class="notification-item">
-                <div class="notification-icon-wrapper">
-                    <img src="{% static 'icons/notification.png' %}" alt="Notification">
-                    <span class="notification-badge">5</span>
-                </div>
-                <span>Notification</span>
-            </div>
+              <!-- Notification with badge -->
+        <div
+          class="notification-item"
+          onclick="window.location.href='{% url 'accounts:announcements' %}'"
+        >
+          <div class="notification-icon-wrapper">
+            <img
+              src="{% static 'icons/notification.png' %}"
+              alt="Notification"
+            />
+            <span class="notification-badge">{{ unread_count|default:0 }}</span>
+          </div>
+          <span>Announcements</span>
+        </div>
 
-            <ul class="menu">
-                <li class="menu-item" onclick="window.location.href='{% url 'accounts:personal_info' %}'">
-                    <img src="{% static 'icons/user-info.png' %}" alt="">
-                    <span>Personal Info</span>
-                </li>
-                <li class="menu-item active">
-                    <img src="{% static 'icons/request-records.png' %}" alt="">
-                    <span>Document Request</span>
-                </li>
-                
-                <li class="menu-item">
-                    <img src="{% static 'icons/file-report.png' %}" alt="">
-                    <span>File Report</span>
-                </li>
-            </ul>
-        </aside>
+        <ul class="menu">
+          <li class="menu-item" onclick="window.location.href='{% url 'accounts:personal_info' %}'">
+            <img src="{% static 'icons/user-info.png' %}" alt="" />
+            <span>Personal Info</span>
+          </li>
+          <li class="menu-item active" onclick="window.location.href='{% url 'accounts:document_request' %}'">
+            <img src="{% static 'icons/request-records.png' %}" alt="" />
+            <span>Document Request</span>
+          </li>
+         
+          <li class="menu-item" onclick="window.location.href='{% url 'accounts:file_report' %}'">
+              <img src="{% static 'icons/file-report.png' %}" alt="" />
+              <span>File Report</span>
+            </a>
+          </li>
+      </aside>
 
         <!-- Main Content -->
         <main class="main-content">

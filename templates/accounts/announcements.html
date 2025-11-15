@@ -299,9 +299,8 @@
                     "
                   >
                     <small style="color: var(--text-secondary)">
-                      Posted by: {{
-                      announcement.posted_by.full_name|default:"Administrator"
-                      }}
+                       Posted by: 
+                  {% if announcement.posted_by %}{{ announcement.posted_by.full_name }}{% else %}Administrator{% endif %}
                     </small>
                   </div>
                 </div>
