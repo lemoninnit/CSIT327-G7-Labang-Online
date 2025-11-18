@@ -150,27 +150,52 @@ def verify_code(request, user_id):
     user = get_object_or_404(User, id=user_id)
     
     if request.method == 'POST':
+        if request.POST.get('resend') == '1':
+            # Resend code logic
+            reset_code = PasswordResetCode.generate_code(user)
+            subject = 'Password Reset Verification Code - Labang Online'
+            message = f"""
+            Hello {user.full_name},
+            
+            You requested a password reset for your Labang Online account.
+            
+            Your new verification code is: {reset_code.code}
+            
+            This code will expire in 10 minutes.
+            
+            If you didn't request this password reset, please ignore this email.
+            
+            Best regards,
+            Labang Online Team
+            """
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=False,
+                )
+                messages.success(request, f"A new verification code has been sent to {user.email}. Please check your email.")
+            except Exception as e:
+                messages.error(request, f"Failed to resend email. Please try again later. Error: {str(e)}")
+            return redirect('accounts:verify_code', user_id=user.id)
         entered_code = request.POST.get('code')
-        
         try:
             reset_code = PasswordResetCode.objects.get(
                 user=user, 
                 code=entered_code, 
                 is_used=False
             )
-            
             if reset_code.is_valid():
-                # Store the code in session for password reset
                 request.session['reset_code_id'] = reset_code.id
                 messages.success(request, "Code verified successfully! Please enter your new password.")
                 return redirect('accounts:reset_password')
             else:
                 messages.error(request, "Code has expired. Please request a new code.")
                 return redirect('accounts:forgot_password')
-                
         except PasswordResetCode.DoesNotExist:
             messages.error(request, "Invalid verification code. Please try again.")
-    
     context = {'user': user}
     return render(request, 'accounts/verify_code.html', context)
 
