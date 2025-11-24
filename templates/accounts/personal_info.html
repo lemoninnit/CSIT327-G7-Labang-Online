@@ -362,10 +362,8 @@
               {% endif %}
               <div class="user-name">
                 <h2>{{ user.full_name }}</h2>
-                {% if user.is_superuser %}
-                <span class="role admin">Super Administrator</span>
-                {% elif user.is_staff %}
-                <span class="role admin">Administrator</span>
+                {% if user.is_staff %}
+                <span class="role admin">Resident</span>
                 {% elif user.resident_confirmation %}
                 <span class="role">Resident</span>
                 {% else %}
@@ -451,15 +449,7 @@
               >EDIT INFORMATION</a
             >
 
-            <!-- Admin Dashboard Button - Only visible for staff/superusers -->
-            {% if user.is_staff or user.is_superuser %}
-            <a
-              href="{% url 'accounts:admin_dashboard' %}"
-              class="action-btn admin-btn"
-            >
-              ADMIN DASHBOARD
-            </a>
-            {% endif %}
+            
           </div>
         </div>
       </main>

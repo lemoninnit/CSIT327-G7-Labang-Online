@@ -51,11 +51,23 @@
   gap: 12px;
   text-decoration: none;
   color: inherit;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 14px;
+  padding: 16px;
+  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-hover) 100%);
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 32px var(--shadow);
+  will-change: transform, box-shadow;
+  transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease;
 }
-.action-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px var(--shadow); }
-.action-text h3 { margin: 0 0 6px; }
-.action-text p { margin: 0; color: var(--text-secondary); font-size: 14px; }
+.action-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 24px 60px var(--shadow);
+  border-color: var(--border-hover);
+}
+.action-text h3 { margin: 0 0 6px; transition: transform 200ms ease, color 200ms ease; }
+.action-text p { margin: 0; color: var(--text-secondary); font-size: 14px; transition: transform 200ms ease, color 200ms ease; }
+.action-card:hover .action-text h3 { transform: translateX(2px); color: var(--text); }
+.action-card:hover .action-text p { transform: translateX(1px); }
 @media (max-width: 900px) {
   .grid-3,
   .grid-2 {
@@ -64,21 +76,22 @@
 }
 
 .card {
-  background: linear-gradient(
-    180deg,
-    var(--panel) 0%,
-    var(--panel-hover) 100%
-  );
+  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-hover) 100%);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 18px;
+  border-radius: 14px;
+  padding: 20px;
   box-shadow: 0 10px 30px var(--shadow);
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
 }
+.card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 22px 64px var(--shadow); border-color: var(--border-hover); }
 .icon {
   width: 28px;
   height: 28px;
   margin-right: 8px;
+  filter: drop-shadow(0 4px 10px rgba(16, 185, 129, 0.35));
+  transition: transform 200ms ease, filter 200ms ease;
 }
+.action-card:hover .icon { transform: translateY(-2px) scale(1.05); }
 .step {
   display: flex;
   gap: 12px;
@@ -97,7 +110,9 @@
   border-radius: 12px;
   padding: 16px;
   text-align: center;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
 }
+.stat:hover { transform: translateY(-4px); box-shadow: 0 16px 40px var(--shadow); border-color: var(--border-hover); }
 .stat .value {
   font-size: 24px;
   font-weight: 700;

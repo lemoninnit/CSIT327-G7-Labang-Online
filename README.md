@@ -81,48 +81,45 @@ py manage.py migrate
 py manage.py runserver
 ```
 
-5. Admin Dashboard Instructions
+5. Admin Dashboard (Django)
 
-The Admin Dashboard allows authorized staff to manage users, certificate requests, and incident reports.
+Use Django’s built‑in admin for staff operations.
 
-Access Requirements
+Access
 
-User must have is_staff=True or is_superuser=True.
-Only staff users can access admin URLs.
-Creating an Admin User
-Create a superuser (if none exists):
+Local: `http://127.0.0.1:8000/admin/`
+After deploy: `<your-domain>/admin/`
+
+Requirements
+
+- Your account must have `is_staff=True` (recommended: also `is_superuser=True`).
+- Anonymous users are redirected to the admin login.
+- Logged‑in non‑staff users see 403 Forbidden.
+
+Create an Admin Account
+
+Create a superuser:
+
+```
 py manage.py createsuperuser
+```
 
-Or promote an existing user to staff:
+Promote an existing user:
 
+```
 py manage.py shell
->>> from accounts.models import User
->>> user = User.objects.get(username='your_username')
->>> user.is_staff = True
->>> user.save()
+from accounts.models import User
+u = User.objects.get(username='your_username')
+u.is_staff = True
+u.is_superuser = True  # optional but recommended
+u.save()
+```
 
-URLs
-Feature	URL
-Admin Dashboard	/accounts/admin/dashboard/
-User Management	/accounts/admin/users/
-Certificate Management	/accounts/admin/certificates/
-Report Management	/accounts/admin/reports/
+Troubleshooting
 
-All admin views require login. Unauthorized users are redirected to /accounts/personal_info/.
-
-Key Features
-
-- Dashboard Statistics: Users, certificates, and reports overvie
-- User Management: Verify, activate/deactivate users, view details
-- Certificate Management: Approve/reject payments, update claim status
-- Report Management: Update status, delete reports
-- Activity Tracking: Automatic logging via Django
-- Create announcements
-- Security
-- Authentication required
-- CSRF protection on all forms
-- SQL injection prevention through Django ORM
-- Only staff can perform admin actions
+- 403 Forbidden at `/admin/`: ensure your user has `is_staff=True`.
+- Redirect to login: log in with a staff/superuser account.
+- Static files missing in production: run `py manage.py collectstatic` and ensure `whitenoise` is installed.
 
 
 ## Team members
