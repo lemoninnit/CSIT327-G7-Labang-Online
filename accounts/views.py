@@ -1,7 +1,10 @@
+# views.py
 """
 Views for Labang Online application
 Handles authentication, user management, and password recovery
 """
+
+
 
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib import messages
@@ -24,10 +27,14 @@ from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.contrib.auth.decorators import user_passes_test
 
+import google.generativeai as genai
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+import json
+import os
 
 
-# -------------------- HELPER FUNCTION --------------------
-# REMOVED: get_base64_image function - no longer needed with URL fields
 
 
 # -------------------- LOGIN --------------------
@@ -1070,3 +1077,113 @@ def announcements(request):
         'unread_count': unread_count,
     }
     return render(request, 'accounts/announcements.html', context)
+
+
+@login_required
+def chatbot_api(request):
+    """Handle chatbot API requests for LabangOnline"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST method required'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        user_message = data.get('message', '').strip()
+        
+        if not user_message:
+            return JsonResponse({'error': 'Message is required'}, status=400)
+        
+        # Check if API key is configured
+        gemini_api_key = os.environ.get('GEMINI_API_KEY', '')
+        if not gemini_api_key:
+            return JsonResponse({
+                'error': 'AI service not configured.',
+                'success': False
+            }, status=500)
+        
+        # Configure Gemini
+        genai.configure(api_key=gemini_api_key)
+        
+        generation_config = {
+            "temperature": 0.7,
+            "top_p": 1,
+            "top_k": 1,
+            "max_output_tokens": 2048,
+        }
+        
+        # System context for LabangOnline
+        context = f"""You are a helpful AI assistant for LabangOnline, the official online portal for Barangay Labangon in Cebu City, Philippines.
+
+LabangOnline offers:
+- Document Request Services (Barangay Clearance, Certificate of Residency, Certificate of Indigency, Good Moral Character Certificate, Business Clearance)
+- Incident Report Filing
+- Announcements and Updates
+- Resident Verification Services
+
+Current user information:
+- Name: {request.user.full_name}
+- Username: {request.user.username}
+- Resident Status: {"Verified" if request.user.resident_confirmation else "Pending Verification"}
+- Address: {request.user.address_line}, {request.user.barangay}, {request.user.city}
+
+Answer questions about:
+- How to request documents
+- Document processing fees and requirements
+- How to file incident reports
+- Account and profile management
+- Barangay services and procedures
+
+Be helpful, professional, and friendly. Keep responses concise and actionable. When discussing fees or official procedures, be accurate based on the platform's actual offerings."""
+        
+        full_prompt = f"{context}\n\nUser: {user_message}\n\nAssistant:"
+        
+        # Try different models
+        model_attempts = [
+            'gemini-2.5-flash',
+            'gemini-2.0-flash',
+            'gemini-flash-latest',
+            'gemini-2.5-pro',
+            'gemini-pro-latest',
+        ]
+        
+        response_text = None
+        for model_name in model_attempts:
+            try:
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(
+                    full_prompt,
+                    generation_config=generation_config
+                )
+                response_text = response.text
+                print(f"✓ SUCCESS with model: {model_name}")
+                break
+            except Exception as e:
+                error_msg = str(e)[:150]
+                print(f"✗ Model '{model_name}' failed: {error_msg}")
+                continue
+        
+        if not response_text:
+            return JsonResponse({
+                'error': 'Could not generate response. Please try again.',
+                'success': False
+            }, status=500)
+        
+        return JsonResponse({
+            'response': response_text,
+            'success': True
+        })
+        
+    except json.JSONDecodeError as e:
+        print(f"JSON decode error: {e}")
+        return JsonResponse({
+            'error': 'Invalid request format',
+            'success': False
+        }, status=400)
+    
+    except Exception as e:
+        print(f"Chatbot API error: {type(e).__name__}: {e}")
+        import traceback
+        print(f"Full traceback:\n{traceback.format_exc()}")
+        return JsonResponse({
+            'error': f'An error occurred: {str(e)}',
+            'success': False
+        }, status=500)
