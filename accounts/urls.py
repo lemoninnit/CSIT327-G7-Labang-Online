@@ -1,3 +1,4 @@
+#urls.py
 from django.urls import path
 from . import views
 
@@ -40,5 +41,7 @@ urlpatterns = [
     path('announcements/', views.announcements, name='announcements'),
     # Verify code & resend
     path('verify_code/<int:user_id>/resend/', views.resend_code, name='resend_code'),
+    path('api/chatbot/', views.chatbot_api, name='chatbot_api'),
+    
     
 ]
