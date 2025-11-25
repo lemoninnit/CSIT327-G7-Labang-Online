@@ -185,3 +185,32 @@ body {
   color: #10b981;
   font-size: 14px;
 }
+
+/* Print styles - minimal, clean A4 slip */
+@media print {
+  @page { size: A4; margin: 15mm; }
+
+  html, body { background: #ffffff !important; overflow: visible; }
+  .sidebar, .topbar, .actions, .print-card, .alert,
+  .notification-item, .menu, #mode-toggle,
+  .chatbot-float-btn, .chatbot-modal { display: none !important; }
+
+  .main-content { height: auto; }
+  .container { max-width: none; padding: 0; }
+
+  .page-header h1 { color: #000; font-size: 18px; margin-bottom: 4px; }
+  .page-subtitle { color: #555; font-size: 12px; margin-bottom: 12px; }
+
+  .panel { background: #fff; border: 1px solid #ddd; box-shadow: none; border-radius: 6px; padding: 12px; }
+  .panel h2 { color: #000; font-size: 14px; margin-bottom: 8px; }
+
+  .detail-label { color: #555; }
+  .detail-item { color: #111; font-size: 12px; }
+  .amount, .request-id { color: #111; }
+
+  a[href]::after { content: "" !important; }
+
+  .steps { display: none !important; }
+
+  .print-header { display: block; font-weight: 700; font-size: 14px; margin-bottom: 10px; }
+}

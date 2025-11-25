@@ -161,15 +161,22 @@
                         </div>
                     </div>
                     
-                    {% if cert_request.certificate_type == 'indigency' and proof_photo_base64 %}
+                    {% if cert_request.certificate_type == 'indigency' %}
                     <div class="details-card">
                         <h2>Financial Proof</h2>
+                        {% if cert_request.proof_photo_url %}
+                        <div style="text-align: center; margin: 20px 0;">
+                            <img src="{{ cert_request.proof_photo_url }}" alt="Financial Proof" style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid var(--border);">
+                        </div>
+                        {% elif proof_photo_base64 %}
                         <div style="text-align: center; margin: 20px 0;">
                             <img src="data:image/jpeg;base64,{{ proof_photo_base64 }}" alt="Financial Proof" style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid var(--border);">
                         </div>
+                        {% else %}
                         <div style="color: #9ca3af; font-size: 14px; text-align: center;">
-                            <p>This financial proof image was submitted as part of your indigency certificate request.</p>
+                            <p>No financial proof image on file for this request.</p>
                         </div>
+                        {% endif %}
                     </div>
                     {% endif %}
                     

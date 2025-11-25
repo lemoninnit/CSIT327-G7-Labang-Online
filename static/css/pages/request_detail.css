@@ -23,7 +23,7 @@ html, body { overflow: hidden; height: 100%; margin: 0; padding: 0; }
 .btn:hover { background-color: var(--brand); color: #fff; }
 
 /* Status badges */
-.status-badge { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.status-badge { display: inline-block; padding: 6px 12px; border-radius: 999px; font-size: 14px; font-weight: 700; line-height: 1.2; }
 .status-badge.unpaid { background: rgba(30,41,59,0.18); color: var(--text-secondary); border: 1px solid rgba(30,41,59,0.35); }
 .status-badge.pending { background: rgba(30,41,59,0.18); color: var(--text-secondary); border: 1px solid rgba(30,41,59,0.35); }
 .status-badge.paid { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.35); }

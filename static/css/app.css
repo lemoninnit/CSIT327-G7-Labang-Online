@@ -111,6 +111,20 @@ body {
   color: var(--text);
 }
 
+/* Global theme toggle button styling */
+#mode-toggle {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-weight: 700;
+}
+
+#mode-toggle:hover {
+  background: var(--brand-700);
+}
+
 /* Main */
 .site-main {
   padding: 40px 0;

@@ -117,7 +117,7 @@
   <body>
     <div class="dashboard-wrapper">
       <!-- Sidebar -->
-x      <aside class="sidebar">
+      <aside class="sidebar">
         <a href="/" aria-label="Home">
           <div class="logo">
             <img src="{% static 'logo.png' %}" alt="Labang Logo" />
@@ -199,36 +199,11 @@ x      <aside class="sidebar">
           <!-- Filter Section -->
           <div class="filter-section">
             <div class="filter-buttons">
-              <button
-                class="filter-btn {% if not request.GET.type %}active{% endif %}"
-                onclick="window.location.href='{% url 'accounts:announcements' %}'"
-              >
-                All
-              </button>
-              <button
-                class="filter-btn {% if request.GET.type == 'general' %}active{% endif %}"
-                onclick="window.location.href='?type=general'"
-              >
-                General
-              </button>
-              <button
-                class="filter-btn {% if request.GET.type == 'event' %}active{% endif %}"
-                onclick="window.location.href='?type=event'"
-              >
-                Events
-              </button>
-              <button
-                class="filter-btn {% if request.GET.type == 'alert' %}active{% endif %}"
-                onclick="window.location.href='?type=alert'"
-              >
-                Alerts
-              </button>
-              <button
-                class="filter-btn {% if request.GET.type == 'maintenance' %}active{% endif %}"
-                onclick="window.location.href='?type=maintenance'"
-              >
-                Maintenance
-              </button>
+              <button class="filter-btn active" data-type="all">All</button>
+              <button class="filter-btn" data-type="general">General</button>
+              <button class="filter-btn" data-type="event">Events</button>
+              <button class="filter-btn" data-type="alert">Alerts</button>
+              <button class="filter-btn" data-type="maintenance">Maintenance</button>
             </div>
           </div>
 
@@ -328,7 +303,7 @@ x      <aside class="sidebar">
     </div>
 
     <script src="{% static 'js/dashboard.js' %}"></script>
-    <script>
+  <script>
       function openModal(id) {
         const modal = document.getElementById(`modal-${id}`);
         if (modal) {
@@ -349,6 +324,28 @@ x      <aside class="sidebar">
           event.target.classList.remove("active");
         }
       };
+
+      (function() {
+        const buttons = document.querySelectorAll('.filter-btn');
+        const cards = document.querySelectorAll('.announcement-card');
+        function applyFilter(type) {
+          buttons.forEach(b => b.classList.remove('active'));
+          const activeBtn = Array.from(buttons).find(b => b.dataset.type === type) || document.querySelector('.filter-btn[data-type="all"]');
+          if (activeBtn) activeBtn.classList.add('active');
+          cards.forEach(card => {
+            if (type === 'all') {
+              card.style.display = '';
+            } else {
+              const matches = card.classList.contains(type);
+              card.style.display = matches ? '' : 'none';
+            }
+          });
+        }
+        buttons.forEach(btn => {
+          btn.addEventListener('click', () => applyFilter(btn.dataset.type));
+        });
+        applyFilter('all');
+      })();
     </script>
 {% include 'accounts/chatbot.html' %}
 </body>

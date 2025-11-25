@@ -55,7 +55,7 @@
   </footer>
 
   {% block scripts %}{% endblock %}
-  {% include 'accounts/chatbot.html' %}
+  {% block chatbot %}{% include 'accounts/chatbot.html' %}{% endblock %}
   <script>
     // Enhanced persistent dark/light mode system
     (function() {

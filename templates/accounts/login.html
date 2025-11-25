@@ -24,7 +24,15 @@
         </div>
         <div>
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" required>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="password" id="password" name="password" required style="flex:1">
+            <button type="button" id="toggle-password" class="btn btn-secondary" aria-label="Toggle password visibility" style="width:40px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center">
+              <svg id="toggle-password-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
           <div class="forgot-password">
             <a href="/accounts/forgot_password">Forgot Password?</a>
           </div>
@@ -38,3 +46,26 @@
   </div>
 </main>
 {% endblock %}
+
+{% block scripts %}
+<script>
+  (function() {
+    const pwd = document.getElementById('password');
+    const btn = document.getElementById('toggle-password');
+    const icon = document.getElementById('toggle-password-icon');
+    if (pwd && btn) {
+      btn.addEventListener('click', function() {
+        const isHidden = pwd.type === 'password';
+        pwd.type = isHidden ? 'text' : 'password';
+        if (icon) {
+          icon.innerHTML = isHidden
+            ? '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.77 21.77 0 0 1 6.06-7.94M20.12 6.12A10.94 10.94 0 0 1 23 12s-4 8-11 8a10.94 10.94 0 0 1-5.06-1.06"/><line x1="1" y1="1" x2="23" y2="23"></line>'
+            : '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle>';
+        }
+      });
+    }
+  })();
+</script>
+{% endblock %}
+
+{% block chatbot %}{% endblock %}
