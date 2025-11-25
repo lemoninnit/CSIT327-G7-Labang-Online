@@ -245,6 +245,7 @@ select:hover {
   border: 0;
   cursor: pointer;
   font-weight: 700;
+  color: var(--text);
 }
 .btn-primary {
   background: linear-gradient(90deg, var(--brand), var(--brand-700));

@@ -447,10 +447,12 @@
     <div class="dashboard-wrapper">
       <!-- Sidebar -->
       <aside class="sidebar">
-        <div class="logo">
-          <img src="{% static 'logo.png' %}" alt="Labang Logo" />
-          <span>LabangOnline</span>
-        </div>
+        <a href="/" aria-label="Home">
+          <div class="logo">
+            <img src="{% static 'logo.png' %}" alt="Labang Logo" />
+            <span>LabangOnline</span>
+          </div>
+        </a>
 
         <!-- Notification with badge -->
         <div
@@ -642,6 +644,6 @@
         });
       })();
     </script>
-    {% include 'accounts/chatbot.html' %}
-  </body>
+{% include 'accounts/chatbot.html' %}
+</body>
 </html>

@@ -33,10 +33,8 @@
               {% endif %}
               <span class="user-name">{{ user.full_name }}</span>
             </div>
-            <a href="{% url 'accounts:personal_info' %}" class="btn-dashboard">Dashboard</a>
           </div>
         {% elif not user.is_authenticated %}
-          <!-- Non-authenticated user navigation -->
           
         {% endif %}
         <button id="mode-toggle" class="btn" style="padding:8px 12px">Toggle</button>
@@ -57,6 +55,7 @@
   </footer>
 
   {% block scripts %}{% endblock %}
+  {% include 'accounts/chatbot.html' %}
   <script>
     // Enhanced persistent dark/light mode system
     (function() {

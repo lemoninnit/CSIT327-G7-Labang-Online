@@ -378,9 +378,19 @@ if (typeof window.chatbotInitialized === 'undefined') {
         const messagesContainer = document.getElementById('chatbot-messages');
         const typingIndicator = document.getElementById('typing-indicator');
         
+        // Restore open state across pages
+        const openKey = 'labang-chatbot-open';
+        try {
+            const savedOpen = localStorage.getItem(openKey);
+            if (savedOpen === 'true') {
+                modal.classList.add('active');
+            }
+        } catch (_) {}
+
         // Toggle modal
         toggleBtn.addEventListener('click', () => {
             modal.classList.toggle('active');
+            try { localStorage.setItem(openKey, modal.classList.contains('active') ? 'true' : 'false'); } catch (_) {}
             if (modal.classList.contains('active')) {
                 input.focus();
             }
@@ -388,12 +398,14 @@ if (typeof window.chatbotInitialized === 'undefined') {
         
         closeBtn.addEventListener('click', () => {
             modal.classList.remove('active');
+            try { localStorage.setItem(openKey, 'false'); } catch (_) {}
         });
         
         // Close on escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && modal.classList.contains('active')) {
                 modal.classList.remove('active');
+                try { localStorage.setItem(openKey, 'false'); } catch (_) {}
             }
         });
         

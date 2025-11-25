@@ -29,8 +29,9 @@
             <a href="/accounts/forgot_password">Forgot Password?</a>
           </div>
         </div>
-        <div class="actions center-actions">
+        <div class="actions center-actions" style="justify-content:center">
           <button type="submit" class="btn btn-primary">Login</button>
+          <a href="{% url 'accounts:register' %}" class="btn btn-secondary">Create account</a>
         </div>
       </form>
     </div>

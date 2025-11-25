@@ -12,12 +12,12 @@ Barangay Labangon Digital Services{% endblock %} {% block head %}
     {% if user.is_authenticated %}
       <!-- Show Dashboard button for authenticated users -->
       <a href="{% url 'accounts:personal_info' %}" class="btn btn-primary">Go to Dashboard</a>
-      <a href="{% url 'accounts:document_request' %}" class="btn">Request Certificate</a>
-      <a href="{% url 'accounts:file_report' %}" class="btn">File Report</a>
+      <a href="{% url 'accounts:document_request' %}" class="btn btn-secondary">Request Certificate</a>
+      <a href="{% url 'accounts:file_report' %}" class="btn btn-secondary">File Report</a>
     {% else %}
       <!-- Show Login/Register for non-authenticated users -->
       <a href="{% url 'accounts:register' %}" class="btn btn-primary">Create Account</a>
-      <a href="{% url 'accounts:login' %}" class="btn">Sign In</a>
+      <a href="{% url 'accounts:login' %}" class="btn btn-secondary">Sign In</a>
       
     {% endif %}
   </div>

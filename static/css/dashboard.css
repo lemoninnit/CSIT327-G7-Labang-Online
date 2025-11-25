@@ -44,11 +44,29 @@
     margin-bottom: 24px;
     font-size: 16px;
     font-weight: 600;
+    padding: 12px 14px;
+    border-radius: 8px;
 }
+.sidebar .logo,
+.sidebar .logo a,
+.sidebar .logo span {
+    color: var(--text);
+    text-decoration: none;
+}
+.sidebar .logo a:visited { color: var(--text); }
 
 .sidebar .logo img {
     width: 36px;
     margin-right: 10px;
+}
+
+.sidebar a {
+    color: var(--text);
+    text-decoration: none;
+}
+
+.sidebar a:visited {
+    color: var(--text);
 }
 
 /* Notification item with badge */
