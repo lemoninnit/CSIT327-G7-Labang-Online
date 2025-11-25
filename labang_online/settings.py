@@ -16,8 +16,9 @@ from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
-import dj_database_url
- 
+
+# Load environment variables from .env file
+load_dotenv()
  
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,7 +40,8 @@ ALLOWED_HOSTS = [
     'labang-online.onrender.com',
     'csit327-g7-labang-online.onrender.com',
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
+    'testserver'
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://labang-online.onrender.com"
@@ -68,6 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.middleware.AdminAccessMiddleware',  # Custom middleware for admin access
 ]
  
  

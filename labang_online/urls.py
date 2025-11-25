@@ -20,6 +20,11 @@ from django.urls import path, include
 from accounts import views
 from django.conf.urls.static import static
 
+# Configure admin site
+admin.site.site_header = "Labang Online Admin"
+admin.site.site_title = "Labang Online Admin Portal"
+admin.site.index_title = "Welcome to Labang Online Administration"
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
