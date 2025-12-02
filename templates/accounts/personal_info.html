@@ -362,8 +362,8 @@
               {% endif %}
               <div class="user-name">
                 <h2>{{ user.full_name }}</h2>
-                {% if user.is_staff %}
-                <span class="role admin">Resident</span>
+                {% if user.is_superuser %}
+                <span class="role admin">Admin</span>
                 {% elif user.resident_confirmation %}
                 <span class="role">Resident</span>
                 {% else %}
@@ -448,7 +448,11 @@
             <a href="{% url 'accounts:edit_profile' %}" class="action-btn"
               >EDIT INFORMATION</a
             >
-
+            {% if user.is_superuser %}
+            <a href="{% url 'accounts:admin_dashboard' %}" class="action-btn admin-btn"
+              >ADMIN DASHBOARD</a
+            >
+            {% endif %}
             
           </div>
         </div>
