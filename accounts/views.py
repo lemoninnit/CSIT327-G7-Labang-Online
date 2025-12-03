@@ -1863,3 +1863,23 @@ def admin_change_user_type(request):
 
     messages.success(request, f"User {target_user.username} is now set as {role_label}.")
     return redirect('accounts:admin_users')
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def verify_payment(request, request_id):
+    cert = CertificateRequest.objects.get(request_id=request_id)
+    cert.payment_status = 'paid'  # Set to paid
+    cert.save()
+    # ... add success message
+    return redirect('accounts:admin_certificates')
+
+
+@login_required(login_url='accounts:login')
+@never_cache
+def reject_payment(request, request_id):
+    cert = CertificateRequest.objects.get(request_id=request_id)
+    cert.payment_status = 'failed'  # or 'unpaid'
+    cert.save()
+    # ... add error message
+    return redirect('accounts:admin_certificates')

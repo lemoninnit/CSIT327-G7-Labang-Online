@@ -472,11 +472,8 @@
                                 <td>{{ cert.created_at|date:"M d, Y" }}</td>
                                 <td>
                                     {% if cert.payment_status == 'pending' %}
-                                    <form method="POST" action="{% url 'accounts:admin_reject_payment' cert.request_id %}" style="display:inline;">
-                                        {% csrf_token %}
-                                         <button onclick="confirmVerifyPayment('{{ cert.request_id }}', '{{ cert.payment_reference }}', '{{ cert.get_payment_mode_display }}')" class="action-btn btn-verify">✓ Verify</button>
-                                    <button onclick="confirmRejectPayment('{{ cert.request_id }}', '{{ cert.payment_reference }}')" class="action-btn btn-reject">✗ Reject</button>
-                                    </form>
+                                    <button type="button" onclick="confirmVerifyPayment('{{ cert.request_id }}', '{{ cert.payment_reference }}', '{{ cert.get_payment_mode_display }}')" class="action-btn btn-verify">✓ Verify</button>
+                                    <button type="button" onclick="confirmRejectPayment('{{ cert.request_id }}', '{{ cert.payment_reference }}')" class="action-btn btn-reject">✗ Reject</button>
                                     {% endif %}
                                     
                                     {% if cert.payment_status == 'paid' %}
@@ -517,13 +514,10 @@
                     ℹ️ Please verify this payment reference in your payment system before confirming.
                 </p>
             </div>
-            <form method="POST" id="verifyPaymentForm">
-                {% csrf_token %}
-                <div class="modal-footer">
-                    <button type="button" onclick="closeVerifyPaymentModal()" class="modal-btn modal-btn-cancel">Cancel</button>
-                    <button type="submit" class="modal-btn" style="background: #28a745; color: white;">✓ Confirm Verification</button>
-                </div>
-            </form>
+            <div class="modal-footer">
+                <button type="button" onclick="closeVerifyPaymentModal()" class="modal-btn modal-btn-cancel">Cancel</button>
+                <button type="button" onclick="submitVerifyPayment()" class="modal-btn" style="background: #28a745; color: white;">✓ Confirm Verification</button>
+            </div>
         </div>
     </div>
 
@@ -543,13 +537,10 @@
                     ⚠️ Are you sure you want to reject this payment? The user will need to resubmit their payment.
                 </p>
             </div>
-            <form method="POST" id="rejectPaymentForm">
-                {% csrf_token %}
-                <div class="modal-footer">
-                    <button type="button" onclick="closeRejectPaymentModal()" class="modal-btn modal-btn-cancel">Cancel</button>
-                    <button type="submit" class="modal-btn" style="background: #dc3545; color: white;">✗ Confirm Rejection</button>
-                </div>
-            </form>
+            <div class="modal-footer">
+                <button type="button" onclick="closeRejectPaymentModal()" class="modal-btn modal-btn-cancel">Cancel</button>
+                <button type="button" onclick="submitRejectPayment()" class="modal-btn" style="background: #dc3545; color: white;">✗ Confirm Rejection</button>
+            </div>
         </div>
     </div>
 
@@ -581,36 +572,79 @@
     </div>
 
     <script>
+        // Store the current request ID and action for verification/rejection
+        let currentRequestId = null;
+        let currentAction = null;
 
         function confirmVerifyPayment(requestId, paymentRef, paymentMode) {
             const modal = document.getElementById('verifyPaymentModal');
-            const form = document.getElementById('verifyPaymentForm');
+            
+            currentRequestId = requestId;
+            currentAction = 'verify';
             
             document.getElementById('verifyRequestId').textContent = requestId;
             document.getElementById('verifyPaymentRef').textContent = paymentRef || 'N/A';
             document.getElementById('verifyPaymentMode').textContent = paymentMode || 'N/A';
             
-            form.action = `/accounts/admin/certificates/${requestId}/verify-payment/`;
             modal.classList.add('active');
         }
 
         function closeVerifyPaymentModal() {
             document.getElementById('verifyPaymentModal').classList.remove('active');
+            currentRequestId = null;
+            currentAction = null;
+        }
+
+        function submitVerifyPayment() {
+            if (currentRequestId) {
+                // Create and submit the form programmatically
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/accounts/admin/certificates/${currentRequestId}/verify-payment/`;
+                
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+                if (csrfToken) {
+                    form.appendChild(csrfToken.cloneNode(true));
+                }
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
         }
 
         function confirmRejectPayment(requestId, paymentRef) {
             const modal = document.getElementById('rejectPaymentModal');
-            const form = document.getElementById('rejectPaymentForm');
+            
+            currentRequestId = requestId;
+            currentAction = 'reject';
             
             document.getElementById('rejectRequestId').textContent = requestId;
             document.getElementById('rejectPaymentRef').textContent = paymentRef || 'N/A';
             
-            form.action = `/accounts/admin/certificates/${requestId}/reject-payment/`;
             modal.classList.add('active');
         }
 
         function closeRejectPaymentModal() {
             document.getElementById('rejectPaymentModal').classList.remove('active');
+            currentRequestId = null;
+            currentAction = null;
+        }
+
+        function submitRejectPayment() {
+            if (currentRequestId) {
+                // Create and submit the form programmatically
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/accounts/admin/certificates/${currentRequestId}/reject-payment/`;
+                
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+                if (csrfToken) {
+                    form.appendChild(csrfToken.cloneNode(true));
+                }
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
         }
 
         function openClaimModal(requestId, currentStatus) {
