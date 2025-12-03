@@ -173,6 +173,11 @@
             border-collapse: collapse;
         }
 
+        /* Modal details styling */
+        .detail-row { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #ecf0f1; }
+        .detail-label { font-weight: 600; color: #7f8c8d; margin-bottom: 6px; }
+        .detail-value { color: #2c3e50; }
+
         thead {
             background: #34495e;
             color: white;
@@ -297,9 +302,7 @@
             margin-bottom: 20px;
         }
 
-        .modal-header h2 {
-            color: #2c3e50;
-        }
+        .modal-header h2 { color: #2c3e50; }
 
         .modal-body {
             margin-bottom: 20px;
@@ -319,15 +322,8 @@
             font-size: 0.95rem;
         }
 
-        .modal-btn-primary {
-            background: #3498db;
-            color: white;
-        }
-
-        .modal-btn-cancel {
-            background: #95a5a6;
-            color: white;
-        }
+        .modal-btn-primary { background: #3498db; color: white; }
+        .modal-btn-cancel { background: #95a5a6; color: white; }
 
         @media (max-width: 768px) {
             .sidebar {
@@ -479,6 +475,8 @@
                                     {% if cert.payment_status == 'paid' %}
                                     <button onclick="openClaimModal('{{ cert.request_id }}', '{{ cert.claim_status }}')" class="action-btn btn-update">Update Claim</button>
                                     {% endif %}
+                                    <button type="button" onclick="viewCertificate('{{ cert.request_id }}', '{{ cert.user.full_name|escapejs }}', '{{ cert.get_certificate_type_display|escapejs }}', '{{ cert.get_payment_status_display|escapejs }}', '{{ cert.get_claim_status_display|escapejs }}', '{{ cert.payment_amount }}', '{{ cert.get_payment_mode_display|default:'Not Selected'|escapejs }}', '{{ cert.payment_reference|default:'N/A'|escapejs }}', '{{ cert.purpose|escapejs }}', '{{ cert.proof_photo_url|default:''|escapejs }}', '{{ cert.created_at|date:"M d, Y H:i" }}')" class="action-btn btn-view">View</button>
+                                    <button type="button" onclick="confirmDeleteCertificate('{{ cert.request_id }}')" class="action-btn btn-reject">Delete</button>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -544,6 +542,36 @@
         </div>
     </div>
 
+    <!-- Delete Certificate Modal -->
+    <div id="deleteCertModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Delete Certificate Request</h2>
+            </div>
+            <div class="modal-body">
+                <p><strong>Request ID:</strong> <span id="deleteRequestId"></span></p>
+                <p style="margin-top: 12px; color: var(--text-secondary);">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeDeleteCertificateModal()" class="modal-btn modal-btn-cancel">Cancel</button>
+                <button type="button" onclick="submitDeleteCertificate()" class="modal-btn" style="background:#ef4444; color:#fff; border-radius:10px;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Certificate Modal -->
+    <div id="viewCertModal" class="modal">
+        <div class="modal-content" style="max-width:600px; width:90%; max-height:80vh; overflow-y:auto;">
+            <div class="modal-header">
+                <h2>Certificate Details</h2>
+            </div>
+            <div class="modal-body" id="certDetails"></div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeViewCertificate()" class="modal-btn modal-btn-cancel">Close</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Claim Status Update Modal -->
     <div id="claimModal" class="modal">
@@ -587,6 +615,32 @@
             document.getElementById('verifyPaymentMode').textContent = paymentMode || 'N/A';
             
             modal.classList.add('active');
+        }
+
+        function confirmDeleteCertificate(requestId) {
+            const modal = document.getElementById('deleteCertModal');
+            currentRequestId = requestId;
+            currentAction = 'delete';
+            document.getElementById('deleteRequestId').textContent = requestId;
+            modal.classList.add('active');
+        }
+
+        function closeDeleteCertificateModal() {
+            document.getElementById('deleteCertModal').classList.remove('active');
+            currentRequestId = null;
+            currentAction = null;
+        }
+
+        function submitDeleteCertificate() {
+            if (currentRequestId) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/accounts/admin/certificates/${currentRequestId}/delete/`;
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+                if (csrfToken) { form.appendChild(csrfToken.cloneNode(true)); }
+                document.body.appendChild(form);
+                form.submit();
+            }
         }
 
         function closeVerifyPaymentModal() {
@@ -647,6 +701,31 @@
             }
         }
 
+        function viewCertificate(id, name, type, payStatus, claimStatus, amount, mode, reference, purpose, photoUrl, createdAt) {
+            const modal = document.getElementById('viewCertModal');
+            const details = document.getElementById('certDetails');
+            const photoBlock = photoUrl ? `<div class="detail-row"><div class="detail-label">Proof Photo</div><div class="detail-value"><img src="${photoUrl}" alt="Proof Photo" style="max-width:100%; border-radius:8px; border:1px solid #ecf0f1;"/></div></div>` : '';
+
+            details.innerHTML = `
+                <div class="detail-row"><div class="detail-label">Request ID</div><div class="detail-value">${id}</div></div>
+                <div class="detail-row"><div class="detail-label">Resident Name</div><div class="detail-value">${name}</div></div>
+                <div class="detail-row"><div class="detail-label">Certificate Type</div><div class="detail-value">${type}</div></div>
+                <div class="detail-row"><div class="detail-label">Payment Status</div><div class="detail-value">${payStatus}</div></div>
+                <div class="detail-row"><div class="detail-label">Claim Status</div><div class="detail-value">${claimStatus}</div></div>
+                <div class="detail-row"><div class="detail-label">Amount</div><div class="detail-value">₱${amount}</div></div>
+                <div class="detail-row"><div class="detail-label">Payment Mode</div><div class="detail-value">${mode}</div></div>
+                <div class="detail-row"><div class="detail-label">Reference</div><div class="detail-value" style="font-family: monospace;">${reference}</div></div>
+                <div class="detail-row"><div class="detail-label">Created</div><div class="detail-value">${createdAt}</div></div>
+                <div class="detail-row"><div class="detail-label">Purpose</div><div class="detail-value">${purpose || 'N/A'}</div></div>
+                ${photoBlock}
+            `;
+            modal.classList.add('active');
+        }
+
+        function closeViewCertificate() {
+            document.getElementById('viewCertModal').classList.remove('active');
+        }
+
         function openClaimModal(requestId, currentStatus) {
             const modal = document.getElementById('claimModal');
             const form = document.getElementById('claimForm');
@@ -667,6 +746,8 @@
             const claimModal = document.getElementById('claimModal');
             const verifyModal = document.getElementById('verifyPaymentModal');
             const rejectModal = document.getElementById('rejectPaymentModal');
+            const deleteModal = document.getElementById('deleteCertModal');
+            const viewCertModal = document.getElementById('viewCertModal');
             
             if (event.target == claimModal) {
                 closeClaimModal();
@@ -676,6 +757,12 @@
             }
             if (event.target == rejectModal) {
                 closeRejectPaymentModal();
+            }
+            if (event.target == deleteModal) {
+                closeDeleteCertificateModal();
+            }
+            if (event.target == viewCertModal) {
+                closeViewCertificate();
             }
         }
     </script>

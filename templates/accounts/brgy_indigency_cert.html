@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -371,6 +372,15 @@
             </header>
 
             <div class="form-container">
+                {% if messages %}
+                <div style="margin-bottom:12px;">
+                    {% for message in messages %}
+                        <div style="background: rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.35); color:#fecaca; border-radius:10px; padding:10px 12px; margin-bottom:8px;" {% if message.tags %}class="{{ message.tags }}"{% endif %}>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
                 <!-- Form Header -->
                 <div class="form-header">
                     <h1>Certificate of Indigency</h1>
@@ -458,4 +468,3 @@
     {% include 'accounts/chatbot.html' %}
     </body>
 </html>
-

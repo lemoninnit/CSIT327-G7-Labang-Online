@@ -26,13 +26,12 @@ from django.db import models  # Add this for Q queries
 from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.contrib.auth.decorators import user_passes_test
-
-import google.generativeai as genai
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
 import os
+import requests
 
 
 
@@ -638,17 +637,30 @@ def brgy_indigency_cert(request):
                 'user': user,
             }
             return render(request, 'accounts/brgy_indigency_cert.html', context)
-        
-        # Upload proof photo to Supabase
+
+        # Validate image type and size
+        allowed_types = {'image/jpeg', 'image/jpg', 'image/png'}
+        if getattr(proof_photo, 'content_type', '').lower() not in allowed_types:
+            messages.error(request, "Invalid image type. Please upload a JPG or PNG file.")
+            context = { 'user': user }
+            return render(request, 'accounts/brgy_indigency_cert.html', context)
+
+        max_size_mb = 5
+        if hasattr(proof_photo, 'size') and proof_photo.size > max_size_mb * 1024 * 1024:
+            messages.error(request, f"Image too large. Please upload a file under {max_size_mb} MB.")
+            context = { 'user': user }
+            return render(request, 'accounts/brgy_indigency_cert.html', context)
+
+        # Upload proof photo using storage utils (Supabase or local fallback)
         from .storage_utils import upload_to_supabase
         proof_photo_url = upload_to_supabase(
             proof_photo, 
             bucket_name='user-uploads',
             folder='indigency-proofs'
         )
-        
+
         if not proof_photo_url:
-            messages.error(request, "Failed to upload proof photo. Please try again.")
+            messages.error(request, "Failed to upload proof photo. Please try again later.")
             context = {
                 'user': user,
             }
@@ -903,8 +915,8 @@ def counter_payment(request, request_id):
         cert_request.payment_status = 'pending'
         cert_request.payment_reference = f"COUNTER-{cert_request.request_id}"
         cert_request.save(update_fields=['payment_status', 'payment_reference'])
-        messages.success(request, "Your on-site payment has been scheduled. Please proceed to the cashier.")
-        return redirect('accounts:certificate_requests')
+        messages.success(request, "Your on-site payment has been scheduled. You can switch payment options anytime.")
+        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
 
     context = {
         'user': user,
@@ -1096,17 +1108,10 @@ def chatbot_api(request):
         if not user_message:
             return JsonResponse({'error': 'Message is required'}, status=400)
         
-        # Check if API key is configured
         gemini_api_key = os.environ.get('GEMINI_API_KEY', '')
         if not gemini_api_key:
-            return JsonResponse({
-                'error': 'AI service not configured.',
-                'success': False
-            }, status=500)
-        
-        # Configure Gemini
-        genai.configure(api_key=gemini_api_key)
-        
+            return JsonResponse({'error': 'AI service not configured.', 'success': False}, status=500)
+
         generation_config = {
             "temperature": 0.7,
             "top_p": 1,
@@ -1138,38 +1143,81 @@ Answer questions about:
 
 Be helpful, professional, and friendly. Keep responses concise and actionable. When discussing fees or official procedures, be accurate based on the platform's actual offerings."""
         
-        full_prompt = f"{context}\n\nUser: {user_message}\n\nAssistant:"
+        history = data.get('history', [])
+        safe_history = []
+        try:
+            for h in history:
+                role = h.get('role')
+                content = str(h.get('content', '')).strip()
+                if role in ('user', 'assistant') and content:
+                    safe_history.append({'role': role, 'content': content})
+        except Exception:
+            safe_history = []
+
+        conversation_context = "\n".join([
+            f"{'User' if h['role']=='user' else 'Assistant'}: {h['content']}" for h in safe_history[-10:]
+        ])
+
+        if conversation_context:
+            full_prompt = f"{context}\n\n{conversation_context}\n\nUser: {user_message}\n\nAssistant:"
+        else:
+            full_prompt = f"{context}\n\nUser: {user_message}\n\nAssistant:"
         
-        # Try different models
-        model_attempts = [
-            'gemini-2.5-flash',
-            'gemini-2.0-flash',
-            'gemini-flash-latest',
-            'gemini-2.5-pro',
-            'gemini-pro-latest',
-        ]
-        
+        model_attempts = ['gemini-1.5-flash', 'gemini-1.5-pro']
+
         response_text = None
-        for model_name in model_attempts:
+        try:
+            # Try SDK import first
             try:
-                model = genai.GenerativeModel(model_name)
-                response = model.generate_content(
-                    full_prompt,
-                    generation_config=generation_config
-                )
-                response_text = response.text
-                print(f"✓ SUCCESS with model: {model_name}")
-                break
-            except Exception as e:
-                error_msg = str(e)[:150]
-                print(f"✗ Model '{model_name}' failed: {error_msg}")
-                continue
+                import google.generativeai as genai  # type: ignore
+                genai.configure(api_key=gemini_api_key)
+                for model_name in model_attempts:
+                    try:
+                        model = genai.GenerativeModel(model_name)
+                        response = model.generate_content(full_prompt, generation_config=generation_config)
+                        response_text = getattr(response, 'text', None)
+                        if not response_text:
+                            try:
+                                candidates = getattr(response, 'candidates', [])
+                                if candidates:
+                                    parts = getattr(candidates[0].content, 'parts', [])
+                                    response_text = ''.join([getattr(p, 'text', '') for p in parts if getattr(p, 'text', '')]) or None
+                            except Exception:
+                                response_text = None
+                        if response_text:
+                            break
+                    except Exception:
+                        continue
+            except Exception:
+                response_text = None
+
+            # Fallback: REST API if SDK fails or returns empty
+            if not response_text:
+                for model_name in model_attempts:
+                    try:
+                        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={gemini_api_key}"
+                        payload = {
+                            "contents": [{"role": "user", "parts": [{"text": full_prompt}]}],
+                            "generationConfig": generation_config,
+                        }
+                        r = requests.post(url, json=payload, timeout=20)
+                        data = r.json()
+                        candidates = data.get("candidates", [])
+                        if candidates:
+                            parts = candidates[0].get("content", {}).get("parts", [])
+                            response_text = "".join([p.get("text", "") for p in parts]) or None
+                            if response_text:
+                                break
+                    except Exception:
+                        continue
+        except Exception:
+            response_text = None
         
         if not response_text:
             return JsonResponse({
-                'error': 'Could not generate response. Please try again.',
+                'error': 'temporarily_unavailable',
                 'success': False
-            }, status=500)
+            }, status=503)
         
         return JsonResponse({
             'response': response_text,
@@ -1411,16 +1459,11 @@ def admin_certificates(request):
 @never_cache
 def admin_certificate_detail(request, request_id):
     """
-    View and manage individual certificate request
+    Deprecated: Details are shown in a modal on the certificates page.
+    Redirect to the certificates list to prevent template errors.
     """
-    certificate = get_object_or_404(CertificateRequest, request_id=request_id)
-    
-    context = {
-        'user': request.user,
-        'certificate': certificate,
-    }
-    
-    return render(request, 'admin/certificate_detail.html', context)
+    messages.info(request, "Open certificate details via the View button on the Certificates page.")
+    return redirect('accounts:admin_certificates')
 
 
 @login_required(login_url='accounts:login')
@@ -1496,6 +1539,19 @@ def admin_update_claim_status(request, request_id):
     
     return redirect('accounts:admin_certificates')
 
+
+# Delete a certificate request
+@login_required(login_url='accounts:login')
+@user_passes_test(is_admin, login_url='accounts:personal_info')
+@never_cache
+def admin_delete_certificate(request, request_id):
+    """Delete a certificate request permanently"""
+    if request.method == 'POST':
+        certificate = get_object_or_404(CertificateRequest, request_id=request_id)
+        certificate.delete()
+        messages.success(request, f"Certificate request {request_id} has been deleted.")
+        return redirect('accounts:admin_certificates')
+    return redirect('accounts:admin_certificates')
 
 # -------------------- REPORT MANAGEMENT --------------------
 @login_required(login_url='accounts:login')

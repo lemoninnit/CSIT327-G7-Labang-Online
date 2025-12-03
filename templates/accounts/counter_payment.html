@@ -331,10 +331,9 @@
                 I will pay on-site
               </button>
               <a
-                href="{% url 'accounts:certificate_requests' %}"
+                href="{% url 'accounts:payment_mode_selection' cert_request.request_id %}"
                 class="btn-secondary"
-                >Back to Requests</a
-              >
+                >Back to Payment Options</a>
             </form>
 
             <div class="print-card">
