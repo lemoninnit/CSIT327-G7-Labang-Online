@@ -63,6 +63,7 @@ urlpatterns = [
     path('admin/certificates/<str:request_id>/verify-payment/', views.admin_verify_payment, name='admin_verify_payment'),
     path('admin/certificates/<str:request_id>/reject-payment/', views.admin_reject_payment, name='admin_reject_payment'),
     path('admin/certificates/<str:request_id>/update-claim/', views.admin_update_claim_status, name='admin_update_claim_status'),
+    path('admin/certificates/<str:request_id>/delete/', views.admin_delete_certificate, name='admin_delete_certificate'),
 
     # Report Management URLs
     path('admin/reports/', views.admin_reports, name='admin_reports'),
@@ -96,6 +97,7 @@ urlpatterns = [
     path('admin/certificates/<str:request_id>/verify-payment/', views.admin_verify_payment, name='admin_verify_payment'),
     path('admin/certificates/<str:request_id>/reject-payment/', views.admin_reject_payment, name='admin_reject_payment'),
     path('admin/certificates/<str:request_id>/update-claim/', views.admin_update_claim_status, name='admin_update_claim_status'),
+    path('admin/certificates/<str:request_id>/delete/', views.admin_delete_certificate, name='admin_delete_certificate'),
 
     # Report Management URLs
     path('admin/reports/', views.admin_reports, name='admin_reports'),

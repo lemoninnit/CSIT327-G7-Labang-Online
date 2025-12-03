@@ -1,15 +1,26 @@
 """
-Supabase Storage utility functions for file uploads
+File upload utilities with optional Supabase support.
+Falls back to Django default storage when Supabase SDK is unavailable
+or not configured.
 """
- 
-from supabase import create_client, Client
-from django.conf import settings
+
 import uuid
 import os
+from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+
+try:
+    from supabase import create_client, Client  # type: ignore
+except Exception:
+    create_client = None
+    Client = None
  
  
-def get_supabase_client(use_service_key: bool = False) -> Client:
+def get_supabase_client(use_service_key: bool = False):
     """Initialize Supabase client, preferring env-configured URL if available."""
+    if not create_client:
+        return None
     project_ref = "egllznsxjgkhnwexidii"
     # Prefer explicit URL from settings/env; otherwise fall back to project_ref
     url = (
@@ -24,7 +35,10 @@ def get_supabase_client(use_service_key: bool = False) -> Client:
     else:
         key = os.environ.get("SUPABASE_KEY") or getattr(settings, "SUPABASE_KEY", "")
 
-    return create_client(url, key)
+    try:
+        return create_client(url, key)
+    except Exception:
+        return None
  
  
  
@@ -41,42 +55,37 @@ def upload_to_supabase(file, bucket_name='user-uploads', folder=''):
         str: Public URL of the uploaded file, or None if upload fails
     """
     try:
-        supabase = get_supabase_client()
-        # Use service key to bypass RLS
         supabase = get_supabase_client(use_service_key=True)
-        # Generate unique filename to prevent collisions
-        ext = file.name.split('.')[-1] if '.' in file.name else 'jpg'
+
+        ext = file.name.split('.')[-1].lower() if '.' in file.name else 'jpg'
         unique_id = uuid.uuid4().hex
-       
-        # Construct the full path
-        if folder:
-            filename = f"{folder}/{unique_id}.{ext}"
-        else:
-            filename = f"{unique_id}.{ext}"
-       
-        # Read file content
-        file.seek(0)  # Reset file pointer to beginning
+        filename = f"{folder}/{unique_id}.{ext}" if folder else f"{unique_id}.{ext}"
+
+        file.seek(0)
         file_bytes = file.read()
-       
-        # Determine content type
-        content_type = file.content_type if hasattr(file, 'content_type') else 'application/octet-stream'
-       
-        # Upload file to Supabase Storage
-        response = supabase.storage.from_(bucket_name).upload(
-            filename,
-            file_bytes,
-            file_options={"content-type": content_type}
-        )
-       
-        # Get public URL
-        public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
-       
-        return public_url
-       
+        content_type = getattr(file, 'content_type', 'application/octet-stream')
+
+        if supabase:
+            supabase.storage.from_(bucket_name).upload(
+                filename,
+                file_bytes,
+                file_options={"content-type": content_type}
+            )
+            public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
+            return public_url
+
+        # Fallback: save to local MEDIA storage
+        media_path = os.path.join(folder or '', f"{unique_id}.{ext}")
+        default_storage.save(media_path, ContentFile(file_bytes))
+        return settings.MEDIA_URL.rstrip('/') + '/' + media_path.replace('\\', '/')
+
     except Exception as e:
-        print(f"Error uploading to Supabase Storage: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"Error uploading file: {e}")
+        try:
+            import traceback
+            traceback.print_exc()
+        except Exception:
+            pass
         return None
  
  
@@ -94,25 +103,30 @@ def delete_from_supabase(file_url, bucket_name='user-uploads'):
     try:
         if not file_url:
             return False
-           
-        supabase = get_supabase_client()
-       
-        # Extract filename from URL
-        # URL format: https://PROJECT_REF.supabase.co/storage/v1/object/public/BUCKET_NAME/FILENAME
-        if '/object/public/' in file_url:
+
+        supabase = get_supabase_client(use_service_key=True)
+
+        if supabase and '/object/public/' in file_url:
             parts = file_url.split('/object/public/')
             if len(parts) == 2:
                 path_parts = parts[1].split('/', 1)
                 if len(path_parts) == 2:
                     filename = path_parts[1]
-                   
-                    # Delete the file
                     supabase.storage.from_(bucket_name).remove([filename])
                     return True
-       
+
+        # Fallback: try deleting from local MEDIA storage
+        try:
+            if file_url.startswith(settings.MEDIA_URL):
+                relative_path = file_url[len(settings.MEDIA_URL):].lstrip('/')
+                default_storage.delete(relative_path)
+                return True
+        except Exception:
+            pass
+
         return False
-       
+
     except Exception as e:
-        print(f"Error deleting from Supabase Storage: {e}")
+        print(f"Error deleting file: {e}")
         return False
  

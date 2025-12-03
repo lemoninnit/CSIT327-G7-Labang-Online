@@ -37,8 +37,8 @@
     position: fixed;
     bottom: 100px;
     right: 30px;
-    width: 400px;
-    height: 550px;
+    width: clamp(320px, 28vw, 420px);
+    height: clamp(420px, 60vh, 560px);
     background: #1e293b;
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
@@ -322,6 +322,7 @@
         </h3>
         <button class="chatbot-close" id="chatbot-close" aria-label="Close chatbot">&times;</button>
     </div>
+    <div class="chatbot-transition" id="chatbot-transition">Reconnecting…</div>
     
     <div class="chatbot-messages" id="chatbot-messages">
         <!-- Welcome message -->
@@ -364,7 +365,6 @@
 </div>
 
 <script>
-// Chatbot functionality - Only initialize once
 if (typeof window.chatbotInitialized === 'undefined') {
     window.chatbotInitialized = true;
     
@@ -376,8 +376,9 @@ if (typeof window.chatbotInitialized === 'undefined') {
         const sendBtn = document.getElementById('chatbot-send');
         const messagesContainer = document.getElementById('chatbot-messages');
         const typingIndicator = document.getElementById('typing-indicator');
+        const transitionOverlay = document.getElementById('chatbot-transition');
+        const historyKey = 'labang-chatbot-history';
         
-        // Restore open state across pages
         const openKey = 'labang-chatbot-open';
         try {
             const savedOpen = localStorage.getItem(openKey);
@@ -386,7 +387,18 @@ if (typeof window.chatbotInitialized === 'undefined') {
             }
         } catch (_) {}
 
-        // Toggle modal
+        let history = [];
+        try {
+            const saved = sessionStorage.getItem(historyKey);
+            if (saved) {
+                history = JSON.parse(saved) || [];
+            }
+        } catch (_) {}
+
+        function persistHistory() {
+            try { sessionStorage.setItem(historyKey, JSON.stringify(history)); } catch (_) {}
+        }
+
         toggleBtn.addEventListener('click', () => {
             modal.classList.toggle('active');
             try { localStorage.setItem(openKey, modal.classList.contains('active') ? 'true' : 'false'); } catch (_) {}
@@ -400,7 +412,6 @@ if (typeof window.chatbotInitialized === 'undefined') {
             try { localStorage.setItem(openKey, 'false'); } catch (_) {}
         });
         
-        // Close on escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && modal.classList.contains('active')) {
                 modal.classList.remove('active');
@@ -408,7 +419,6 @@ if (typeof window.chatbotInitialized === 'undefined') {
             }
         });
         
-        // Get CSRF token
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -424,8 +434,7 @@ if (typeof window.chatbotInitialized === 'undefined') {
             return cookieValue;
         }
         
-        // Add message to chat
-        function addMessage(content, isUser = false) {
+        function addMessage(content, isUser = false, persist = true) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat-message ${isUser ? 'user' : 'bot'}`;
             
@@ -455,9 +464,17 @@ if (typeof window.chatbotInitialized === 'undefined') {
             // Insert before typing indicator
             messagesContainer.insertBefore(messageDiv, typingIndicator);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            if (persist) {
+                history.push({ role: isUser ? 'user' : 'assistant', content });
+                persistHistory();
+            }
+        }
+
+        function addAssistantFallback(errText) {
+            const text = 'I could not respond right now. Please try again later or choose a topic: Document Requests, File Report, Account, Announcements.';
+            addMessage(text, false);
         }
         
-        // Send message
         async function sendMessage() {
             const message = input.value.trim();
             if (!message) return;
@@ -478,7 +495,7 @@ if (typeof window.chatbotInitialized === 'undefined') {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ message: message })
+                    body: JSON.stringify({ message: message, history: history })
                 });
                 
                 const data = await response.json();
@@ -489,12 +506,12 @@ if (typeof window.chatbotInitialized === 'undefined') {
                 if (data.success) {
                     addMessage(data.response, false);
                 } else {
-                    addMessage('Sorry, I encountered an error. Please try again.', false);
+                    addAssistantFallback(data.error || '');
                 }
             } catch (error) {
                 console.error('Chatbot error:', error);
                 typingIndicator.classList.remove('active');
-                addMessage('Sorry, something went wrong. Please try again later.', false);
+                addAssistantFallback('');
             } finally {
                 sendBtn.disabled = false;
                 input.focus();
@@ -509,6 +526,22 @@ if (typeof window.chatbotInitialized === 'undefined') {
                 sendMessage();
             }
         });
+
+        if (history.length > 0) {
+            const container = messagesContainer;
+            while (container.firstChild) { container.removeChild(container.firstChild); }
+            container.appendChild(typingIndicator);
+            for (const m of history) { addMessage(m.content, m.role === 'user', false); }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (transitionOverlay) {
+                transitionOverlay.classList.toggle('active', document.visibilityState !== 'visible');
+            }
+        });
     })();
 }
 </script>
+.chatbot-transition { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); color: #fff; font-weight: 600; }
+.light .chatbot-transition { background: rgba(0,0,0,0.08); color: #111827; }
+.chatbot-transition.active { display: flex; }

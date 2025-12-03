@@ -14,11 +14,12 @@ Barangay Labangon Digital Services{% endblock %} {% block head %}
       <a href="{% url 'accounts:personal_info' %}" class="btn btn-primary">Go to Dashboard</a>
       <a href="{% url 'accounts:document_request' %}" class="btn btn-secondary">Request Certificate</a>
       <a href="{% url 'accounts:file_report' %}" class="btn btn-secondary">File Report</a>
+      
     {% else %}
       <!-- Show Login/Register for non-authenticated users -->
       <a href="{% url 'accounts:register' %}" class="btn btn-primary">Create Account</a>
       <a href="{% url 'accounts:login' %}" class="btn btn-secondary">Sign In</a>
-      
+
     {% endif %}
   </div>
   <div class="stats">
@@ -162,3 +163,5 @@ Barangay Labangon Digital Services{% endblock %} {% block head %}
 </section>
 
 {% endblock %}
+
+{% block chatbot %}{% endblock %}
