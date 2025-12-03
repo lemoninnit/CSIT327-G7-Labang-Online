@@ -1232,6 +1232,11 @@ def admin_dashboard(request):
     recent_certificates = CertificateRequest.objects.select_related('user').order_by('-created_at')[:5]
     recent_reports = IncidentReport.objects.select_related('user').order_by('-created_at')[:5]
     recent_users = User.objects.filter(is_staff=False).order_by('-date_joined')[:5]
+
+
+    # Debug: Print total_admin to verify it's being calculated
+    print(f"DEBUG: total_admin = {total_admin}")
+    print(f"DEBUG: Admin users: {list(User.objects.filter(is_superuser=True).values_list('username', flat=True))}")
     
     context = {
         'user': request.user,
