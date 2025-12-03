@@ -37,21 +37,9 @@ py manage.py migrate
 py manage.py runserver
 ```
 
-Open `http://127.0.0.1:8000/accounts/register/` to register and verify.
+Open `http://127.0.0.1:8000/` to register and verify.
 
 **Setup Gmail Recovery**
-
-```
-notepad .env
-```
-
-Paste this in the .env
-
-```
-EMAIL_HOST_USER=lenonleenatividad4@gmail.com
-EMAIL_HOST_PASSWORD=xsvv kuet jktf wrtd
-EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-```
 
 ```
 python setup_gmail_recovery.py
@@ -89,7 +77,7 @@ Use Django’s built‑in admin for staff operations.
 Access
 
 Local: `http://127.0.0.1:8000/admin/`
-After deploy: `<your-domain>/admin/`
+After deploy: `https://csit327-g7-labang-online.onrender.com//admin/`
 
 Requirements
 
@@ -121,6 +109,10 @@ Troubleshooting
 - 403 Forbidden at `/admin/`: ensure your user has `is_staff=True`.
 - Redirect to login: log in with a staff/superuser account.
 - Static files missing in production: run `py manage.py collectstatic` and ensure `whitenoise` is installed.
+
+Deploy Render
+
+- https://csit327-g7-labang-online.onrender.com/
 
 
 ## Team members
