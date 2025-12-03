@@ -325,16 +325,10 @@
               the cashier.
             </div>
 
-            <form method="post" class="actions">
-              {% csrf_token %}
-              <button type="submit" class="btn-primary">
-                I will pay on-site
-              </button>
-              <a
-                href="{% url 'accounts:payment_mode_selection' cert_request.request_id %}"
-                class="btn-secondary"
-                >Back to Payment Options</a>
-            </form>
+            <div class="actions">
+              <a href="{% url 'accounts:certificate_requests' %}" class="btn-primary">I will pay on-site</a>
+              <a href="{% url 'accounts:payment_mode_selection' cert_request.request_id %}" class="btn-secondary">Back to Payment Options</a>
+            </div>
 
             <div class="print-card">
               <div>
