@@ -456,7 +456,7 @@
                                 <td><span class="status-badge status-{{ report.status|lower|cut:' ' }}">{{ report.status }}</span></td>
                                 <td>{{ report.created_at|date:"M d, Y" }}</td>
                                 <td>
-                                    <button onclick="viewReport('{{ report.report_id }}', '{{ report.user.full_name }}', '{{ report.incident_type }}', '{{ report.place }}', '{{ report.message|escapejs }}', '{{ report.status }}', '{{ report.created_at|date:"M d, Y H:i" }}')" class="action-btn btn-view">👁 View</button>
+                                    <button type="button" class="action-btn btn-view" onclick="viewReport(this)" data-report-id="{{ report.report_id }}" data-resident-name="{{ report.user.full_name }}" data-incident-type="{{ report.incident_type }}" data-location="{{ report.place }}" data-message="{{ report.message }}" data-status="{{ report.status }}" data-date="{{ report.created_at|date:'M d, Y H:i' }}">👁 View</button>
                                     <button onclick="openStatusModal('{{ report.report_id }}', '{{ report.status }}')" class="action-btn btn-update">✏ Update</button>
                                     <button onclick="confirmDelete('{{ report.report_id }}')" class="action-btn btn-delete">🗑 Delete</button>
                                 </td>
@@ -538,42 +538,59 @@
     </div>
 
     <script>
-        function viewReport(id, name, type, place, message, status, date) {
+        function viewReport(btn) {
             const modal = document.getElementById('viewModal');
             const details = document.getElementById('reportDetails');
+            
+            // Get data from button's data attributes
+            const id = btn.dataset.reportId;
+            const name = btn.dataset.residentName;
+            const type = btn.dataset.incidentType;
+            const place = btn.dataset.location;
+            const message = btn.dataset.message;
+            const status = btn.dataset.status;
+            const date = btn.dataset.date;
+            
+            const statusClass = status.toLowerCase().replace(/ /g, '');
             
             details.innerHTML = `
                 <div class="detail-row">
                     <div class="detail-label">Report ID</div>
-                    <div class="detail-value">${id}</div>
+                    <div class="detail-value">${escapeHtml(id)}</div>
                 </div>
                 <div class="detail-row">
                     <div class="detail-label">Resident Name</div>
-                    <div class="detail-value">${name}</div>
+                    <div class="detail-value">${escapeHtml(name)}</div>
                 </div>
                 <div class="detail-row">
                     <div class="detail-label">Incident Type</div>
-                    <div class="detail-value">${type}</div>
+                    <div class="detail-value">${escapeHtml(type)}</div>
                 </div>
                 <div class="detail-row">
                     <div class="detail-label">Location</div>
-                    <div class="detail-value">${place}</div>
+                    <div class="detail-value">${escapeHtml(place)}</div>
                 </div>
                 <div class="detail-row">
                     <div class="detail-label">Status</div>
-                    <div class="detail-value"><span class="status-badge status-${status.toLowerCase().replace(/ /g, '')}">${status}</span></div>
+                    <div class="detail-value"><span class="status-badge status-${statusClass}">${escapeHtml(status)}</span></div>
                 </div>
                 <div class="detail-row">
                     <div class="detail-label">Reported On</div>
-                    <div class="detail-value">${date}</div>
+                    <div class="detail-value">${escapeHtml(date)}</div>
                 </div>
                 <div class="detail-row">
                     <div class="detail-label">Description</div>
-                    <div class="detail-value">${message}</div>
+                    <div class="detail-value">${escapeHtml(message)}</div>
                 </div>
             `;
             
             modal.classList.add('active');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         function closeViewModal() {
