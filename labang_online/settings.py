@@ -94,7 +94,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'labang_online.wsgi.application'
  
  
-# Database
+# Database and ai from .env
+
+gemini_api_key = os.environ.get('GEMINI_API_KEY', '')
+print("GEMINI_API_KEY loaded:", bool(os.environ.get('GEMINI_API_KEY')))
+
 load_dotenv()
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
 SUPABASE_KEY = os.environ.get('SUPABASE_KEY', '')
@@ -104,6 +108,7 @@ DATABASES = {
     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 }
  
+
  
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -180,3 +185,4 @@ AUTH_USER_MODEL = 'accounts.User'
  
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+

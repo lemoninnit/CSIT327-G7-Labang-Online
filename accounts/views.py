@@ -32,6 +32,7 @@ from django.contrib.auth.decorators import login_required
 import json
 import os
 import requests
+import google.generativeai as genai 
 
 
 
@@ -1108,10 +1109,17 @@ def chatbot_api(request):
         if not user_message:
             return JsonResponse({'error': 'Message is required'}, status=400)
         
+        # Check if API key is configured
         gemini_api_key = os.environ.get('GEMINI_API_KEY', '')
         if not gemini_api_key:
-            return JsonResponse({'error': 'AI service not configured.', 'success': False}, status=500)
-
+            return JsonResponse({
+                'error': 'AI service not configured.',
+                'success': False
+            }, status=500)
+        
+        # Configure Gemini
+        genai.configure(api_key=gemini_api_key)
+        
         generation_config = {
             "temperature": 0.7,
             "top_p": 1,
@@ -1143,81 +1151,38 @@ Answer questions about:
 
 Be helpful, professional, and friendly. Keep responses concise and actionable. When discussing fees or official procedures, be accurate based on the platform's actual offerings."""
         
-        history = data.get('history', [])
-        safe_history = []
-        try:
-            for h in history:
-                role = h.get('role')
-                content = str(h.get('content', '')).strip()
-                if role in ('user', 'assistant') and content:
-                    safe_history.append({'role': role, 'content': content})
-        except Exception:
-            safe_history = []
-
-        conversation_context = "\n".join([
-            f"{'User' if h['role']=='user' else 'Assistant'}: {h['content']}" for h in safe_history[-10:]
-        ])
-
-        if conversation_context:
-            full_prompt = f"{context}\n\n{conversation_context}\n\nUser: {user_message}\n\nAssistant:"
-        else:
-            full_prompt = f"{context}\n\nUser: {user_message}\n\nAssistant:"
+        full_prompt = f"{context}\n\nUser: {user_message}\n\nAssistant:"
         
-        model_attempts = ['gemini-1.5-flash', 'gemini-1.5-pro']
-
+        # Try different models
+        model_attempts = [
+            'gemini-2.5-flash',
+            'gemini-2.0-flash',
+            'gemini-flash-latest',
+            'gemini-2.5-pro',
+            'gemini-pro-latest',
+        ]
+        
         response_text = None
-        try:
-            # Try SDK import first
+        for model_name in model_attempts:
             try:
-                import google.generativeai as genai  # type: ignore
-                genai.configure(api_key=gemini_api_key)
-                for model_name in model_attempts:
-                    try:
-                        model = genai.GenerativeModel(model_name)
-                        response = model.generate_content(full_prompt, generation_config=generation_config)
-                        response_text = getattr(response, 'text', None)
-                        if not response_text:
-                            try:
-                                candidates = getattr(response, 'candidates', [])
-                                if candidates:
-                                    parts = getattr(candidates[0].content, 'parts', [])
-                                    response_text = ''.join([getattr(p, 'text', '') for p in parts if getattr(p, 'text', '')]) or None
-                            except Exception:
-                                response_text = None
-                        if response_text:
-                            break
-                    except Exception:
-                        continue
-            except Exception:
-                response_text = None
-
-            # Fallback: REST API if SDK fails or returns empty
-            if not response_text:
-                for model_name in model_attempts:
-                    try:
-                        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={gemini_api_key}"
-                        payload = {
-                            "contents": [{"role": "user", "parts": [{"text": full_prompt}]}],
-                            "generationConfig": generation_config,
-                        }
-                        r = requests.post(url, json=payload, timeout=20)
-                        data = r.json()
-                        candidates = data.get("candidates", [])
-                        if candidates:
-                            parts = candidates[0].get("content", {}).get("parts", [])
-                            response_text = "".join([p.get("text", "") for p in parts]) or None
-                            if response_text:
-                                break
-                    except Exception:
-                        continue
-        except Exception:
-            response_text = None
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(
+                    full_prompt,
+                    generation_config=generation_config
+                )
+                response_text = response.text
+                print(f"✓ SUCCESS with model: {model_name}")
+                break
+            except Exception as e:
+                error_msg = str(e)[:150]
+                print(f"✗ Model '{model_name}' failed: {error_msg}")
+                continue
         
         if not response_text:
             return JsonResponse({
-                'error': 'temporarily_unavailable',
+                'error': 'Could not generate response. Please try again.',
                 'success': False
-            }, status=503)
+            }, status=500)
         
         return JsonResponse({
             'response': response_text,
@@ -1239,6 +1204,7 @@ Be helpful, professional, and friendly. Keep responses concise and actionable. W
             'error': f'An error occurred: {str(e)}',
             'success': False
         }, status=500)
+
     
 
     # Helper function to check if user is admin
