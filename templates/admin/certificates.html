@@ -452,7 +452,9 @@
                                             {{ cert.payment_reference }}
                                         </span>
                                     {% else %}
-                                        <span style="color: #95a5a6; font-style: italic;">N/A</span>
+                                        <span style="font-family: monospace; background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-size: 0.9rem;">
+                                            {{ cert.request_id }}
+                                        </span>
                                     {% endif %}
                                 </td>
                                 <td>
