@@ -917,7 +917,7 @@ def counter_payment(request, request_id):
         cert_request.payment_reference = f"COUNTER-{cert_request.request_id}"
         cert_request.save(update_fields=['payment_status', 'payment_reference'])
         messages.success(request, "Your on-site payment has been scheduled. You can switch payment options anytime.")
-        return redirect('accounts:payment_mode_selection', request_id=cert_request.request_id)
+        return redirect('accounts:certificate_requests')
 
     context = {
         'user': user,
