@@ -331,9 +331,9 @@
         }
 
         .status-badge.failed {
-            background: rgba(30, 41, 59, 0.18);
-            color: var(--text-secondary);
-            border: 1px solid rgba(30, 41, 59, 0.35);
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
         .status-badge.processing {
@@ -814,6 +814,7 @@
                                     <option value="processing" {% if request.GET.claim_status == 'processing' %}selected{% endif %}>Processing</option>
                                     <option value="ready" {% if request.GET.claim_status == 'ready' %}selected{% endif %}>Ready for Claim</option>
                                     <option value="claimed" {% if request.GET.claim_status == 'claimed' %}selected{% endif %}>Claimed</option>
+                                    <option value="failed" {% if request.GET.claim_status == 'failed' %}selected{% endif %}>Failed</option>
                                 </select>
                             </div>
                             <div class="filter-group">

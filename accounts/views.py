@@ -164,6 +164,8 @@ def forgot_password(request):
                     fail_silently=False,
                 )
                 messages.success(request, f"Verification code sent to {email}. Please check your email and enter the 6-digit code.")
+                # Store code in session to display on verify page
+                request.session['verification_code'] = reset_code.code
                 return redirect('accounts:verify_code', user_id=user.id)
             except Exception as e:
                 messages.error(request, f"Failed to send email. Please try again later. Error: {str(e)}")
@@ -193,6 +195,9 @@ def verify_code(request, user_id):
             if reset_code.is_valid():
                 # Store the code in session for password reset
                 request.session['reset_code_id'] = reset_code.id
+                # Clear verification code from session after successful verification
+                if 'verification_code' in request.session:
+                    del request.session['verification_code']
                 messages.success(request, "Code verified successfully! Please enter your new password.")
                 return redirect('accounts:reset_password')
             else:
@@ -202,7 +207,9 @@ def verify_code(request, user_id):
         except PasswordResetCode.DoesNotExist:
             messages.error(request, "Invalid verification code. Please try again.")
     
-    context = {'user': user, 'hide_user_nav': True}
+    # Get verification code from session if available
+    verification_code = request.session.get('verification_code', None)
+    context = {'user': user, 'hide_user_nav': True, 'verification_code': verification_code}
     return render(request, 'accounts/verify_code.html', context)
 
 
@@ -236,6 +243,8 @@ def resend_code(request, user_id):
             fail_silently=False,
         )
         messages.success(request, f"A new verification code was sent to {user.email}.")
+        # Store code in session to display on verify page
+        request.session['verification_code'] = reset_code.code
     except Exception as e:
         messages.error(request, f"Failed to send email. Please try again later. Error: {str(e)}")
     
@@ -473,7 +482,7 @@ def certificate_requests(request):
     if payment_status and payment_status in valid_payment_statuses:
         requests = requests.filter(payment_status=payment_status)
     
-    valid_claim_statuses = ['processing', 'ready', 'claimed']
+    valid_claim_statuses = ['processing', 'ready', 'claimed', 'failed']
     if claim_status and claim_status in valid_claim_statuses:
         requests = requests.filter(claim_status=claim_status)
     
@@ -1468,6 +1477,7 @@ def admin_reject_payment(request, request_id):
         
         if certificate.payment_status == 'pending':
             certificate.payment_status = 'failed'
+            certificate.claim_status = 'failed'
             certificate.save()
             
             messages.success(request, f"Payment rejected for request {request_id}.")

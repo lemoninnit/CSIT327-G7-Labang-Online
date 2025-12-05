@@ -65,6 +65,8 @@ body {
   background: linear-gradient(180deg, var(--bg) 0%, var(--bg-secondary) 100%);
   color: var(--text);
   transition: background-color 0.3s ease, color 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 .container {
   max-width: 960px;
@@ -129,6 +131,7 @@ body {
 /* Main */
 .site-main {
   padding: 40px 0;
+  flex: 1;
 }
 .panel {
   background: linear-gradient(180deg, var(--panel) 0%, var(--panel-hover) 100%);
@@ -336,6 +339,8 @@ select:hover {
   padding: 28px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   color: var(--muted);
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
 /* Light mode specific overrides */
