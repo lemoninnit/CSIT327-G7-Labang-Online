@@ -95,6 +95,7 @@ class CertificateRequest(models.Model):
         ('processing', 'Processing'),
         ('ready', 'Ready for Claim'),
         ('claimed', 'Claimed'),
+        ('failed', 'Failed'),
     ]
     
     # Basic Info

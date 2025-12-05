@@ -18,10 +18,21 @@ Labang Online{% endblock %} {% block content %}
           "
         />
 
-        <p class="hint-text">
-          We've sent a 6-digit verification code to <strong>{{ user.email }}</strong>.<br />
-          This code expires in <strong>5 minutes</strong>. Please enter the code below to continue.
-        </p>
+        {% if verification_code %}
+        <div style="padding: 20px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%); border: 2px solid rgba(16, 185, 129, 0.3); border-radius: 16px; text-align: center; margin: 20px 0;">
+          <p style="margin: 0 0 12px 0; color: var(--muted); font-size: 14px; font-weight: 500;">Your Verification Code:</p>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+            <code id="verification-code-display" style="font-size: 32px; font-weight: 700; color: #10b981; letter-spacing: 8px; font-family: 'Courier New', monospace; padding: 12px 24px; background: rgba(16, 185, 129, 0.1); border-radius: 12px; border: 2px dashed rgba(16, 185, 129, 0.3);">{{ verification_code }}</code>
+            <button type="button" onclick="copyVerificationCode()" style="padding: 12px 16px; background: #10b981; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 6px;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+              </svg>
+              Copy
+            </button>
+          </div>
+          <p style="margin: 0; color: var(--muted); font-size: 12px;">You can copy and paste this code into the field below</p>
+        </div>
+        {% endif %}
 
         {% if messages %}
         <div class="messages">
@@ -79,27 +90,29 @@ document.getElementById('code').addEventListener('input', function(e) {
     }
 });
 
-// Optional: display a 5-minute countdown
-(function() {
-  const container = document.querySelector('.hint-text');
-  const end = Date.now() + 5 * 60 * 1000;
-  function fmt(ms){
-    const s = Math.max(0, Math.floor(ms/1000));
-    const m = Math.floor(s/60);
-    const r = s % 60;
-    return `${m}:${r.toString().padStart(2,'0')}`;
-  }
-  function tick(){
-    const left = end - Date.now();
-    if (container) container.innerHTML = `We've sent a 6-digit verification code to <strong>{{ user.email }}</strong>.<br />This code expires in <strong>5 minutes</strong> (time left: <strong>${fmt(left)}</strong>).`;
-    if (left <= 0) return; else setTimeout(tick, 1000);
-  }
-  tick();
-})();
 
 // Focus on the input when page loads
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('code').focus();
 });
+
+// Copy verification code function
+function copyVerificationCode() {
+    const code = document.getElementById('verification-code-display').textContent.trim();
+    navigator.clipboard.writeText(code).then(function() {
+        // Show feedback
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 6px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Copied!';
+        btn.style.background = '#059669';
+        setTimeout(function() {
+            btn.innerHTML = originalText;
+            btn.style.background = '#10b981';
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Failed to copy code:', err);
+        alert('Failed to copy code. Please copy it manually.');
+    });
+}
 </script>
 {% endblock %}
